@@ -5,16 +5,14 @@
     "kind": "process",
     "type": "caseManagement",
     "apiVersion": "orchestrator.uipath.com/v1",
-    "projectKey": "74f896c8-948b-41ae-b21f-e81199362475",
-    "isOverridable": true,
+    "projectKey": "5021058f-a1ea-447f-931f-237a9a64d6d3",
     "dependencies": [
       {
-        "name": "TradeFlowAICase",
-        "kind": "package"
+        "kind": "package",
+        "name": "TradeFlowAICase"
       }
     ],
     "runtimeDependencies": [],
-    "files": [],
     "folders": [
       {
         "fullyQualifiedName": "solution_folder"
@@ -24,7 +22,7 @@
       "type": "CaseManagement",
       "name": "TradeFlowAICase",
       "package": {
-        "key": "7287a830-580d-4fe6-bb61-e5358fe9d774"
+        "key": "27ef4859-e772-469a-bcbb-c715ee2a0716"
       },
       "targetFrameworkValue": "Portable",
       "retentionAction": "Delete",
@@ -33,6 +31,7 @@
       "staleRetentionPeriod": 180
     },
     "locks": [],
-    "key": "48ca9079-8556-4779-b2ff-8af4bcd35f2f"
+    "key": "cf0778df-6457-49c5-9884-a6e32115e954",
+    "files": []
   }
 }

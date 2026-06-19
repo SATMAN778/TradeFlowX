@@ -3,21 +3,31 @@
     "dsl": "1.0.0",
     "name": "Workflow",
     "tags": {
-      "projectId": "d89f1ea4-9d5a-4139-b235-1a604dfeb397",
-      "solutionId": "5ee353eb-6876-4a0a-ea73-08dec6ee4f70"
+      "projectId": "4001664a",
+      "solutionId": "74a2e510"
     },
     "version": "0.0.1",
     "namespace": "default",
     "metadata": {
-      "variables": {}
+      "variables": []
     }
   },
   "httpRetryConfig": {
     "maxRetries": 3,
     "delayMs": 1000,
     "networkErrors": true,
-    "statusCodes": [408, 429, 500, 502, 503, 504],
-    "backoff": {"strategy": "constant", "maxDelayMs": 36000},
+    "statusCodes": [
+      408,
+      429,
+      500,
+      502,
+      503,
+      504
+    ],
+    "backoff": {
+      "strategy": "constant",
+      "maxDelayMs": 36000
+    },
     "respectRetryAfter": true
   },
   "input": {
@@ -32,7 +42,9 @@
             "description": "The OFAC API endpoint path to call (e.g., /sanctions-lists, /entities?list=SDN List, /changes/latest)"
           }
         },
-        "required": ["endpointPath"],
+        "required": [
+          "endpointPath"
+        ],
         "title": "Inputs"
       }
     }
@@ -44,8 +56,12 @@
           {
             "WorkflowStart": {
               "set": "${Object.entries($workflow.definition?.document?.metadata?.variables?.schema?.document?.properties || {}).reduce((acc, [name, def]) => ({ ...acc, [name]: def?.default }), {}) }",
-              "output": {"as": "${$input}"},
-              "export": {"as": "{ ...$context, variables: { ...$context.variables, ...$output } }"},
+              "output": {
+                "as": "${$input}"
+              },
+              "export": {
+                "as": "{ ...$context, variables: { ...$context.variables, ...$output } }"
+              },
               "metadata": {
                 "activityType": "Assign",
                 "displayName": "Workflow start",
@@ -76,12 +92,12 @@
               },
               "metadata": {
                 "activityType": "Connector",
+                "configuration": "{\"essentialConfiguration\":{\"connectorVersion\":null,\"executionType\":null,\"customFieldsRequestDetails\":null,\"instanceParameters\":{\"connectorKey\":\"uipath-uipath-http\",\"objectName\":\"http-request\",\"httpMethod\":\"POST\",\"activityType\":\"Curated\",\"version\":\"1.0.0\",\"supportsStreaming\":false,\"subType\":\"method\"},\"objectName\":\"http-request\",\"packageVersion\":\"\",\"httpMethod\":\"POST\",\"path\":\"/http-request\",\"unifiedTypesCompatible\":false},\"optionalConfiguration\":{\"_textBlocks\":[],\"objectActions\":null,\"connectorName\":null,\"maxPageSize\":null,\"jobArguments\":null,\"isAutopilotInvalidConfig\":false,\"additionalHeaders\":null,\"cachedLookupValues\":[],\"cachedBrowserItems\":[],\"cachedPropertyMappings\":[],\"primaryKeys\":[],\"objectDisplayName\":null,\"baseObject\":null,\"eventMode\":null,\"eventOperation\":null,\"language\":\"en-US\",\"hasBreakingChanges\":null,\"fieldsContainer\":{\"inputFields\":[{\"id\":\"authentication\",\"name\":\"authentication\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"method\",\"name\":\"method\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"url\",\"name\":\"url\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"path\",\"name\":\"path\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"headers\",\"name\":\"headers\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true}],\"outputFields\":[],\"inputMode\":null,\"jitInputField\":null},\"connectorKey\":\"uipath-uipath-http\",\"activityType\":\"Curated\",\"version\":\"1.0.0\",\"supportsStreaming\":false,\"subType\":\"method\"}}",
                 "displayName": "HTTP Request: OFAC API",
                 "fullName": "Connector",
                 "uiPathActivityTypeId": "5c4cc855-b42a-37e6-b910-de8588998fce",
                 "assemblyQualifiedName": "Connector",
-                "outputName": "HttpRequest",
-                "configuration": "{\"essentialConfiguration\":{\"connectorVersion\":null,\"executionType\":null,\"customFieldsRequestDetails\":null,\"instanceParameters\":{\"connectorKey\":\"uipath-uipath-http\",\"objectName\":\"http-request\",\"httpMethod\":\"POST\",\"activityType\":\"Curated\",\"version\":\"1.0.0\",\"supportsStreaming\":false,\"subType\":\"method\"},\"objectName\":\"http-request\",\"packageVersion\":\"\",\"httpMethod\":\"POST\",\"path\":\"/http-request\",\"unifiedTypesCompatible\":false},\"optionalConfiguration\":{\"_textBlocks\":[],\"objectActions\":null,\"connectorName\":null,\"maxPageSize\":null,\"jobArguments\":null,\"isAutopilotInvalidConfig\":false,\"additionalHeaders\":null,\"cachedLookupValues\":[],\"cachedBrowserItems\":[],\"cachedPropertyMappings\":[],\"primaryKeys\":[],\"objectDisplayName\":null,\"baseObject\":null,\"eventMode\":null,\"eventOperation\":null,\"language\":\"en-US\",\"hasBreakingChanges\":null,\"fieldsContainer\":{\"inputFields\":[{\"id\":\"authentication\",\"name\":\"authentication\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"method\",\"name\":\"method\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"url\",\"name\":\"url\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"path\",\"name\":\"path\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"headers\",\"name\":\"headers\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true}],\"outputFields\":[],\"inputMode\":null,\"jitInputField\":null},\"connectorKey\":\"uipath-uipath-http\",\"activityType\":\"Curated\",\"version\":\"1.0.0\",\"supportsStreaming\":false,\"subType\":\"method\"}}"
+                "outputName": "HttpRequest"
               }
             }
           },

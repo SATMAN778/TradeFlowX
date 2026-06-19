@@ -5,9 +5,22 @@
     {
       "filePath": "content/Workflow.json",
       "uniqueId": "4a182019-0251-4d9b-9e56-d4719438e38d",
-      "type": "Api",
-      "input": null,
-      "output": null
+      "input": {
+        "type": "object",
+        "properties": {
+          "endpointPath": {
+            "type": "string",
+            "default": "/sanctions-lists",
+            "description": "The OFAC API endpoint path to call (e.g., /sanctions-lists, /entities?list=SDN List, /changes/latest)"
+          }
+        },
+        "required": [
+          "endpointPath"
+        ],
+        "title": "Inputs"
+      },
+      "output": null,
+      "type": "Api"
     }
   ]
 }

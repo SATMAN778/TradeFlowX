@@ -8,19 +8,16 @@
     "isOverridable": true,
     "dependencies": [],
     "runtimeDependencies": [],
-    "files": [],
     "folders": [
       {
         "fullyQualifiedName": "solution_folder"
       }
     ],
     "spec": {
-      "fileName": null,
-      "fileReference": null,
-      "name": "StorageBucketUploader",
-      "description": null
+      "name": "StorageBucketUploader"
     },
     "locks": [],
-    "key": "72f70cff-84ce-448d-b6d7-6084f552b0f6"
+    "key": "72f70cff-84ce-448d-b6d7-6084f552b0f6",
+    "files": []
   }
 }

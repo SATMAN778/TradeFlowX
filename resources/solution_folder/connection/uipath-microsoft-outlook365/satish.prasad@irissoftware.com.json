@@ -8,7 +8,6 @@
     "isOverridable": true,
     "dependencies": [],
     "runtimeDependencies": [],
-    "files": [],
     "folders": [
       {
         "fullyQualifiedName": "solution_folder"
@@ -17,13 +16,13 @@
     "spec": {
       "connectorName": "Microsoft Outlook 365",
       "name": "satish.prasad@irissoftware.com",
-      "description": null,
       "authenticationType": "AuthenticateAfterDeployment",
       "connectorVersion": "1.38.8",
       "connectorKey": "uipath-microsoft-outlook365",
       "pollingInterval": 5
     },
     "locks": [],
-    "key": "5f5cf858-df4e-4dc7-91f7-0b471d4dc011"
+    "key": "5f5cf858-df4e-4dc7-91f7-0b471d4dc011",
+    "files": []
   }
 }

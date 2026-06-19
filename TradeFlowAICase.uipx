@@ -1,37 +1,37 @@
 {
-  "DocVersion": "1.0.0",
-  "StudioMinVersion": "2025.04.0",
-  "SolutionId": "5ee353eb-6876-4a0a-ea73-08dec6ee4f70",
-  "Projects": [
-    {
-      "Type": "AppV2",
-      "ProjectRelativePath": "App/project.uiproj",
-      "Id": "53ef7499-7f34-44b7-b38d-55eed5fd491e"
-    },
-    {
-      "Type": "Agent",
-      "ProjectRelativePath": "Import Shipment Document/project.uiproj",
-      "Id": "aeec4752-bd1d-432c-8c6c-81f43745e2a1"
-    },
-    {
-      "Type": "Agent",
-      "ProjectRelativePath": "OFAC Compliance Screening/project.uiproj",
-      "Id": "a5bbe92e-aa50-4fd0-87b6-447bad28d69f"
-    },
-    {
-      "Type": "Api",
-      "ProjectRelativePath": "OFAC SLS API/project.uiproj",
-      "Id": "1c67722f-64af-4484-a057-fe3495cb1e11"
-    },
-    {
-      "Type": "Api",
-      "ProjectRelativePath": "StorageBucketUploader/project.uiproj",
-      "Id": "505e5c88-6699-46a7-9a78-645d7e0b960b"
-    },
-    {
-      "Type": "CaseManagement",
-      "ProjectRelativePath": "TradeFlowAICase/project.uiproj",
-      "Id": "74f896c8-948b-41ae-b21f-e81199362475"
-    }
-  ]
+    "SolutionId": "7eccaa7a-23e0-4b83-e7ec-08decdd7b62e",
+    "Projects": [
+        {
+            "Id": "53ef7499-7f34-44b7-b38d-55eed5fd491e",
+            "Type": "AppV2",
+            "ProjectRelativePath": "App/project.uiproj"
+        },
+        {
+            "Id": "aeec4752-bd1d-432c-8c6c-81f43745e2a1",
+            "Type": "Agent",
+            "ProjectRelativePath": "Import Shipment Document/project.uiproj"
+        },
+        {
+            "Id": "a5bbe92e-aa50-4fd0-87b6-447bad28d69f",
+            "Type": "Agent",
+            "ProjectRelativePath": "OFAC Compliance Screening/project.uiproj"
+        },
+        {
+            "Id": "1c67722f-64af-4484-a057-fe3495cb1e11",
+            "Type": "Api",
+            "ProjectRelativePath": "OFAC SLS API/project.uiproj"
+        },
+        {
+            "Id": "505e5c88-6699-46a7-9a78-645d7e0b960b",
+            "Type": "Api",
+            "ProjectRelativePath": "StorageBucketUploader/project.uiproj"
+        },
+        {
+            "Type": "CaseManagement",
+            "ProjectRelativePath": "TradeFlowAICase\\project.uiproj",
+            "Id": "5021058f-a1ea-447f-931f-237a9a64d6d3"
+        }
+    ],
+    "DocVersion": "1.0.0",
+    "StudioMinVersion": "2025.04.0"
 }

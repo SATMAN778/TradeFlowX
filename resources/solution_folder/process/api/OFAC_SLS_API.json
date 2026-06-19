@@ -14,43 +14,30 @@
       }
     ],
     "runtimeDependencies": [],
-    "files": [],
     "folders": [
       {
         "fullyQualifiedName": "solution_folder"
       }
     ],
     "spec": {
-      "entryPointUniqueId": null,
-      "inputArgumentsSchema": null,
-      "outputArgumentsSchema": null,
-      "inputArgumentsSchemaV2": null,
-      "outputArgumentsSchemaV2": null,
       "type": "Api",
       "name": "OFAC SLS API",
-      "description": null,
       "package": {
         "key": "4dee92bd-0b72-4626-ac5a-bc9af065b439"
       },
       "packageName": "TradeFlowAICase.api.OFAC.SLS.API",
-      "packageVersion": null,
-      "entryPointName": null,
-      "inputArguments": null,
       "hiddenForAttendedUser": false,
       "alwaysRunning": false,
       "autoStartProcess": false,
       "targetFrameworkValue": "Portable",
       "retentionAction": "Delete",
       "retentionPeriod": 30,
-      "retentionBucketRef": null,
       "staleRetentionAction": "Delete",
       "staleRetentionPeriod": 180,
-      "staleRetentionBucketRef": null,
-      "entryPoints": null,
-      "connections": null,
       "tags": []
     },
     "locks": [],
-    "key": "c27ff2d6-f69a-4f66-a5ad-300f1ddc3424"
+    "key": "c27ff2d6-f69a-4f66-a5ad-300f1ddc3424",
+    "files": []
   }
 }

@@ -8,19 +8,16 @@
     "isOverridable": true,
     "dependencies": [],
     "runtimeDependencies": [],
-    "files": [],
     "folders": [
       {
         "fullyQualifiedName": "solution_folder"
       }
     ],
     "spec": {
-      "fileName": null,
-      "fileReference": null,
-      "name": "OFAC SLS API",
-      "description": null
+      "name": "OFAC SLS API"
     },
     "locks": [],
-    "key": "4dee92bd-0b72-4626-ac5a-bc9af065b439"
+    "key": "4dee92bd-0b72-4626-ac5a-bc9af065b439",
+    "files": []
   }
 }

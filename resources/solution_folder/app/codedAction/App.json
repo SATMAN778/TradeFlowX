@@ -14,7 +14,6 @@
       }
     ],
     "runtimeDependencies": [],
-    "files": [],
     "folders": [
       {
         "fullyQualifiedName": "solution_folder"
@@ -22,17 +21,13 @@
     ],
     "spec": {
       "name": "App",
-      "description": null,
       "version": "1.0.0",
-      "routingName": null,
-      "appSystemName": null,
       "package": {
         "key": "8588400f-e8a0-4655-8cb9-f508c039677c"
-      },
-      "externalClientId": null,
-      "actionSchema": null
+      }
     },
     "locks": [],
-    "key": "f1d3e4e6-c008-4592-a5f7-201aeb8d564a"
+    "key": "f1d3e4e6-c008-4592-a5f7-201aeb8d564a",
+    "files": []
   }
 }

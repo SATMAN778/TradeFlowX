@@ -14,47 +14,31 @@
       }
     ],
     "runtimeDependencies": [],
-    "files": [],
     "folders": [
       {
         "fullyQualifiedName": "solution_folder"
       }
     ],
     "spec": {
-      "targetRuntime": null,
-      "referencedAssets": null,
-      "entryPointUniqueId": null,
-      "inputArgumentsSchema": null,
-      "outputArgumentsSchema": null,
-      "inputArgumentsSchemaV2": null,
-      "outputArgumentsSchemaV2": null,
       "type": "Agent",
       "name": "OFAC Compliance Screening",
-      "description": null,
       "package": {
         "key": "47ba20ee-5c68-4d80-83a7-22480f2d4106"
       },
       "packageName": "TradeFlowAICase.agent.OFAC.Compliance.Screening",
-      "packageVersion": null,
-      "entryPointName": null,
-      "inputArguments": null,
       "hiddenForAttendedUser": false,
       "alwaysRunning": false,
       "autoStartProcess": false,
       "targetFrameworkValue": "Portable",
       "agentMemory": false,
-      "environmentVariables": null,
       "retentionAction": "Delete",
       "retentionPeriod": 30,
-      "retentionBucketRef": null,
       "staleRetentionAction": "Delete",
       "staleRetentionPeriod": 180,
-      "staleRetentionBucketRef": null,
-      "entryPoints": null,
-      "connections": null,
       "tags": []
     },
     "locks": [],
-    "key": "51368622-d0ef-4d66-8dec-47b712101394"
+    "key": "51368622-d0ef-4d66-8dec-47b712101394",
+    "files": []
   }
 }
