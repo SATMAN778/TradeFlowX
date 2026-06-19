@@ -8,6 +8,7 @@
     "isOverridable": true,
     "dependencies": [],
     "runtimeDependencies": [],
+    "files": [],
     "folders": [
       {
         "fullyQualifiedName": "solution_folder"
@@ -17,7 +18,6 @@
       "name": "Import Shipment Document"
     },
     "locks": [],
-    "key": "59a65096-73e9-4dd4-91de-ef66a48a9282",
-    "files": []
+    "key": "59a65096-73e9-4dd4-91de-ef66a48a9282"
   }
 }

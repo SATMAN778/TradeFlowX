@@ -6,13 +6,15 @@
     "type": "caseManagement",
     "apiVersion": "orchestrator.uipath.com/v1",
     "projectKey": "5021058f-a1ea-447f-931f-237a9a64d6d3",
+    "isOverridable": true,
     "dependencies": [
       {
-        "kind": "package",
-        "name": "TradeFlowAICase"
+        "name": "TradeFlowAICase",
+        "kind": "package"
       }
     ],
     "runtimeDependencies": [],
+    "files": [],
     "folders": [
       {
         "fullyQualifiedName": "solution_folder"
@@ -31,7 +33,6 @@
       "staleRetentionPeriod": 180
     },
     "locks": [],
-    "key": "cf0778df-6457-49c5-9884-a6e32115e954",
-    "files": []
+    "key": "cf0778df-6457-49c5-9884-a6e32115e954"
   }
 }

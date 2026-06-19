@@ -28,7 +28,7 @@
         },
         {
             "Type": "CaseManagement",
-            "ProjectRelativePath": "TradeFlowAICase\\project.uiproj",
+            "ProjectRelativePath": "TradeFlowAICase/project.uiproj",
             "Id": "5021058f-a1ea-447f-931f-237a9a64d6d3"
         }
     ],
