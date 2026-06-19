@@ -1,0 +1,26 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "OFAC SLS API",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "1c67722f-64af-4484-a057-fe3495cb1e11",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "fileName": null,
+      "fileReference": null,
+      "name": "OFAC SLS API",
+      "description": null
+    },
+    "locks": [],
+    "key": "4dee92bd-0b72-4626-ac5a-bc9af065b439"
+  }
+}

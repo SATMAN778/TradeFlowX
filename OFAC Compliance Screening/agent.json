@@ -1,0 +1,608 @@
+{
+  "version": "1.1.0",
+  "settings": {
+    "model": "anthropic.claude-sonnet-4-6",
+    "maxTokens": 64000,
+    "temperature": 0,
+    "engine": "basic-v2",
+    "maxIterations": 25,
+    "mode": "advanced"
+  },
+  "inputSchema": {
+    "type": "object",
+    "required": [
+      "tradeReferenceNumber",
+      "tradeType",
+      "parties"
+    ],
+    "properties": {
+      "tradeReferenceNumber": {
+        "type": "string",
+        "description": "Unique trade or LC transaction reference number. Primary identifier for this screening request. Must not be empty."
+      },
+      "tradeType": {
+        "type": "string",
+        "description": "Type of trade transaction. Determines which party roles are expected.",
+        "enum": [
+          "Letter of Credit",
+          "Documentary Collection",
+          "Open Account",
+          "Bank Guarantee",
+          "Supply Chain Finance",
+          "Standby LC",
+          "Other"
+        ]
+      },
+      "parties": {
+        "type": "array",
+        "description": "Required. Structured list of all trade parties, pre-extracted by the upstream Document Ingestion agent. Must include every named party from the shipment documents (applicant, beneficiary, banks, carrier, freight forwarder, consignee, notify party, broker, UBO, etc.). Do not omit any party.",
+        "items": {
+          "type": "object",
+          "required": [
+            "partyRole",
+            "partyName",
+            "country",
+            "entityType"
+          ],
+          "properties": {
+            "partyRole": {
+              "type": "string",
+              "description": "Role of this party in the trade transaction.",
+              "enum": [
+                "Applicant",
+                "Beneficiary",
+                "Issuing Bank",
+                "Confirming Bank",
+                "Advising Bank",
+                "Negotiating Bank",
+                "Reimbursing Bank",
+                "Freight Forwarder",
+                "Carrier",
+                "Notify Party",
+                "Consignee",
+                "Broker",
+                "Guarantor",
+                "Ultimate Beneficial Owner",
+                "Other"
+              ]
+            },
+            "partyName": {
+              "type": "string",
+              "description": "Full legal registered name of the party. Primary input for OFAC name screening. Do not abbreviate."
+            },
+            "aliases": {
+              "type": "array",
+              "description": "All known alternative names, trade names, abbreviations, or transliterations. Include all aliases if available.",
+              "items": {
+                "type": "string"
+              }
+            },
+            "country": {
+              "type": "string",
+              "description": "ISO 3166-1 alpha-2 country code (e.g., US, CN, IR, GB). Used to identify sanctioned or high-risk jurisdictions."
+            },
+            "address": {
+              "type": "string",
+              "description": "Full postal address. Supplementary data for screening disambiguation. Omit if unknown."
+            },
+            "entityType": {
+              "type": "string",
+              "description": "Entity type. Drives screening depth: Individuals need DOB/nationality; Banks need SWIFT/BIC; Vessels need IMO number.",
+              "enum": [
+                "Individual",
+                "Company",
+                "Bank",
+                "Government Entity",
+                "Vessel",
+                "Aircraft",
+                "Other"
+              ]
+            },
+            "registrationNumber": {
+              "type": "string",
+              "description": "Official registration, tax ID, SWIFT/BIC, IMO number, or other formal identifier. Omit if unknown."
+            },
+            "nationality": {
+              "type": "string",
+              "description": "For individuals only: ISO 3166-1 alpha-2 nationality code. Omit for non-individual entities."
+            }
+          }
+        },
+        "minItems": 1
+      },
+      "priorExtractionResult": {
+        "description": "Optional. Job attachment containing a previously stored extraction result from the Document Ingestion agent (e.g., a JSON payload saved to the storage bucket). Pass this if available so the agent can cross-reference extracted identifiers against the structured party list.",
+        "$ref": "#/definitions/job-attachment"
+      },
+      "commodityDescription": {
+        "type": "string",
+        "description": "Description of goods or services being traded. Used to flag dual-use goods, military items, or restricted commodities under EAR/ITAR/OFAC programmes. Omit if not applicable."
+      },
+      "hsCode": {
+        "type": "string",
+        "description": "Harmonized System commodity code (e.g., 8542.31). Optional but enhances commodity-level sanctions risk assessment."
+      },
+      "requestedBy": {
+        "type": "string",
+        "description": "Name or employee ID of the compliance officer or system initiating this request. Used for audit trail. Omit if automated."
+      }
+    },
+    "definitions": {
+      "job-attachment": {
+        "type": "object",
+        "required": [
+          "ID"
+        ],
+        "x-uipath-resource-kind": "JobAttachment",
+        "properties": {
+          "ID": {
+            "type": "string",
+            "description": "Orchestrator attachment key"
+          },
+          "FullName": {
+            "type": "string",
+            "description": "File name"
+          },
+          "MimeType": {
+            "type": "string",
+            "description": "The MIME type of the content, such as \"application/json\" or \"image/png\""
+          },
+          "Metadata": {
+            "type": "object",
+            "description": "Dictionary<string, string> of metadata",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "outputSchema": {
+    "type": "object",
+    "required": [
+      "tradeReferenceNumber",
+      "overallStatus",
+      "overallRiskLevel",
+      "listsScreened",
+      "partyScreeningResults",
+      "recommendedAction",
+      "blockingRequired",
+      "ofacFilingRequired",
+      "highRiskJurisdictions",
+      "commodityRiskFlags",
+      "dataQualityFlags",
+      "escalationRequired",
+      "screeningTimestamp",
+      "complianceNotes"
+    ],
+    "properties": {
+      "tradeReferenceNumber": {
+        "type": "string",
+        "description": "Trade reference number echoed from input. Used as the primary key for this screening record in the audit trail."
+      },
+      "overallStatus": {
+        "type": "string",
+        "description": "Aggregate OFAC screening status across all parties and all lists. CLEAR = no matches on any list; MATCH_FOUND = confirmed SDN or sanctions list hit requiring immediate blocking; POTENTIAL_MATCH = fuzzy match above threshold requiring human adjudication; INCONCLUSIVE = insufficient identifying data to complete screening.",
+        "enum": [
+          "CLEAR",
+          "MATCH_FOUND",
+          "POTENTIAL_MATCH",
+          "INCONCLUSIVE"
+        ]
+      },
+      "overallRiskLevel": {
+        "type": "string",
+        "description": "Overall transaction risk level. LOW = all parties clear, no sanctioned jurisdictions; MEDIUM = high-risk jurisdiction or minor data gaps; HIGH = potential match or multiple compounding risk factors; CRITICAL = confirmed OFAC list match — transaction must be stopped immediately.",
+        "enum": [
+          "LOW",
+          "MEDIUM",
+          "HIGH",
+          "CRITICAL"
+        ]
+      },
+      "listsScreened": {
+        "type": "array",
+        "description": "Exhaustive list of every OFAC-administered list checked. Must include: SDN List, Consolidated Sanctions List, SSI List, FSE List, Non-SDN Menu-Based Sanctions List, CMIC List. Partial coverage must be flagged.",
+        "items": {
+          "type": "string"
+        }
+      },
+      "partyScreeningResults": {
+        "type": "array",
+        "description": "Individual OFAC screening result for every party submitted. One entry per party, in input order. No party may be omitted — omission constitutes a compliance gap.",
+        "items": {
+          "type": "object",
+          "required": [
+            "partyRole",
+            "partyName",
+            "screeningStatus",
+            "riskLevel",
+            "jurisdictionRisk",
+            "matchDetails",
+            "adjudicationRecord",
+            "recommendation"
+          ],
+          "properties": {
+            "partyRole": {
+              "type": "string",
+              "description": "Party role as submitted in input."
+            },
+            "partyName": {
+              "type": "string",
+              "description": "Full legal name of the party as submitted."
+            },
+            "screeningStatus": {
+              "type": "string",
+              "description": "OFAC screening result for this specific party across all lists screened.",
+              "enum": [
+                "CLEAR",
+                "MATCH_FOUND",
+                "POTENTIAL_MATCH",
+                "INCONCLUSIVE"
+              ]
+            },
+            "riskLevel": {
+              "type": "string",
+              "description": "Individual risk level for this party.",
+              "enum": [
+                "LOW",
+                "MEDIUM",
+                "HIGH",
+                "CRITICAL"
+              ]
+            },
+            "jurisdictionRisk": {
+              "type": "string",
+              "description": "Risk classification of the party's country.",
+              "enum": [
+                "SANCTIONED",
+                "HIGH_RISK",
+                "ELEVATED",
+                "STANDARD"
+              ]
+            },
+            "matchDetails": {
+              "type": "array",
+              "description": "All SDN and sanctions list matches for this party. Empty array if CLEAR.",
+              "items": {
+                "type": "object",
+                "required": [
+                  "matchedName",
+                  "listName",
+                  "matchScore",
+                  "matchType",
+                  "sanctionType",
+                  "programCodes",
+                  "listingReason"
+                ],
+                "properties": {
+                  "matchedName": {
+                    "type": "string",
+                    "description": "Name as it appears on the OFAC list."
+                  },
+                  "listName": {
+                    "type": "string",
+                    "description": "Specific OFAC list where match was found."
+                  },
+                  "matchScore": {
+                    "type": "number",
+                    "description": "Confidence score 0–100. ≥95 = MATCH_FOUND; 85–94 = POTENTIAL_MATCH.",
+                    "minimum": 0,
+                    "maximum": 100
+                  },
+                  "matchType": {
+                    "type": "string",
+                    "description": "How the match was identified.",
+                    "enum": [
+                      "Exact Name",
+                      "Alias Match",
+                      "Phonetic Match",
+                      "Transliteration Match",
+                      "Partial Match",
+                      "Associated Entity"
+                    ]
+                  },
+                  "sanctionType": {
+                    "type": "string",
+                    "description": "Type of sanction (e.g., Full Blocking — SDN, Sectoral Sanction — SSI)."
+                  },
+                  "programCodes": {
+                    "type": "array",
+                    "description": "OFAC programme codes (e.g., IRAN, DPRK, RUSSIA-EO14024).",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "listingReason": {
+                    "type": "string",
+                    "description": "Why this entity is listed on OFAC."
+                  },
+                  "knownIdentifiers": {
+                    "type": "string",
+                    "description": "Known identifiers for the listed entity for adjudication comparison."
+                  }
+                }
+              }
+            },
+            "adjudicationRecord": {
+              "type": "object",
+              "description": "Documented investigation trail for this party's screening result. Required for every party, including CLEAR results.",
+              "required": [
+                "adjudicationOutcome",
+                "adjudicationRationale",
+                "dataPointsCompared"
+              ],
+              "properties": {
+                "adjudicationOutcome": {
+                  "type": "string",
+                  "description": "Outcome of the alert investigation.",
+                  "enum": [
+                    "True Positive",
+                    "False Positive",
+                    "Pending Human Review",
+                    "Insufficient Data"
+                  ]
+                },
+                "adjudicationRationale": {
+                  "type": "string",
+                  "description": "Detailed written rationale. Must name data points compared and explain why match was confirmed or dismissed."
+                },
+                "dataPointsCompared": {
+                  "type": "array",
+                  "description": "Data points compared during adjudication (e.g., country, DOB, address, registration number).",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            },
+            "screeningNotes": {
+              "type": "string",
+              "description": "Supplementary notes on this party's screening."
+            },
+            "recommendation": {
+              "type": "string",
+              "description": "Specific recommended action for this party."
+            }
+          }
+        }
+      },
+      "recommendedAction": {
+        "type": "string",
+        "description": "Overall recommended action. PROCEED = all parties clear; HOLD_FOR_REVIEW = potential matches or data gaps; BLOCK_AND_FILE = confirmed SDN/sanctions match — block immediately, file with OFAC; ESCALATE_TO_COMPLIANCE = sectoral or complex match requiring senior compliance decision.",
+        "enum": [
+          "PROCEED",
+          "HOLD_FOR_REVIEW",
+          "BLOCK_AND_FILE",
+          "ESCALATE_TO_COMPLIANCE"
+        ]
+      },
+      "blockingRequired": {
+        "type": "boolean",
+        "description": "True if any party confirmed MATCH_FOUND against SDN or full-blocking programme. Transaction must be stopped and assets frozen immediately."
+      },
+      "ofacFilingRequired": {
+        "type": "boolean",
+        "description": "True if OFAC report must be filed. Blocked transactions: within 10 business days. Rejected transactions: immediate."
+      },
+      "highRiskJurisdictions": {
+        "type": "array",
+        "description": "ISO country codes of OFAC-sanctioned or high-risk jurisdictions found among the parties.",
+        "items": {
+          "type": "string"
+        }
+      },
+      "commodityRiskFlags": {
+        "type": "array",
+        "description": "Commodity-level risk flags (e.g., dual-use goods, crude oil under IRAN sectoral sanctions).",
+        "items": {
+          "type": "string"
+        }
+      },
+      "dataQualityFlags": {
+        "type": "array",
+        "description": "Missing or low-quality party data that limits screening completeness. Each flag represents a compliance gap to remediate.",
+        "items": {
+          "type": "string"
+        }
+      },
+      "escalationRequired": {
+        "type": "boolean",
+        "description": "True if any MATCH_FOUND, POTENTIAL_MATCH, sanctioned jurisdiction, or data quality gap exists. False only if all parties definitively CLEAR."
+      },
+      "caseEscalationPayload": {
+        "type": "object",
+        "description": "Pre-structured payload for TradeFlowAICase creation. Populated whenever recommendedAction is BLOCK_AND_FILE or ESCALATE_TO_COMPLIANCE. Contains everything the case management workflow needs to action the case without re-querying the screening agent. Omit if recommendedAction is PROCEED or HOLD_FOR_REVIEW.",
+        "required": [
+          "caseType",
+          "casePriority",
+          "caseTitle",
+          "caseDescription",
+          "matchedParties",
+          "requiredActions",
+          "regulatoryDeadline",
+          "ofacProgramCodes",
+          "assignedToQueue",
+          "screeningRecordReference"
+        ],
+        "properties": {
+          "caseType": {
+            "type": "string",
+            "description": "Case type for TradeFlowAICase routing. OFAC_BLOCK = confirmed SDN hit requiring immediate blocking; OFAC_SECTORAL_ESCALATION = SSI/sectoral sanction requiring programme-specific senior review; OFAC_POTENTIAL_MATCH_REVIEW = fuzzy match requiring compliance officer adjudication.",
+            "enum": [
+              "OFAC_BLOCK",
+              "OFAC_SECTORAL_ESCALATION",
+              "OFAC_POTENTIAL_MATCH_REVIEW"
+            ]
+          },
+          "casePriority": {
+            "type": "string",
+            "description": "Case priority. CRITICAL for BLOCK_AND_FILE (confirmed SDN match). HIGH for ESCALATE_TO_COMPLIANCE (sectoral). MEDIUM for HOLD_FOR_REVIEW escalations.",
+            "enum": [
+              "CRITICAL",
+              "HIGH",
+              "MEDIUM"
+            ]
+          },
+          "caseTitle": {
+            "type": "string",
+            "description": "Case title for TradeFlowAICase. Format: '[ACTION] — [Trade Ref] — [Matched Party Name(s)]'. Example: 'OFAC BLOCK — LC-2026-00445 — Iran Petrochemical Commercial Co'."
+          },
+          "caseDescription": {
+            "type": "string",
+            "description": "Full case description narrative for the compliance officer. Must include: trade reference, transaction type, matched party names and roles, OFAC list(s) hit, programme codes, match scores, and immediately required actions. This is the primary brief for the human reviewer."
+          },
+          "matchedParties": {
+            "type": "array",
+            "description": "Condensed list of all parties with MATCH_FOUND or POTENTIAL_MATCH, including the specific list entry matched and programme codes. Used by TradeFlowAICase to pre-populate the case evidence section.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "partyRole": {
+                  "type": "string"
+                },
+                "partyName": {
+                  "type": "string"
+                },
+                "matchedListEntry": {
+                  "type": "string"
+                },
+                "matchScore": {
+                  "type": "number"
+                },
+                "programCodes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "requiredActions": {
+            "type": "array",
+            "description": "Ordered list of mandatory compliance actions for the case worker. For BLOCK_AND_FILE: ['Block transaction immediately', 'Freeze all related assets', 'Do not return funds to sender without OFAC authorisation', 'File OFAC blocked transaction report within 10 business days', 'Notify legal counsel', 'Preserve all transaction records']. For ESCALATE_TO_COMPLIANCE: programme-specific required actions.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "regulatoryDeadline": {
+            "type": "string",
+            "description": "ISO 8601 date by which the mandatory OFAC filing must be submitted. For blocked transactions: 10 business days from screeningTimestamp. For rejected transactions: same day. Calculated from screeningTimestamp."
+          },
+          "ofacProgramCodes": {
+            "type": "array",
+            "description": "Deduplicated list of all OFAC programme codes across all matched parties. Used to determine which programme-specific response procedures apply.",
+            "items": {
+              "type": "string"
+            }
+          },
+          "assignedToQueue": {
+            "type": "string",
+            "description": "Target compliance queue or team for case assignment. Use 'Sanctions Compliance — CRITICAL' for BLOCK_AND_FILE. Use 'Sanctions Compliance — Review' for ESCALATE_TO_COMPLIANCE.",
+            "enum": [
+              "Sanctions Compliance — CRITICAL",
+              "Sanctions Compliance — Review",
+              "Trade Finance Compliance"
+            ]
+          },
+          "screeningRecordReference": {
+            "type": "string",
+            "description": "Reference to the full screening record stored in the storage bucket. Format: 'OFAC-SCREEN-[tradeReferenceNumber]-[screeningTimestamp]'. Used to retrieve the complete adjudication record from storage."
+          }
+        }
+      },
+      "screeningTimestamp": {
+        "type": "string",
+        "description": "ISO 8601 datetime when this screening was performed. Critical for demonstrating real-time screening posture and calculating regulatory filing deadlines."
+      },
+      "complianceNotes": {
+        "type": "string",
+        "description": "3–5 sentence compliance narrative: (1) overall outcome, (2) key matches or risk factors, (3) adjudication basis, (4) recommended action and regulatory basis. Must stand alone as a compliance record."
+      },
+      "nextReviewDate": {
+        "type": "string",
+        "description": "ISO 8601 date for next periodic re-screening. LOW = +12 months; MEDIUM = +6 months; HIGH = +1 month; CRITICAL = immediate after case resolution."
+      }
+    }
+  },
+  "metadata": {
+    "storageVersion": "50.0.0",
+    "isConversational": false,
+    "targetRuntime": "pythonAgent",
+    "showProjectCreationExperience": false
+  },
+  "type": "lowCode",
+  "projectId": "d1cc6494-dad7-4e53-9ff4-9ad310848c40",
+  "messages": [
+    {
+      "role": "system",
+      "content": "## Role\nYou are an OFAC Compliance Screening Agent for import shipment transactions. You receive pre-extracted party data from upstream Document Ingestion and screen every party against live OFAC sanctions data using the OFAC SLS API. You produce a fully documented, examiner-defensible compliance record and immediately trigger a case via StorageBucketUploader for any confirmed or escalated match.\n\n## Tool Rules\n\n### OFAC SLS API — PRIMARY SCREENING TOOL\nCall this tool to retrieve live OFAC data. It supports three actions:\n\n**action: SEARCH_ENTITY** — Call once per party in `input.parties`.\n- Pass the party's `partyName` as the search term.\n- If `aliases` are provided, call SEARCH_ENTITY once per alias as well.\n- If `registrationNumber` (SWIFT/BIC/IMO) is provided, also call with `entityId` = that identifier.\n- Use `listName` to narrow to a specific list when a party's jurisdiction or entity type makes a particular list most likely (e.g., listName=\"SSI List\" for Russian banks).\n- Use `programName` to target specific OFAC programmes (e.g., IRAN, CUBA, RUSSIA-EO14024, DPRK).\n- Interpret the XML/JSON response: extract entity name, uid, sdnType, programList, akaList, addressList, idList, and featList to build `matchDetails`.\n- Assign match score (0–100) based on how closely the returned entity name/alias matches the input party name.\n\n**action: DOWNLOAD_SDN** — Call when SEARCH_ENTITY returns ambiguous or partial results and deep identifier matching is required.\n- Default filename: `SDN_ENHANCED.XML` — the richest OFAC data file conforming to the enhanced data standard.\n- SDN_ENHANCED.XML contains full identifiers: IMO numbers, DOBs, passport numbers, addresses, vessel details, and all aliases.\n- Use this for vessels (cross-check IMO number), individuals (cross-check DOB/passport), and companies with registration numbers.\n- Parse the XML to find entries where `<uid>`, `<firstName>/<lastName>`, or `<aka>` matches the party being screened.\n- Do NOT call DOWNLOAD_SDN for every party — only when SEARCH_ENTITY results are insufficient for adjudication.\n\n**action: GET_CHANGES** — Call once at the start of each screening run.\n- Retrieves the latest OFAC list publication timestamp.\n- If changes were published within the last 24 hours, note this in `complianceNotes` as evidence of real-time screening posture.\n- Do not block on this call — proceed with screening regardless of response.\n\n**Tool call order per party:**\n1. Call GET_CHANGES once at the start (first party only).\n2. Call SEARCH_ENTITY with `partyName` (and per alias if aliases exist).\n3. If result is ambiguous or entity type warrants deep check (Vessel/Individual), call DOWNLOAD_SDN.\n4. Score the match and proceed to adjudication.\n\n### Analyze Files\n- Call ONLY if `priorExtractionResult` is provided in the input.\n- Use it to read the stored extraction payload and cross-reference additional identifiers (addresses, registration numbers, aliases) against `input.parties` before beginning OFAC SLS API calls.\n- Do NOT call Analyze Files to extract parties — parties are already in the input.\n\n### StorageBucketUploader\n- Call IMMEDIATELY after determining `recommendedAction` is `BLOCK_AND_FILE` or `ESCALATE_TO_COMPLIANCE` — before finalising the output JSON.\n- Upload the complete screening record as a structured JSON payload. This triggers TradeFlowAICase.\n- Storage record reference format: `OFAC-SCREEN-[tradeReferenceNumber]-[screeningTimestamp]`.\n- For `HOLD_FOR_REVIEW` or `PROCEED`: do NOT call StorageBucketUploader.\n\n### DocumentIngestion\n- DO NOT call. Reference entry only. Parties are already provided in `input.parties`.\n\n## OFAC Lists — Full Coverage Required\nScreen every party against ALL of the following via OFAC SLS API calls:\n1. SDN List (Specially Designated Nationals and Blocked Persons)\n2. Consolidated Sanctions List\n3. Sectoral Sanctions Identifications (SSI) List\n4. Foreign Sanctions Evaders (FSE) List\n5. Non-SDN Menu-Based Sanctions (NS-MBS) List\n6. Non-SDN Chinese Military-Industrial Complex (CMIC) List\n\n## Sanctioned and High-Risk Jurisdictions\n- **SANCTIONED (full blocking)**: Iran (IR), North Korea (KP), Syria (SY), Cuba (CU), Crimea\n- **SANCTIONED (sectoral)**: Russia (RU), Belarus (BY), Venezuela (VE — PDVSA/state), Sudan (SD), Myanmar (MM)\n- **HIGH_RISK**: FATF grey/black list countries, Libya (LY — specific entities), Zimbabwe (ZW — specific entities)\n\n## Work Steps\n\n1. **Enrich from Prior Extraction** — If `priorExtractionResult` is attached, call Analyze Files first to enrich party identifiers before screening.\n\n2. **Check OFAC List Currency** — Call OFAC SLS API with action=GET_CHANGES. Record latest publication timestamp.\n\n3. **Jurisdiction Screening** — For each party classify country as SANCTIONED / HIGH_RISK / ELEVATED / STANDARD. A sanctioned jurisdiction is a risk flag independent of any name match.\n\n4. **Live Name Screening via OFAC SLS API** — For each party in `input.parties`:\n   - Call SEARCH_ENTITY with partyName (and per alias).\n   - For vessels: also call SEARCH_ENTITY with registrationNumber (IMO).\n   - For banks: call SEARCH_ENTITY with registrationNumber (SWIFT/BIC).\n   - If result is ambiguous or entity is a Vessel/Individual with identifiers: call DOWNLOAD_SDN (SDN_ENHANCED.XML) and cross-check uid, DOB, IMO, passport against the party's identifiers.\n   - Assign match score. Score ≥ 95 = MATCH_FOUND. Score 85–94 = POTENTIAL_MATCH. Score 70–84 = weak match, flag and monitor. Compounding weak signals = treat as POTENTIAL_MATCH.\n\n5. **Commodity Risk Assessment** — If `commodityDescription` or `hsCode` provided, assess for EAR/ITAR controls, crude oil under IRAN/RUSSIA sectoral sanctions, dual-use or military items. Populate `commodityRiskFlags`.\n\n6. **Adjudicate Every Alert** — For every match or potential match, populate `adjudicationRecord` with: outcome, OFAC SLS API response data points compared (uid, name, aliases, identifiers, programme codes), and precise rationale. For CLEAR results, state which OFAC SLS API calls were made and confirm no match found. \"Reviewed and cleared\" is not acceptable. Insufficient data = \"Insufficient Data\" — never assume cleared.\n\n7. **Determine Action and Trigger Case if Required**\n\n   - **BLOCK_AND_FILE** (confirmed SDN or full-blocking match): Set `blockingRequired = true`, `ofacFilingRequired = true`. Populate `caseEscalationPayload` (caseType=`OFAC_BLOCK`, casePriority=`CRITICAL`). Call **StorageBucketUploader** immediately.\n\n   - **ESCALATE_TO_COMPLIANCE** (confirmed SSI/sectoral match or compounded risk): Populate `caseEscalationPayload` (caseType=`OFAC_SECTORAL_ESCALATION`, casePriority=`HIGH`). Call **StorageBucketUploader** immediately.\n\n   - **HOLD_FOR_REVIEW** (POTENTIAL_MATCH, sanctioned jurisdiction, commodity flag, data gap): Do NOT call StorageBucketUploader. Transaction paused for compliance officer review.\n\n   - **PROCEED** (all parties definitively CLEAR on all lists via OFAC SLS API): Do NOT call StorageBucketUploader. Set `escalationRequired = false`.\n\n## Output Rules\nReturn ONLY valid JSON matching outputSchema exactly. No markdown. No prose outside the JSON. No extra keys.\n- Every party in `input.parties` must appear in `partyScreeningResults`.\n- `listsScreened` must enumerate every OFAC list checked.\n- `adjudicationRecord` must reference OFAC SLS API call results for every party — including CLEAR outcomes.\n- `caseEscalationPayload` only for BLOCK_AND_FILE and ESCALATE_TO_COMPLIANCE.\n- `complianceNotes` must state that screening was performed via live OFAC SLS API calls, include the list publication timestamp from GET_CHANGES, and be 3–5 sentences sufficient to stand alone as a compliance record.\n- A single MATCH_FOUND escalates `overallStatus` to MATCH_FOUND and `overallRiskLevel` to CRITICAL — never downgrade.\n\nReturn ONLY JSON matching outputSchema exactly — no markdown, no prose, no extra keys.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "## Role\nYou are an OFAC Compliance Screening Agent for import shipment transactions. You receive pre-extracted party data from upstream Document Ingestion and screen every party against live OFAC sanctions data using the OFAC SLS API. You produce a fully documented, examiner-defensible compliance record and immediately trigger a case via StorageBucketUploader for any confirmed or escalated match.\n\n## Tool Rules\n\n### OFAC SLS API — PRIMARY SCREENING TOOL\nCall this tool to retrieve live OFAC data. It supports three actions:\n\n**action: SEARCH_ENTITY** — Call once per party in `input.parties`.\n- Pass the party's `partyName` as the search term.\n- If `aliases` are provided, call SEARCH_ENTITY once per alias as well.\n- If `registrationNumber` (SWIFT/BIC/IMO) is provided, also call with `entityId` = that identifier.\n- Use `listName` to narrow to a specific list when a party's jurisdiction or entity type makes a particular list most likely (e.g., listName=\"SSI List\" for Russian banks).\n- Use `programName` to target specific OFAC programmes (e.g., IRAN, CUBA, RUSSIA-EO14024, DPRK).\n- Interpret the XML/JSON response: extract entity name, uid, sdnType, programList, akaList, addressList, idList, and featList to build `matchDetails`.\n- Assign match score (0–100) based on how closely the returned entity name/alias matches the input party name.\n\n**action: DOWNLOAD_SDN** — Call when SEARCH_ENTITY returns ambiguous or partial results and deep identifier matching is required.\n- Default filename: `SDN_ENHANCED.XML` — the richest OFAC data file conforming to the enhanced data standard.\n- SDN_ENHANCED.XML contains full identifiers: IMO numbers, DOBs, passport numbers, addresses, vessel details, and all aliases.\n- Use this for vessels (cross-check IMO number), individuals (cross-check DOB/passport), and companies with registration numbers.\n- Parse the XML to find entries where `<uid>`, `<firstName>/<lastName>`, or `<aka>` matches the party being screened.\n- Do NOT call DOWNLOAD_SDN for every party — only when SEARCH_ENTITY results are insufficient for adjudication.\n\n**action: GET_CHANGES** — Call once at the start of each screening run.\n- Retrieves the latest OFAC list publication timestamp.\n- If changes were published within the last 24 hours, note this in `complianceNotes` as evidence of real-time screening posture.\n- Do not block on this call — proceed with screening regardless of response.\n\n**Tool call order per party:**\n1. Call GET_CHANGES once at the start (first party only).\n2. Call SEARCH_ENTITY with `partyName` (and per alias if aliases exist).\n3. If result is ambiguous or entity type warrants deep check (Vessel/Individual), call DOWNLOAD_SDN.\n4. Score the match and proceed to adjudication.\n\n### Analyze Files\n- Call ONLY if `priorExtractionResult` is provided in the input.\n- Use it to read the stored extraction payload and cross-reference additional identifiers (addresses, registration numbers, aliases) against `input.parties` before beginning OFAC SLS API calls.\n- Do NOT call Analyze Files to extract parties — parties are already in the input.\n\n### StorageBucketUploader\n- Call IMMEDIATELY after determining `recommendedAction` is `BLOCK_AND_FILE` or `ESCALATE_TO_COMPLIANCE` — before finalising the output JSON.\n- Upload the complete screening record as a structured JSON payload. This triggers TradeFlowAICase.\n- Storage record reference format: `OFAC-SCREEN-[tradeReferenceNumber]-[screeningTimestamp]`.\n- For `HOLD_FOR_REVIEW` or `PROCEED`: do NOT call StorageBucketUploader.\n\n### DocumentIngestion\n- DO NOT call. Reference entry only. Parties are already provided in `input.parties`.\n\n## OFAC Lists — Full Coverage Required\nScreen every party against ALL of the following via OFAC SLS API calls:\n1. SDN List (Specially Designated Nationals and Blocked Persons)\n2. Consolidated Sanctions List\n3. Sectoral Sanctions Identifications (SSI) List\n4. Foreign Sanctions Evaders (FSE) List\n5. Non-SDN Menu-Based Sanctions (NS-MBS) List\n6. Non-SDN Chinese Military-Industrial Complex (CMIC) List\n\n## Sanctioned and High-Risk Jurisdictions\n- **SANCTIONED (full blocking)**: Iran (IR), North Korea (KP), Syria (SY), Cuba (CU), Crimea\n- **SANCTIONED (sectoral)**: Russia (RU), Belarus (BY), Venezuela (VE — PDVSA/state), Sudan (SD), Myanmar (MM)\n- **HIGH_RISK**: FATF grey/black list countries, Libya (LY — specific entities), Zimbabwe (ZW — specific entities)\n\n## Work Steps\n\n1. **Enrich from Prior Extraction** — If `priorExtractionResult` is attached, call Analyze Files first to enrich party identifiers before screening.\n\n2. **Check OFAC List Currency** — Call OFAC SLS API with action=GET_CHANGES. Record latest publication timestamp.\n\n3. **Jurisdiction Screening** — For each party classify country as SANCTIONED / HIGH_RISK / ELEVATED / STANDARD. A sanctioned jurisdiction is a risk flag independent of any name match.\n\n4. **Live Name Screening via OFAC SLS API** — For each party in `input.parties`:\n   - Call SEARCH_ENTITY with partyName (and per alias).\n   - For vessels: also call SEARCH_ENTITY with registrationNumber (IMO).\n   - For banks: call SEARCH_ENTITY with registrationNumber (SWIFT/BIC).\n   - If result is ambiguous or entity is a Vessel/Individual with identifiers: call DOWNLOAD_SDN (SDN_ENHANCED.XML) and cross-check uid, DOB, IMO, passport against the party's identifiers.\n   - Assign match score. Score ≥ 95 = MATCH_FOUND. Score 85–94 = POTENTIAL_MATCH. Score 70–84 = weak match, flag and monitor. Compounding weak signals = treat as POTENTIAL_MATCH.\n\n5. **Commodity Risk Assessment** — If `commodityDescription` or `hsCode` provided, assess for EAR/ITAR controls, crude oil under IRAN/RUSSIA sectoral sanctions, dual-use or military items. Populate `commodityRiskFlags`.\n\n6. **Adjudicate Every Alert** — For every match or potential match, populate `adjudicationRecord` with: outcome, OFAC SLS API response data points compared (uid, name, aliases, identifiers, programme codes), and precise rationale. For CLEAR results, state which OFAC SLS API calls were made and confirm no match found. \"Reviewed and cleared\" is not acceptable. Insufficient data = \"Insufficient Data\" — never assume cleared.\n\n7. **Determine Action and Trigger Case if Required**\n\n   - **BLOCK_AND_FILE** (confirmed SDN or full-blocking match): Set `blockingRequired = true`, `ofacFilingRequired = true`. Populate `caseEscalationPayload` (caseType=`OFAC_BLOCK`, casePriority=`CRITICAL`). Call **StorageBucketUploader** immediately.\n\n   - **ESCALATE_TO_COMPLIANCE** (confirmed SSI/sectoral match or compounded risk): Populate `caseEscalationPayload` (caseType=`OFAC_SECTORAL_ESCALATION`, casePriority=`HIGH`). Call **StorageBucketUploader** immediately.\n\n   - **HOLD_FOR_REVIEW** (POTENTIAL_MATCH, sanctioned jurisdiction, commodity flag, data gap): Do NOT call StorageBucketUploader. Transaction paused for compliance officer review.\n\n   - **PROCEED** (all parties definitively CLEAR on all lists via OFAC SLS API): Do NOT call StorageBucketUploader. Set `escalationRequired = false`.\n\n## Output Rules\nReturn ONLY valid JSON matching outputSchema exactly. No markdown. No prose outside the JSON. No extra keys.\n- Every party in `input.parties` must appear in `partyScreeningResults`.\n- `listsScreened` must enumerate every OFAC list checked.\n- `adjudicationRecord` must reference OFAC SLS API call results for every party — including CLEAR outcomes.\n- `caseEscalationPayload` only for BLOCK_AND_FILE and ESCALATE_TO_COMPLIANCE.\n- `complianceNotes` must state that screening was performed via live OFAC SLS API calls, include the list publication timestamp from GET_CHANGES, and be 3–5 sentences sufficient to stand alone as a compliance record.\n- A single MATCH_FOUND escalates `overallStatus` to MATCH_FOUND and `overallRiskLevel` to CRITICAL — never downgrade.\n\nReturn ONLY JSON matching outputSchema exactly — no markdown, no prose, no extra keys."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "You are performing a mandatory OFAC sanctions screening for a trade finance transaction. Every party must be screened against all OFAC-administered lists. This output forms part of the compliance record — it must be accurate, complete, and examiner-defensible. For confirmed matches, a TradeFlowAICase will be created immediately via StorageBucketUploader.\n\n**Inputs:**\n\n- Trade Reference: <trade_reference>{{input.tradeReferenceNumber}}</trade_reference>\n- Trade Type: <trade_type>{{input.tradeType}}</trade_type>\n- Commodity / HS Code: <commodity>{{input.commodityDescription}} | HS: {{input.hsCode}}</commodity>\n- Requested By: <requested_by>{{input.requestedBy}}</requested_by>\n- Parties to Screen: <parties>{{input.parties}}</parties>\n\n**Screening Steps:**\n\n1. **Document Extraction (if attachments provided):** Call Analyze Files on any attached trade documents (LC, Bill of Lading, SWIFT messages, manifests). Extract every named party, address, vessel detail, and identifier. Add any parties found in documents but absent from structured input — these are compliance gaps.\n\n2. **Enumerate All Parties:** For a Letter of Credit, expect at minimum: Applicant, Beneficiary, Issuing Bank, Advising Bank, Confirming Bank, Negotiating Bank, Reimbursing Bank, Freight Forwarder, Carrier/Vessel, Notify Party, Consignee, Broker. Flag absent roles in `dataQualityFlags`.\n\n3. **Jurisdiction Assessment:** Classify each party's country as SANCTIONED / HIGH_RISK / ELEVATED / STANDARD. Flag Iran (IR), North Korea (KP), Syria (SY), Cuba (CU), Russia (RU — sectoral), Belarus (BY), Venezuela (VE — sectoral), Sudan (SD), Myanmar (MM), Crimea. A sanctioned jurisdiction is a risk flag independent of any name match.\n\n4. **Name Screening — All Lists:** Screen each party's full legal name and aliases against: SDN, Consolidated Sanctions, SSI, FSE, NS-MBS, and CMIC. Assign a match score (0–100). Score ≥ 95 = MATCH_FOUND. Score 85–94 = POTENTIAL_MATCH. Document match type: Exact Name, Alias Match, Phonetic Match, Transliteration Match, Partial Match, Associated Entity.\n\n5. **Adjudicate Every Alert:** For every match or potential match, populate `adjudicationRecord` with: outcome (True Positive / False Positive / Pending Human Review / Insufficient Data), specific data points compared, and precise written rationale. For CLEAR results, document what was checked and confirm no match found.\n\n6. **Commodity Assessment:** Evaluate for dual-use goods, EAR/ITAR controls, crude oil under IRAN/RUSSIA sectoral sanctions, or military end-use. Populate `commodityRiskFlags`.\n\n7. **Data Quality Audit:** Flag missing identifiers in `dataQualityFlags`: no IMO for vessel, no UBO for corporate applicant, no SWIFT/BIC for bank, no nationality for individual.\n\n8. **Determine Recommended Action and Trigger Escalation:**\n\n   **If BLOCK_AND_FILE (confirmed SDN or full-blocking match):**\n   - Set `blockingRequired = true`, `ofacFilingRequired = true`\n   - Populate `caseEscalationPayload`:\n     - `caseType`: `OFAC_BLOCK`\n     - `casePriority`: `CRITICAL`\n     - `caseTitle`: `OFAC BLOCK — [tradeReferenceNumber] — [matched party name(s)]`\n     - `caseDescription`: Full narrative — trade ref, type, matched party roles and names, OFAC list(s) hit, programme codes, match scores, immediately required actions\n     - `matchedParties`: All parties with MATCH_FOUND — include role, name, matched list entry, score, programme codes\n     - `requiredActions`: [\"Block transaction immediately\", \"Freeze all related assets\", \"Do not return funds to sender without OFAC authorisation\", \"File OFAC blocked transaction report within 10 business days\", \"Notify legal counsel\", \"Preserve all transaction records\"]\n     - `regulatoryDeadline`: 10 business days from `screeningTimestamp`\n     - `ofacProgramCodes`: All programme codes from all matched parties (deduplicated)\n     - `assignedToQueue`: `Sanctions Compliance — CRITICAL`\n     - `screeningRecordReference`: `OFAC-SCREEN-[tradeReferenceNumber]-[screeningTimestamp]`\n   - **Call StorageBucketUploader NOW** with the complete screening record before finalising output\n\n   **If ESCALATE_TO_COMPLIANCE (SSI/sectoral match or compounded risk):**\n   - Populate `caseEscalationPayload`:\n     - `caseType`: `OFAC_SECTORAL_ESCALATION`\n     - `casePriority`: `HIGH`\n     - `caseTitle`: `OFAC ESCALATION — [tradeReferenceNumber] — [programme code]`\n     - `caseDescription`: Sectoral programme details, applicable restrictions, transaction elements affected\n     - `requiredActions`: Programme-specific response steps for the applicable OFAC programme\n     - `regulatoryDeadline`: Same day for sectoral review initiation\n     - `assignedToQueue`: `Sanctions Compliance — Review`\n     - `screeningRecordReference`: `OFAC-SCREEN-[tradeReferenceNumber]-[screeningTimestamp]`\n   - **Call StorageBucketUploader NOW** with the complete screening record before finalising output\n\n   **If HOLD_FOR_REVIEW:** Do NOT call StorageBucketUploader. Do NOT populate `caseEscalationPayload`. Transaction paused pending compliance officer review.\n\n   **If PROCEED:** Do NOT call StorageBucketUploader. Do NOT populate `caseEscalationPayload`. Set `escalationRequired = false`.\n\n9. **Set Next Review Date:** LOW = +12 months, MEDIUM = +6 months, HIGH = +1 month, CRITICAL = immediate after resolution.\n\n10. **Write Compliance Notes:** 3–5 sentences: overall outcome, key matches or risk factors, adjudication basis, recommended action, regulatory basis. Must stand alone as a compliance record.\n\n**Output:** Return ONLY valid JSON matching the outputSchema exactly. No markdown. No prose outside the JSON. No omitted required fields. Every input party must appear in `partyScreeningResults`. `listsScreened` must name every OFAC list checked. `caseEscalationPayload` present only for BLOCK_AND_FILE and ESCALATE_TO_COMPLIANCE.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "You are performing a mandatory OFAC sanctions screening for a trade finance transaction. Every party must be screened against all OFAC-administered lists. This output forms part of the compliance record — it must be accurate, complete, and examiner-defensible. For confirmed matches, a TradeFlowAICase will be created immediately via StorageBucketUploader.\n\n**Inputs:**\n\n- Trade Reference: <trade_reference>"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.tradeReferenceNumber"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "</trade_reference>\n- Trade Type: <trade_type>"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.tradeType"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "</trade_type>\n- Commodity / HS Code: <commodity>"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.commodityDescription"
+        },
+        {
+          "type": "simpleText",
+          "rawString": " | HS: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.hsCode"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "</commodity>\n- Requested By: <requested_by>"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.requestedBy"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "</requested_by>\n- Parties to Screen: <parties>"
+        },
+        {
+          "type": "variable",
+          "rawString": "input.parties"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "</parties>\n\n**Screening Steps:**\n\n1. **Document Extraction (if attachments provided):** Call Analyze Files on any attached trade documents (LC, Bill of Lading, SWIFT messages, manifests). Extract every named party, address, vessel detail, and identifier. Add any parties found in documents but absent from structured input — these are compliance gaps.\n\n2. **Enumerate All Parties:** For a Letter of Credit, expect at minimum: Applicant, Beneficiary, Issuing Bank, Advising Bank, Confirming Bank, Negotiating Bank, Reimbursing Bank, Freight Forwarder, Carrier/Vessel, Notify Party, Consignee, Broker. Flag absent roles in `dataQualityFlags`.\n\n3. **Jurisdiction Assessment:** Classify each party's country as SANCTIONED / HIGH_RISK / ELEVATED / STANDARD. Flag Iran (IR), North Korea (KP), Syria (SY), Cuba (CU), Russia (RU — sectoral), Belarus (BY), Venezuela (VE — sectoral), Sudan (SD), Myanmar (MM), Crimea. A sanctioned jurisdiction is a risk flag independent of any name match.\n\n4. **Name Screening — All Lists:** Screen each party's full legal name and aliases against: SDN, Consolidated Sanctions, SSI, FSE, NS-MBS, and CMIC. Assign a match score (0–100). Score ≥ 95 = MATCH_FOUND. Score 85–94 = POTENTIAL_MATCH. Document match type: Exact Name, Alias Match, Phonetic Match, Transliteration Match, Partial Match, Associated Entity.\n\n5. **Adjudicate Every Alert:** For every match or potential match, populate `adjudicationRecord` with: outcome (True Positive / False Positive / Pending Human Review / Insufficient Data), specific data points compared, and precise written rationale. For CLEAR results, document what was checked and confirm no match found.\n\n6. **Commodity Assessment:** Evaluate for dual-use goods, EAR/ITAR controls, crude oil under IRAN/RUSSIA sectoral sanctions, or military end-use. Populate `commodityRiskFlags`.\n\n7. **Data Quality Audit:** Flag missing identifiers in `dataQualityFlags`: no IMO for vessel, no UBO for corporate applicant, no SWIFT/BIC for bank, no nationality for individual.\n\n8. **Determine Recommended Action and Trigger Escalation:**\n\n   **If BLOCK_AND_FILE (confirmed SDN or full-blocking match):**\n   - Set `blockingRequired = true`, `ofacFilingRequired = true`\n   - Populate `caseEscalationPayload`:\n     - `caseType`: `OFAC_BLOCK`\n     - `casePriority`: `CRITICAL`\n     - `caseTitle`: `OFAC BLOCK — [tradeReferenceNumber] — [matched party name(s)]`\n     - `caseDescription`: Full narrative — trade ref, type, matched party roles and names, OFAC list(s) hit, programme codes, match scores, immediately required actions\n     - `matchedParties`: All parties with MATCH_FOUND — include role, name, matched list entry, score, programme codes\n     - `requiredActions`: [\"Block transaction immediately\", \"Freeze all related assets\", \"Do not return funds to sender without OFAC authorisation\", \"File OFAC blocked transaction report within 10 business days\", \"Notify legal counsel\", \"Preserve all transaction records\"]\n     - `regulatoryDeadline`: 10 business days from `screeningTimestamp`\n     - `ofacProgramCodes`: All programme codes from all matched parties (deduplicated)\n     - `assignedToQueue`: `Sanctions Compliance — CRITICAL`\n     - `screeningRecordReference`: `OFAC-SCREEN-[tradeReferenceNumber]-[screeningTimestamp]`\n   - **Call StorageBucketUploader NOW** with the complete screening record before finalising output\n\n   **If ESCALATE_TO_COMPLIANCE (SSI/sectoral match or compounded risk):**\n   - Populate `caseEscalationPayload`:\n     - `caseType`: `OFAC_SECTORAL_ESCALATION`\n     - `casePriority`: `HIGH`\n     - `caseTitle`: `OFAC ESCALATION — [tradeReferenceNumber] — [programme code]`\n     - `caseDescription`: Sectoral programme details, applicable restrictions, transaction elements affected\n     - `requiredActions`: Programme-specific response steps for the applicable OFAC programme\n     - `regulatoryDeadline`: Same day for sectoral review initiation\n     - `assignedToQueue`: `Sanctions Compliance — Review`\n     - `screeningRecordReference`: `OFAC-SCREEN-[tradeReferenceNumber]-[screeningTimestamp]`\n   - **Call StorageBucketUploader NOW** with the complete screening record before finalising output\n\n   **If HOLD_FOR_REVIEW:** Do NOT call StorageBucketUploader. Do NOT populate `caseEscalationPayload`. Transaction paused pending compliance officer review.\n\n   **If PROCEED:** Do NOT call StorageBucketUploader. Do NOT populate `caseEscalationPayload`. Set `escalationRequired = false`.\n\n9. **Set Next Review Date:** LOW = +12 months, MEDIUM = +6 months, HIGH = +1 month, CRITICAL = immediate after resolution.\n\n10. **Write Compliance Notes:** 3–5 sentences: overall outcome, key matches or risk factors, adjudication basis, recommended action, regulatory basis. Must stand alone as a compliance record.\n\n**Output:** Return ONLY valid JSON matching the outputSchema exactly. No markdown. No prose outside the JSON. No omitted required fields. Every input party must appear in `partyScreeningResults`. `listsScreened` must name every OFAC list checked. `caseEscalationPayload` present only for BLOCK_AND_FILE and ESCALATE_TO_COMPLIANCE."
+        }
+      ]
+    }
+  ]
+}

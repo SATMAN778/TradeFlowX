@@ -1,0 +1,26 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "StorageBucketUploader",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "505e5c88-6699-46a7-9a78-645d7e0b960b",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "fileName": null,
+      "fileReference": null,
+      "name": "StorageBucketUploader",
+      "description": null
+    },
+    "locks": [],
+    "key": "72f70cff-84ce-448d-b6d7-6084f552b0f6"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "Import Shipment Document",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "aeec4752-bd1d-432c-8c6c-81f43745e2a1",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "fileName": null,
+      "fileReference": null,
+      "name": "Import Shipment Document",
+      "description": null
+    },
+    "locks": [],
+    "key": "59a65096-73e9-4dd4-91de-ef66a48a9282"
+  }
+}

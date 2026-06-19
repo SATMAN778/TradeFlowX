@@ -1,0 +1,30 @@
+{
+  "agentPosition": {
+    "x": 0,
+    "y": -144
+  },
+  "resourceNodes": [
+    {
+      "id": "agent=>Analyze Files:86ce595d-2eb0-448d-bd7c-d4335cfae502",
+      "position": {
+        "x": 144,
+        "y": 240
+      }
+    },
+    {
+      "id": "agent=>DeepRAG:66b9d60d-6de6-4024-9266-c1170a62d044",
+      "position": {
+        "x": 384,
+        "y": 288
+      }
+    },
+    {
+      "id": "agent=>StorageBucketUploader:86bafb48-6b90-42f3-b272-dcea87f7b56c",
+      "position": {
+        "x": 544,
+        "y": 192
+      }
+    }
+  ],
+  "zoom": 1
+}

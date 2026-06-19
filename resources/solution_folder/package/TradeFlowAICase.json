@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "TradeFlowAICase",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "74f896c8-948b-41ae-b21f-e81199362475",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "TradeFlowAICase"
+    },
+    "locks": [],
+    "key": "7287a830-580d-4fe6-bb61-e5358fe9d774"
+  }
+}

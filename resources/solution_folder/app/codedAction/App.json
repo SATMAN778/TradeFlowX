@@ -1,0 +1,38 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "App",
+    "kind": "app",
+    "type": "codedAction",
+    "apiVersion": "apps.uipath.com/v1",
+    "projectKey": "53ef7499-7f34-44b7-b38d-55eed5fd491e",
+    "isOverridable": true,
+    "dependencies": [
+      {
+        "name": "App",
+        "kind": "package"
+      }
+    ],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "App",
+      "description": null,
+      "version": "1.0.0",
+      "routingName": null,
+      "appSystemName": null,
+      "package": {
+        "key": "8588400f-e8a0-4655-8cb9-f508c039677c"
+      },
+      "externalClientId": null,
+      "actionSchema": null
+    },
+    "locks": [],
+    "key": "f1d3e4e6-c008-4592-a5f7-201aeb8d564a"
+  }
+}

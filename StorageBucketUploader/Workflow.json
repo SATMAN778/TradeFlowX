@@ -1,0 +1,346 @@
+{
+  "document": {
+    "dsl": "1.0.0",
+    "name": "Workflow",
+    "tags": {
+      "projectId": "5a79f30a-d5c8-4042-bb30-53768ddebd56",
+      "solutionId": "5ee353eb-6876-4a0a-ea73-08dec6ee4f70"
+    },
+    "version": "0.0.1",
+    "namespace": "default",
+    "metadata": {
+      "variables": {
+        "schema": {
+          "format": "json",
+          "document": {
+            "type": "object",
+            "properties": {
+              "filePath": {
+                "type": "string",
+                "default": ""
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "httpRetryConfig": {
+    "maxRetries": 3,
+    "delayMs": 1000,
+    "networkErrors": true,
+    "statusCodes": [
+      408,
+      429,
+      500,
+      502,
+      503,
+      504
+    ],
+    "backoff": {
+      "strategy": "constant",
+      "maxDelayMs": 36000
+    },
+    "respectRetryAfter": true
+  },
+  "input": {
+    "schema": {
+      "format": "json",
+      "document": {
+        "type": "object",
+        "properties": {
+          "bucketId": {
+            "type": "integer"
+          },
+          "fileName": {
+            "type": "string"
+          },
+          "fileContentBase64": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "folderId": {
+            "type": "integer"
+          },
+          "destinationPath": {
+            "type": "string"
+          },
+          "uipathOrgName": {
+            "type": "string"
+          },
+          "uipathClientId": {
+            "type": "string"
+          },
+          "uipathClientSecret": {
+            "type": "string"
+          },
+          "uipathScope": {
+            "type": "string"
+          },
+          "uipathDefaultBucketName": {
+            "type": "string"
+          },
+          "uipathTenantName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "bucketId",
+          "fileName",
+          "fileContentBase64",
+          "mimeType",
+          "folderId",
+          "uipathOrgName",
+          "uipathClientId",
+          "uipathClientSecret",
+          "uipathScope",
+          "uipathTenantName"
+        ],
+        "title": "Inputs"
+      }
+    }
+  },
+  "do": [
+    {
+      "sequence_1": {
+        "do": [
+          {
+            "WorkflowStart": {
+              "set": "${Object.entries($workflow.definition?.document?.metadata?.variables?.schema?.document?.properties || {}).reduce((acc, [name, def]) => ({ ...acc, [name]: def?.default }), {}) }",
+              "output": {
+                "as": "${$input}"
+              },
+              "export": {
+                "as": "{ ...$context, variables: { ...$context.variables, ...$output } }"
+              },
+              "metadata": {
+                "activityType": "Assign",
+                "displayName": "Workflow start",
+                "fullName": "Assign",
+                "isTransparent": true
+              }
+            }
+          },
+          {
+            "TryCatch_UploadFile": {
+              "name": "Try to authenticate and upload the file",
+              "try": [
+                {
+                  "Authenticate": {
+                    "call": "UiPath.Http",
+                    "export": {
+                      "as": "{ ...$context, outputs: { ...$context?.outputs, \"Authenticate\": $output } }"
+                    },
+                    "with": {
+                      "connector": "uipath-uipath-http",
+                      "connectionId": "ImplicitConnection",
+                      "connectionResourceId": null,
+                      "method": "POST",
+                      "endpoint": "/http-request",
+                      "bodyParameters": {
+                        "authentication": "manual",
+                        "method": "POST",
+                        "url": "${\"https://cloud.uipath.com/\" + $workflow.input.uipathOrgName + \"/identity_/connect/token\"}",
+                        "path": "${\"https://cloud.uipath.com/\" + $workflow.input.uipathOrgName + \"/identity_/connect/token\"}",
+                        "headers": "${{ \"Content-Type\": \"application/x-www-form-urlencoded\" }}",
+                        "body": "${\"grant_type=client_credentials&client_id=\" + $workflow.input.uipathClientId + \"&client_secret=\" + $workflow.input.uipathClientSecret + \"&scope=\" + $workflow.input.uipathScope}"
+                      }
+                    },
+                    "metadata": {
+                      "activityType": "Connector",
+                      "configuration": "{\"essentialConfiguration\":{\"connectorVersion\":null,\"executionType\":null,\"customFieldsRequestDetails\":null,\"instanceParameters\":{\"connectorKey\":\"uipath-uipath-http\",\"objectName\":\"http-request\",\"httpMethod\":\"POST\",\"activityType\":\"Curated\",\"version\":\"1.0.0\",\"supportsStreaming\":false,\"subType\":\"method\"},\"objectName\":\"http-request\",\"packageVersion\":\"\",\"httpMethod\":\"POST\",\"path\":\"/http-request\",\"unifiedTypesCompatible\":false},\"optionalConfiguration\":{\"_textBlocks\":[],\"objectActions\":null,\"connectorName\":null,\"maxPageSize\":null,\"jobArguments\":null,\"isAutopilotInvalidConfig\":false,\"additionalHeaders\":null,\"cachedLookupValues\":[],\"cachedBrowserItems\":[],\"cachedPropertyMappings\":[],\"primaryKeys\":[],\"objectDisplayName\":null,\"baseObject\":null,\"eventMode\":null,\"eventOperation\":null,\"language\":\"en-US\",\"hasBreakingChanges\":null,\"fieldsContainer\":{\"inputFields\":[{\"id\":\"authentication\",\"name\":\"authentication\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"method\",\"name\":\"method\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"url\",\"name\":\"url\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"path\",\"name\":\"path\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"headers\",\"name\":\"headers\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"body\",\"name\":\"body\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true}],\"outputFields\":[],\"inputMode\":null,\"jitInputField\":null},\"connectorKey\":\"uipath-uipath-http\",\"activityType\":\"Curated\",\"version\":\"1.0.0\",\"supportsStreaming\":false,\"subType\":\"method\"}}",
+                      "displayName": "Authenticate with UiPath to get a bearer token",
+                      "fullName": "Connector",
+                      "uiPathActivityTypeId": "5c4cc855-b42a-37e6-b910-de8588998fce",
+                      "assemblyQualifiedName": "Connector",
+                      "outputName": "Authenticate"
+                    }
+                  }
+                },
+                {
+                  "SetFilePath": {
+                    "set": {
+                      "filePath": "${$workflow.input.destinationPath ? $workflow.input.destinationPath + \"/\" + $workflow.input.fileName : $workflow.input.fileName}"
+                    },
+                    "export": {
+                      "as": "{ ...$context, variables: { ...$context.variables, ...$output } }"
+                    },
+                    "metadata": {
+                      "activityType": "Assign",
+                      "displayName": "Construct the full file path",
+                      "fullName": "Assign",
+                      "isTransparent": false,
+                      "outputName": "SetFilePath"
+                    }
+                  }
+                },
+                {
+                  "GetWriteUri": {
+                    "call": "UiPath.Http",
+                    "export": {
+                      "as": "{ ...$context, outputs: { ...$context?.outputs, \"GetWriteUri\": $output } }"
+                    },
+                    "with": {
+                      "connector": "uipath-uipath-http",
+                      "connectionId": "ImplicitConnection",
+                      "connectionResourceId": null,
+                      "method": "POST",
+                      "endpoint": "/http-request",
+                      "bodyParameters": {
+                        "authentication": "manual",
+                        "method": "GET",
+                        "url": "${\"https://cloud.uipath.com/\" + $workflow.input.uipathOrgName + \"/\" + $workflow.input.uipathTenantName + \"/orchestrator_/odata/Buckets(\" + $workflow.input.bucketId + \")/UiPath.Server.Configuration.OData.GetWriteUri\"}",
+                        "path": "${\"https://cloud.uipath.com/\" + $workflow.input.uipathOrgName + \"/\" + $workflow.input.uipathTenantName + \"/orchestrator_/odata/Buckets(\" + $workflow.input.bucketId + \")/UiPath.Server.Configuration.OData.GetWriteUri\"}",
+                        "headers": "${{\"Authorization\": \"Bearer \" + $context.outputs.Authenticate.content.access_token, \"X-UIPATH-OrganizationUnitId\": String($workflow.input.folderId)}}",
+                        "query": "${{\"path\": $context.variables.filePath, \"contentType\": $workflow.input.mimeType}}"
+                      }
+                    },
+                    "metadata": {
+                      "activityType": "Connector",
+                      "configuration": "{\"essentialConfiguration\":{\"connectorVersion\":null,\"executionType\":null,\"customFieldsRequestDetails\":null,\"instanceParameters\":{\"connectorKey\":\"uipath-uipath-http\",\"objectName\":\"http-request\",\"httpMethod\":\"POST\",\"activityType\":\"Curated\",\"version\":\"1.0.0\",\"supportsStreaming\":false,\"subType\":\"method\"},\"objectName\":\"http-request\",\"packageVersion\":\"\",\"httpMethod\":\"POST\",\"path\":\"/http-request\",\"unifiedTypesCompatible\":false},\"optionalConfiguration\":{\"_textBlocks\":[],\"objectActions\":null,\"connectorName\":null,\"maxPageSize\":null,\"jobArguments\":null,\"isAutopilotInvalidConfig\":false,\"additionalHeaders\":null,\"cachedLookupValues\":[],\"cachedBrowserItems\":[],\"cachedPropertyMappings\":[],\"primaryKeys\":[],\"objectDisplayName\":null,\"baseObject\":null,\"eventMode\":null,\"eventOperation\":null,\"language\":\"en-US\",\"hasBreakingChanges\":null,\"fieldsContainer\":{\"inputFields\":[{\"id\":\"authentication\",\"name\":\"authentication\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"method\",\"name\":\"method\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"url\",\"name\":\"url\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"path\",\"name\":\"path\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"headers\",\"name\":\"headers\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"query\",\"name\":\"query\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true}],\"outputFields\":[],\"inputMode\":null,\"jitInputField\":null},\"connectorKey\":\"uipath-uipath-http\",\"activityType\":\"Curated\",\"version\":\"1.0.0\",\"supportsStreaming\":false,\"subType\":\"method\"}}",
+                      "displayName": "Get the pre-signed write URI from UiPath Orchestrator",
+                      "fullName": "Connector",
+                      "uiPathActivityTypeId": "5c4cc855-b42a-37e6-b910-de8588998fce",
+                      "assemblyQualifiedName": "Connector",
+                      "outputName": "GetWriteUri"
+                    }
+                  }
+                },
+                {
+                  "PrepareUploadHeaders": {
+                    "run": {
+                      "script": {
+                        "code": "const headersFromUri = $context.outputs.GetWriteUri.content.Headers;\nconst uploadHeaders = {};\nfor (const key in headersFromUri) {\n  uploadHeaders[key] = headersFromUri[key];\n}\nuploadHeaders[\"Content-Type\"] = $workflow.input.mimeType;\nreturn uploadHeaders;",
+                        "language": "javascript",
+                        "arguments": "${{\n                        \"$context\": $context,\n                        \"$workflow\": $workflow,\n                        \"$input\": $input,\n                    }}"
+                      }
+                    },
+                    "export": {
+                      "as": "{ ...$context, outputs: { ...$context?.outputs, \"PrepareUploadHeaders\": $output } }"
+                    },
+                    "metadata": {
+                      "activityType": "JsInvoke",
+                      "displayName": "Prepare headers for the file upload",
+                      "fullName": "JsInvoke",
+                      "outputName": "PrepareUploadHeaders"
+                    }
+                  }
+                },
+                {
+                  "UploadFile": {
+                    "call": "UiPath.Http",
+                    "export": {
+                      "as": "{ ...$context, outputs: { ...$context?.outputs, \"UploadFile\": $output } }"
+                    },
+                    "with": {
+                      "connector": "uipath-uipath-http",
+                      "connectionId": "ImplicitConnection",
+                      "connectionResourceId": null,
+                      "method": "POST",
+                      "endpoint": "/http-request",
+                      "bodyParameters": {
+                        "authentication": "manual",
+                        "method": "PUT",
+                        "url": "${$context.outputs.GetWriteUri.content.Uri}",
+                        "path": "${$context.outputs.GetWriteUri.content.Uri}",
+                        "headers": "${$context.outputs.PrepareUploadHeaders}",
+                        "body": "${$workflow.input.fileContentBase64}"
+                      }
+                    },
+                    "metadata": {
+                      "activityType": "Connector",
+                      "configuration": "{\"essentialConfiguration\":{\"connectorVersion\":null,\"executionType\":null,\"customFieldsRequestDetails\":null,\"instanceParameters\":{\"connectorKey\":\"uipath-uipath-http\",\"objectName\":\"http-request\",\"httpMethod\":\"POST\",\"activityType\":\"Curated\",\"version\":\"1.0.0\",\"supportsStreaming\":false,\"subType\":\"method\"},\"objectName\":\"http-request\",\"packageVersion\":\"\",\"httpMethod\":\"POST\",\"path\":\"/http-request\",\"unifiedTypesCompatible\":false},\"optionalConfiguration\":{\"_textBlocks\":[],\"objectActions\":null,\"connectorName\":null,\"maxPageSize\":null,\"jobArguments\":null,\"isAutopilotInvalidConfig\":false,\"additionalHeaders\":null,\"cachedLookupValues\":[],\"cachedBrowserItems\":[],\"cachedPropertyMappings\":[],\"primaryKeys\":[],\"objectDisplayName\":null,\"baseObject\":null,\"eventMode\":null,\"eventOperation\":null,\"language\":\"en-US\",\"hasBreakingChanges\":null,\"fieldsContainer\":{\"inputFields\":[{\"id\":\"authentication\",\"name\":\"authentication\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"method\",\"name\":\"method\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"url\",\"name\":\"url\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"path\",\"name\":\"path\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"headers\",\"name\":\"headers\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true},{\"id\":\"body\",\"name\":\"body\",\"fieldLocation\":\"body\",\"type\":\"string\",\"clrType\":{\"_elementType\":null,\"_isNullable\":false,\"isArray\":false,\"genericTypeArguments\":[],\"fullName\":null,\"name\":\"String\",\"assemblyQualifiedName\":\"String\",\"isValueType\":true},\"onCanvas\":true}],\"outputFields\":[],\"inputMode\":null,\"jitInputField\":null},\"connectorKey\":\"uipath-uipath-http\",\"activityType\":\"Curated\",\"version\":\"1.0.0\",\"supportsStreaming\":false,\"subType\":\"method\"}}",
+                      "displayName": "Upload the file to the pre-signed URI",
+                      "fullName": "Connector",
+                      "uiPathActivityTypeId": "5c4cc855-b42a-37e6-b910-de8588998fce",
+                      "assemblyQualifiedName": "Connector",
+                      "outputName": "UploadFile"
+                    }
+                  }
+                },
+                {
+                  "SuccessResponse": {
+                    "response": "${{\"storageStatus\": \"stored\", \"bucketName\": $workflow.input.uipathDefaultBucketName || \"documents-bucket\", \"filePath\": $context.variables.filePath, \"storedAt\": new Date().toISOString()}}",
+                    "markJobAsFailed": false,
+                    "then": "end",
+                    "export": {
+                      "as": "{ ...$context, outputs: { ...$context?.outputs, \"SuccessResponse\": $output } }"
+                    },
+                    "metadata": {
+                      "activityType": "Response",
+                      "displayName": "Return success response",
+                      "fullName": "Response",
+                      "outputName": "SuccessResponse"
+                    }
+                  }
+                }
+              ],
+              "catch": {
+                "as": "error",
+                "do": [
+                  {
+                    "HandleError": {
+                      "run": {
+                        "script": {
+                          "code": "let errorCode = \"UPLOAD_FAILED\";\nlet errorMessage = $error.detail || \"An unknown error occurred during upload.\";\n\n// Check for specific error statuses and update error code and message accordingly\nif ($error.status === 401) {\n  errorCode = \"AUTH_FAILED\";\n  errorMessage = \"Authentication failed. Check credentials and scope.\";\n} else if ($error.status === 404) {\n  errorCode = \"BUCKET_NOT_FOUND\";\n  errorMessage = \"Bucket or OData endpoint not found. Check bucketId, folderId, and org/tenant names.\";\n}\n\n// Construct the filePath based on available variables, using $context.variables.filePath\nconst finalFilePath = $context.variables.filePath || ($workflow.input.destinationPath ? $workflow.input.destinationPath + \"/\" + $workflow.input.fileName : $workflow.input.fileName);\n\n// Return the structured error object\nreturn {\n  storageStatus: \"failed\",\n  bucketName: $workflow.input.uipathDefaultBucketName || \"documents-bucket\",\n  filePath: finalFilePath,\n  storedAt: new Date().toISOString(),\n  errorCode: errorCode,\n  errorMessage: errorMessage\n};",
+                          "language": "javascript",
+                          "arguments": "${{\n                        \"$context\": $context,\n                        \"$workflow\": $workflow,\n                        \"$input\": $input,\n                    \"$error\": $error,\n}}"
+                        }
+                      },
+                      "export": {
+                        "as": "{ ...$context, outputs: { ...$context?.outputs, \"HandleError\": $output } }"
+                      },
+                      "metadata": {
+                        "activityType": "JsInvoke",
+                        "displayName": "Determine error code and message based on the failed step and status",
+                        "fullName": "JsInvoke",
+                        "outputName": "HandleError"
+                      }
+                    }
+                  },
+                  {
+                    "FailureResponse": {
+                      "response": "${$context.outputs.HandleError}",
+                      "markJobAsFailed": true,
+                      "then": "end",
+                      "export": {
+                        "as": "{ ...$context, outputs: { ...$context?.outputs, \"FailureResponse\": $output } }"
+                      },
+                      "metadata": {
+                        "activityType": "Response",
+                        "displayName": "Return failure response",
+                        "fullName": "Response",
+                        "outputName": "FailureResponse"
+                      }
+                    }
+                  }
+                ]
+              },
+              "export": {
+                "as": "{ ...$context, outputs: { ...$context?.outputs, \"TryCatch_UploadFile\": $output } }"
+              },
+              "metadata": {
+                "activityType": "TryCatch",
+                "displayName": "Try to authenticate and upload the file",
+                "fullName": "TryCatch",
+                "outputName": "TryCatch_UploadFile"
+              }
+            }
+          }
+        ],
+        "metadata": {
+          "activityType": "Sequence",
+          "displayName": "Sequence",
+          "fullName": "Sequence",
+          "outputName": "sequence_1"
+        }
+      }
+    }
+  ],
+  "evaluate": {
+    "mode": "strict",
+    "language": "javascript"
+  }
+}

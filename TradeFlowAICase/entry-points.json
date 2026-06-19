@@ -1,0 +1,14 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "$id": "entry-points.json",
+  "entryPoints": [
+    {
+      "filePath": "/content/caseplan.json.bpmn#trigger_T02API",
+      "uniqueId": "40b35f60-e825-452c-8305-9d0bbcc894fa",
+      "type": "CaseManagement",
+      "input": { "type": "object", "properties": {} },
+      "output": { "type": "object", "properties": {} },
+      "displayName": "Create Shipment"
+    }
+  ]
+}
