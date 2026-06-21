@@ -1,0 +1,86 @@
+﻿{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "$id": "entry-points.json",
+  "entryPoints": [
+    {
+      "filePath": "/content/agent.json",
+      "type": "agent",
+      "uniqueId": "b2c3d4e5-f6a7-8901-bcde-f01234567890",
+      "input": {
+        "type": "object",
+        "required": [
+          "shipmentDocument"
+        ],
+        "properties": {
+          "shipmentDocument": {
+            "$ref": "#/definitions/job-attachment",
+            "description": "The shipment document to classify (commercial invoice, packing list, or product description). Accepts PDF, DOCX, or plain text formats."
+          },
+          "documentType": {
+            "type": "string",
+            "description": "Optional hint for the document type to guide initial parsing.",
+            "enum": [
+              "CommercialInvoice",
+              "PackingList",
+              "ProductDescription"
+            ]
+          },
+          "chapterHint": {
+            "type": "string",
+            "description": "Optional 2-digit HTS chapter hint (e.g., 84 for Machinery).",
+            "pattern": "^\\d{2}$"
+          },
+          "countryOfOrigin": {
+            "type": "string",
+            "description": "ISO 3166-1 alpha-2 country code for the country of origin.",
+            "pattern": "^[A-Z]{2}$"
+          }
+        },
+        "definitions": {
+          "job-attachment": {
+            "type": "object",
+            "required": ["ID"],
+            "x-uipath-resource-kind": "JobAttachment",
+            "properties": {
+              "FullName": {"type": "string", "description": "File name"},
+              "ID": {"type": "string", "description": "Orchestrator attachment key"},
+              "Metadata": {
+                "type": "object",
+                "description": "Dictionary<string, string> of metadata",
+                "additionalProperties": {"type": "string"}
+              },
+              "MimeType": {"type": "string", "description": "The MIME type of the content"}
+            }
+          }
+        },
+        "title": "Inputs"
+      },
+      "output": {
+        "type": "object",
+        "required": [
+          "job_id",
+          "final_hts_code",
+          "confidence",
+          "gri_rule_applied",
+          "reasoning_summary",
+          "citations",
+          "requires_human_review",
+          "job_status"
+        ],
+        "properties": {
+          "job_id": {"type": "string", "description": "UUID v4 unique identifier for this classification job."},
+          "final_hts_code": {"type": "string", "description": "The 10-digit HTS code in ####.##.#### format."},
+          "duty_rate": {"type": ["number", "null"], "description": "Total applicable duty rate as a decimal. Null when unavailable."},
+          "confidence": {"type": "number", "description": "Agent confidence 0.0-1.0.", "minimum": 0, "maximum": 1},
+          "gri_rule_applied": {"type": "string", "description": "The GRI rule that was determinative."},
+          "reasoning_summary": {"type": "string", "description": "Human-readable classification narrative."},
+          "citations": {"type": "array", "description": "All notes and CROSS rulings cited.", "items": {"type": "string"}},
+          "requires_human_review": {"type": "boolean", "description": "True when escalated or any review trigger condition was met."},
+          "job_status": {"type": "string", "enum": ["completed", "failed", "checkpoint_schema_error", "audit_persistence_failed"]},
+          "audit_bucket_path": {"type": ["string", "null"], "description": "Path in UiPath Storage Bucket to the persisted audit trail."}
+        },
+        "title": "Outputs"
+      }
+    }
+  ]
+}

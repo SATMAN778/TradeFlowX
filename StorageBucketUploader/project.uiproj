@@ -1,6 +1,0 @@
-{
-  "ProjectType": "Api",
-  "Name": "StorageBucketUploader",
-  "Description": null,
-  "MainFile": "Workflow.json"
-}

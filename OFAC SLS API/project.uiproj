@@ -1,6 +1,0 @@
-{
-  "ProjectType": "Api",
-  "Name": "OFAC SLS API",
-  "Description": null,
-  "MainFile": "Workflow.json"
-}

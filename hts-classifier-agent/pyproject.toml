@@ -1,0 +1,14 @@
+[project]
+name = "hts-classifier-agent"
+version = "0.0.1"
+description = "HTS Classifier Agent — LangGraph deep agent for US import tariff classification"
+authors = [{ name = "John Doe", email = "john.doe@myemail.com" }]
+dependencies = [
+    "uipath>=2.10.0, <2.11.0",
+    "uipath-langchain>=0.1.0",
+    "langgraph>=0.2.0",
+    "langchain-anthropic>=0.3.0",
+    "deepagents>=0.1.0",
+    "hypothesis==6.112.2",
+]
+requires-python = ">=3.11"
