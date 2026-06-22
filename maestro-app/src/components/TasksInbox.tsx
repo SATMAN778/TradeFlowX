@@ -7,6 +7,7 @@ import type { MyTask } from '../types/cases';
 import { getMyTasks, assignTask, unassignTask, completeTask } from '../services/casesService';
 import { useAuth } from '../context/AuthContext';
 import type { UserRole } from '../types/auth';
+import S3DocumentViewer from './S3DocumentViewer';
 
 function formatLabel(key: string): string {
   return key.replace(/([A-Z])/g, ' $1').replace(/^./, (s) => s.toUpperCase()).trim();
@@ -210,7 +211,7 @@ interface TaskModalProps {
   onRefresh: (actionType?: 'claim' | 'unclaim' | 'complete', taskId?: string, payload?: any) => void;
 }
 
-function TaskModal({ task, onClose, onRefresh }: TaskModalProps) {
+function TaskWorkstation({ task, onClose, onRefresh }: TaskModalProps) {
   const { activeRole } = useAuth();
   const [formValues, setFormValues] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
@@ -319,235 +320,254 @@ function TaskModal({ task, onClose, onRefresh }: TaskModalProps) {
   const dataEntries = Object.entries(formValues);
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
-        {/* Header */}
-        <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid var(--glass-border)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                {task.title}
-              </h3>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginTop: '8px' }}>
-                <span style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  background: badgeInfo.bg,
-                  color: badgeInfo.text,
-                  border: '1px solid rgba(0,0,0,0.05)'
-                }}>
-                  {badgeInfo.label}
-                </span>
-                <span className={`status-badge ${
-                  (task.priority ?? '').toLowerCase() === 'high' || (task.priority ?? '').toLowerCase() === 'critical'
-                    ? 'status-danger'
-                    : (task.priority ?? '').toLowerCase() === 'medium'
-                    ? 'status-warning'
-                    : 'status-info'
-                }`} style={{ fontSize: '0.7rem' }}>
-                  {task.priority || 'Medium'}
-                </span>
-                {isUnassigned && (
-                  <span className="status-badge status-neutral" style={{ fontSize: '0.7rem' }}>Unassigned</span>
-                )}
-                {isAssignedToMe && (
-                  <span className="status-badge status-success" style={{ fontSize: '0.7rem' }}>Assigned to you</span>
-                )}
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: 'var(--text-secondary)', flexShrink: 0 }}
-            >
-              <X size={20} />
-            </button>
-          </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', animation: 'fadeIn 0.3s ease' }}>
+      {/* Top control bar with Back button */}
+      <div className="glass-panel" style={{ padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <button className="btn btn-secondary" onClick={onClose} style={{ padding: '6px 12px' }}>
+          ← Back to Tasks Inbox
+        </button>
+        <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+          Active Workstation &mdash; <strong style={{ color: 'var(--text-primary)' }}>{task.taskId}</strong>
+        </span>
+      </div>
 
-          <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '0.8rem', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <User size={13} /> {task.assignedToUser || 'Unassigned'}
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Clock size={13} /> Created: {formatDate(task.createdAt)}
-            </span>
-            {task.taskId && (
-              <span style={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>ID: {task.taskId}</span>
-            )}
-          </div>
+      <div className="glass-panel" style={{
+        display: 'flex',
+        flexDirection: 'row',
+        padding: 0,
+        height: 'calc(100vh - 280px)',
+        minHeight: '650px',
+        overflow: 'hidden'
+      }}>
+        {/* Left Side: S3 Document Viewer */}
+        <div style={{ width: '60%', height: '100%', borderRight: '1px solid var(--glass-border)' }}>
+          <S3DocumentViewer task={task} />
         </div>
 
-        {/* Body */}
-        <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          {/* Authorization Check */}
-          {!isRoleAuthorized && (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '12px 16px', background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.15)', borderRadius: '8px', color: '#b91c1c', fontSize: '0.82rem' }}>
-              <ShieldAlert size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
-              <div>
-                <strong style={{ display: 'block', marginBottom: '2px' }}>Role Permission Warning</strong>
-                Your active role does not have authorization to modify or complete this task. You must switch to a matching role (e.g., <strong>{badgeInfo.label}</strong>) or log in as an Administrator.
+        {/* Right Side: Task Form / Actions */}
+        <div style={{ width: '40%', height: '100%', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+          {/* Header */}
+          <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid var(--glass-border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                  {task.title}
+                </h3>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center', marginTop: '8px' }}>
+                  <span style={{
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    background: badgeInfo.bg,
+                    color: badgeInfo.text,
+                    border: '1px solid rgba(0,0,0,0.05)'
+                  }}>
+                    {badgeInfo.label}
+                  </span>
+                  <span className={`status-badge ${
+                    (task.priority ?? '').toLowerCase() === 'high' || (task.priority ?? '').toLowerCase() === 'critical'
+                      ? 'status-danger'
+                      : (task.priority ?? '').toLowerCase() === 'medium'
+                      ? 'status-warning'
+                      : 'status-info'
+                  }`} style={{ fontSize: '0.7rem' }}>
+                    {task.priority || 'Medium'}
+                  </span>
+                  {isUnassigned && (
+                    <span className="status-badge status-neutral" style={{ fontSize: '0.7rem' }}>Unassigned</span>
+                  )}
+                  {isAssignedToMe && (
+                    <span className="status-badge status-success" style={{ fontSize: '0.7rem' }}>Assigned to you</span>
+                  )}
+                </div>
               </div>
             </div>
-          )}
 
-          {/* Success / Error */}
-          {successMsg && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '8px', color: '#059669', fontSize: '0.875rem' }}>
-              <CheckCircle size={16} /> {successMsg}
-            </div>
-          )}
-          {errorMsg && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '8px', color: '#dc2626', fontSize: '0.875rem' }}>
-              <AlertTriangle size={16} /> {errorMsg}
-            </div>
-          )}
-
-          {/* External link */}
-          {task.externalLink && (
-            <a
-              href={task.externalLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-secondary"
-              style={{ justifyContent: 'center', fontSize: '0.85rem', gap: '6px' }}
-            >
-              <ExternalLink size={14} /> Open in Action Center
-            </a>
-          )}
-
-          {/* Task data fields */}
-          {dataEntries.length > 0 && (
-            <div>
-              <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Task Data
-              </p>
-              <div style={{ border: '1px solid var(--glass-border)', borderRadius: '8px', overflow: 'hidden' }}>
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Field</th>
-                      <th>Value</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {dataEntries.map(([key, val]) => (
-                      <tr key={key}>
-                        <td style={{ fontWeight: 500, color: 'var(--text-secondary)', width: '40%', whiteSpace: 'nowrap' }}>
-                          {formatLabel(key)}
-                        </td>
-                        <td>
-                          {isAssignedToMe && isRoleAuthorized ? (
-                            <input
-                              type="text"
-                              value={val}
-                              onChange={(e) => setFormValues((prev) => ({ ...prev, [key]: e.target.value }))}
-                              disabled={submitting}
-                              style={{
-                                width: '100%',
-                                padding: '6px 8px',
-                                border: '1px solid var(--glass-border)',
-                                borderRadius: '4px',
-                                fontSize: '0.875rem',
-                                background: 'var(--bg-primary)',
-                                outline: 'none',
-                              }}
-                            />
-                          ) : (
-                            <span style={{ color: val ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
-                              {val || '—'}
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {/* Confirm step */}
-          {confirmAction && (
-            <div className="confirm-bar">
-              <AlertTriangle size={16} style={{ color: 'var(--warning)', flexShrink: 0 }} />
-              <span style={{ flex: 1 }}>
-                Are you sure you want to <strong>{confirmAction}</strong> this task?
+            <div style={{ display: 'flex', gap: '16px', marginTop: '12px', fontSize: '0.8rem', color: 'var(--text-secondary)', flexWrap: 'wrap' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <User size={13} /> {task.assignedToUser || 'Unassigned'}
               </span>
-              <button
-                className="btn btn-secondary"
-                onClick={() => setConfirmAction(null)}
-                disabled={submitting}
-                style={{ padding: '6px 12px', fontSize: '0.8rem' }}
-              >
-                Cancel
-              </button>
-              <button
-                className="btn btn-primary"
-                onClick={handleSubmitAction}
-                disabled={submitting}
-                style={{
-                  padding: '6px 14px',
-                  fontSize: '0.8rem',
-                  background: confirmAction === 'Approve' ? 'var(--success)' : 'var(--danger)',
-                  borderColor: confirmAction === 'Approve' ? 'var(--success)' : 'var(--danger)',
-                }}
-              >
-                {submitting ? 'Submitting…' : `Yes, ${confirmAction}`}
-              </button>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <Clock size={13} /> Created: {formatDate(task.createdAt)}
+              </span>
+              {task.taskId && (
+                <span style={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>ID: {task.taskId}</span>
+              )}
             </div>
-          )}
+          </div>
 
-          {/* Action buttons */}
-          {!confirmAction && (
-            <div style={{ display: 'flex', gap: '8px', marginTop: '4px', width: '100%' }}>
-              {isUnassigned && (
+          {/* Body */}
+          <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Authorization Check */}
+            {!isRoleAuthorized && (
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '12px 16px', background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.15)', borderRadius: '8px', color: '#b91c1c', fontSize: '0.82rem' }}>
+                <ShieldAlert size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
+                <div>
+                  <strong style={{ display: 'block', marginBottom: '2px' }}>Role Permission Warning</strong>
+                  Your active role does not have authorization to modify or complete this task. You must switch to a matching role (e.g., <strong>{badgeInfo.label}</strong>) or log in as an Administrator.
+                </div>
+              </div>
+            )}
+
+            {/* Success / Error */}
+            {successMsg && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', background: 'rgba(16, 185, 129, 0.08)', border: '1px solid rgba(16, 185, 129, 0.25)', borderRadius: '8px', color: '#059669', fontSize: '0.875rem' }}>
+                <CheckCircle size={16} /> {successMsg}
+              </div>
+            )}
+            {errorMsg && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 16px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.25)', borderRadius: '8px', color: '#dc2626', fontSize: '0.875rem' }}>
+                <AlertTriangle size={16} /> {errorMsg}
+              </div>
+            )}
+
+            {/* External link */}
+            {task.externalLink && (
+              <a
+                href={task.externalLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-secondary"
+                style={{ justifyContent: 'center', fontSize: '0.85rem', gap: '6px' }}
+              >
+                <ExternalLink size={14} /> Open in Action Center
+              </a>
+            )}
+
+            {/* Task data fields */}
+            {dataEntries.length > 0 && (
+              <div>
+                <p style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Task Data
+                </p>
+                <div style={{ border: '1px solid var(--glass-border)', borderRadius: '8px', overflow: 'hidden' }}>
+                  <table className="data-table">
+                    <thead>
+                      <tr>
+                        <th>Field</th>
+                        <th>Value</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dataEntries.map(([key, val]) => (
+                        <tr key={key}>
+                          <td style={{ fontWeight: 500, color: 'var(--text-secondary)', width: '40%', whiteSpace: 'nowrap' }}>
+                            {formatLabel(key)}
+                          </td>
+                          <td>
+                            {isAssignedToMe && isRoleAuthorized ? (
+                              <input
+                                type="text"
+                                value={val}
+                                onChange={(e) => setFormValues((prev) => ({ ...prev, [key]: e.target.value }))}
+                                disabled={submitting}
+                                style={{
+                                  width: '100%',
+                                  padding: '6px 8px',
+                                  border: '1px solid var(--glass-border)',
+                                  borderRadius: '4px',
+                                  fontSize: '0.875rem',
+                                  background: 'var(--bg-primary)',
+                                  outline: 'none',
+                                }}
+                              />
+                            ) : (
+                              <span style={{ color: val ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                                {val || '—'}
+                              </span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* Confirm step */}
+            {confirmAction && (
+              <div className="confirm-bar">
+                <AlertTriangle size={16} style={{ color: 'var(--warning)', flexShrink: 0 }} />
+                <span style={{ flex: 1 }}>
+                  Are you sure you want to <strong>{confirmAction}</strong> this task?
+                </span>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setConfirmAction(null)}
+                  disabled={submitting}
+                  style={{ padding: '6px 12px', fontSize: '0.8rem' }}
+                >
+                  Cancel
+                </button>
                 <button
                   className="btn btn-primary"
-                  onClick={handleClaim}
-                  disabled={claiming || !!successMsg || !isRoleAuthorized}
-                  style={{ flex: 1, justifyContent: 'center' }}
+                  onClick={handleSubmitAction}
+                  disabled={submitting}
+                  style={{
+                    padding: '6px 14px',
+                    fontSize: '0.8rem',
+                    background: confirmAction === 'Approve' ? 'var(--success)' : 'var(--danger)',
+                    borderColor: confirmAction === 'Approve' ? 'var(--success)' : 'var(--danger)',
+                  }}
                 >
-                  {claiming ? 'Claiming…' : 'Claim Task'}
+                  {submitting ? 'Submitting…' : `Yes, ${confirmAction}`}
                 </button>
-              )}
-              {isAssignedToMe && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-                  <div style={{ display: 'flex', gap: '8px' }}>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => setConfirmAction('Approve')}
-                      disabled={submitting || unclaiming || !!successMsg || !isRoleAuthorized}
-                      style={{ flex: 1, justifyContent: 'center', background: 'var(--success)', borderColor: 'var(--success)' }}
-                    >
-                      <Check size={16} /> Approve
-                    </button>
+              </div>
+            )}
+
+            {/* Action buttons */}
+            {!confirmAction && (
+              <div style={{ display: 'flex', gap: '8px', marginTop: '4px', width: '100%' }}>
+                {isUnassigned && (
+                  <button
+                    className="btn btn-primary"
+                    onClick={handleClaim}
+                    disabled={claiming || !!successMsg || !isRoleAuthorized}
+                    style={{ flex: 1, justifyContent: 'center' }}
+                  >
+                    {claiming ? 'Claiming…' : 'Claim Task'}
+                  </button>
+                )}
+                {isAssignedToMe && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => setConfirmAction('Approve')}
+                        disabled={submitting || unclaiming || !!successMsg || !isRoleAuthorized}
+                        style={{ flex: 1, justifyContent: 'center', background: 'var(--success)', borderColor: 'var(--success)' }}
+                      >
+                        <Check size={16} /> Approve
+                      </button>
+                      <button
+                        className="btn btn-secondary"
+                        onClick={() => setConfirmAction('Reject')}
+                        disabled={submitting || unclaiming || !!successMsg || !isRoleAuthorized}
+                        style={{ flex: 1, justifyContent: 'center', color: 'var(--danger)', borderColor: 'rgba(239,68,68,0.3)' }}
+                      >
+                        <X size={16} /> Reject
+                      </button>
+                    </div>
                     <button
                       className="btn btn-secondary"
-                      onClick={() => setConfirmAction('Reject')}
-                      disabled={submitting || unclaiming || !!successMsg || !isRoleAuthorized}
-                      style={{ flex: 1, justifyContent: 'center', color: 'var(--danger)', borderColor: 'rgba(239,68,68,0.3)' }}
+                      onClick={handleUnassign}
+                      disabled={submitting || unclaiming || !!successMsg}
+                      style={{ width: '100%', justifyContent: 'center', borderColor: 'rgba(239, 68, 68, 0.3)', fontSize: '0.85rem' }}
                     >
-                      <X size={16} /> Reject
+                      {unclaiming ? 'Releasing…' : 'Release / Unclaim Task'}
                     </button>
                   </div>
-                  <button
-                    className="btn btn-secondary"
-                    onClick={handleUnassign}
-                    disabled={submitting || unclaiming || !!successMsg}
-                    style={{ width: '100%', justifyContent: 'center', borderColor: 'rgba(239, 68, 68, 0.3)', fontSize: '0.85rem' }}
-                  >
-                    {unclaiming ? 'Releasing…' : 'Release / Unclaim Task'}
-                  </button>
-                </div>
-              )}
-              {!isUnassigned && !isAssignedToMe && (
-                <div style={{ flex: 1, padding: '10px', textAlign: 'center', background: 'rgba(0,0,0,0.03)', borderRadius: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  This task is claimed by <strong>{task.assignedToUser}</strong> and is read-only.
-                </div>
-              )}
-            </div>
-          )}
+                )}
+                {!isUnassigned && !isAssignedToMe && (
+                  <div style={{ flex: 1, padding: '10px', textAlign: 'center', background: 'rgba(0,0,0,0.03)', borderRadius: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                    This task is claimed by <strong>{task.assignedToUser}</strong> and is read-only.
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -772,6 +792,16 @@ export default function TasksInbox({ onTaskCountChange }: TasksInboxProps) {
 
   const unassignedCount = tasks.filter((t) => !t.assignedToUser).length;
 
+  if (selectedTask) {
+    return (
+      <TaskWorkstation
+        task={selectedTask}
+        onClose={() => setSelectedTask(null)}
+        onRefresh={handleTaskRefresh}
+      />
+    );
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', animation: 'fadeIn 0.3s ease' }}>
       {/* Header */}
@@ -878,14 +908,6 @@ export default function TasksInbox({ onTaskCountChange }: TasksInboxProps) {
         </div>
       )}
 
-      {/* Modal */}
-      {selectedTask && (
-        <TaskModal
-          task={selectedTask}
-          onClose={() => setSelectedTask(null)}
-          onRefresh={handleTaskRefresh}
-        />
-      )}
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { getCaseDetails, getTaskDetails, assignTask, unassignTask, completeTask 
 import type { CaseDetailsResponse, TaskDetailsResponse } from '../types/cases';
 import StageTracker from './StageTracker';
 import HumanTasks from './HumanTasks';
+import S3DocumentViewer from './S3DocumentViewer';
 import { useAuth } from '../context/AuthContext';
 
 interface CaseDetailsProps {
@@ -191,79 +192,102 @@ export default function CaseDetails({ caseInstanceId, folderKey, onBack }: CaseD
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
-        {/* Main Content */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* Key Info Grid */}
-          <div className="glass-panel" style={{ padding: '24px' }}>
-            <h3 style={{ marginBottom: '20px' }}>Shipment Details</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <Building size={20} className="text-secondary" style={{ marginTop: '2px' }} />
-                <div>
-                  <p className="text-secondary" style={{ fontSize: '0.8rem' }}>Supplier (UAE)</p>
-                  <p style={{ fontWeight: 500 }}>{caseData.supplierName}</p>
+      {taskDetails?.task ? (
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '24px', minHeight: 'calc(100vh - 280px)' }}>
+          {/* Left Side: S3 Document Viewer */}
+          <div style={{ height: '100%', minHeight: '600px' }}>
+            <S3DocumentViewer task={taskDetails.task} />
+          </div>
+
+          {/* Right Side: Human Tasks Form */}
+          <div>
+            <HumanTasks 
+              taskDetails={taskDetails}
+              onClaim={handleClaim}
+              onUnassign={handleUnassign}
+              onComplete={handleComplete}
+              claiming={claiming}
+              unclaiming={unclaiming}
+              completing={completing}
+              activeRole={activeRole}
+            />
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+          {/* Main Content */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            {/* Key Info Grid */}
+            <div className="glass-panel" style={{ padding: '24px' }}>
+              <h3 style={{ marginBottom: '20px' }}>Shipment Details</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <Building size={20} className="text-secondary" style={{ marginTop: '2px' }} />
+                  <div>
+                    <p className="text-secondary" style={{ fontSize: '0.8rem' }}>Supplier (UAE)</p>
+                    <p style={{ fontWeight: 500 }}>{caseData.supplierName}</p>
+                  </div>
                 </div>
-              </div>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <Building size={20} className="text-secondary" style={{ marginTop: '2px' }} />
-                <div>
-                  <p className="text-secondary" style={{ fontSize: '0.8rem' }}>Importer of Record</p>
-                  <p style={{ fontWeight: 500 }}>{caseData.importer}</p>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <Building size={20} className="text-secondary" style={{ marginTop: '2px' }} />
+                  <div>
+                    <p className="text-secondary" style={{ fontSize: '0.8rem' }}>Importer of Record</p>
+                    <p style={{ fontWeight: 500 }}>{caseData.importer}</p>
+                  </div>
                 </div>
-              </div>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <MapPin size={20} className="text-secondary" style={{ marginTop: '2px' }} />
-                <div>
-                  <p className="text-secondary" style={{ fontSize: '0.8rem' }}>Route</p>
-                  <p style={{ fontWeight: 500 }}>{caseData.portOfLoading} → {caseData.portOfEntry}</p>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <MapPin size={20} className="text-secondary" style={{ marginTop: '2px' }} />
+                  <div>
+                    <p className="text-secondary" style={{ fontSize: '0.8rem' }}>Route</p>
+                    <p style={{ fontWeight: 500 }}>{caseData.portOfLoading} → {caseData.portOfEntry}</p>
+                  </div>
                 </div>
-              </div>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <DollarSign size={20} className="text-secondary" style={{ marginTop: '2px' }} />
-                <div>
-                  <p className="text-secondary" style={{ fontSize: '0.8rem' }}>Value (USD)</p>
-                  <p style={{ fontWeight: 500 }}>${caseData.shipmentValue.toLocaleString()}</p>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <DollarSign size={20} className="text-secondary" style={{ marginTop: '2px' }} />
+                  <div>
+                    <p className="text-secondary" style={{ fontSize: '0.8rem' }}>Value (USD)</p>
+                    <p style={{ fontWeight: 500 }}>${caseData.shipmentValue.toLocaleString()}</p>
+                  </div>
                 </div>
-              </div>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <ShieldAlert size={20} className="text-secondary" style={{ marginTop: '2px' }} />
-                <div>
-                  <p className="text-secondary" style={{ fontSize: '0.8rem' }}>HTS Code</p>
-                  <p style={{ fontWeight: 500 }}>{caseData.htsCode}</p>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <ShieldAlert size={20} className="text-secondary" style={{ marginTop: '2px' }} />
+                  <div>
+                    <p className="text-secondary" style={{ fontSize: '0.8rem' }}>HTS Code</p>
+                    <p style={{ fontWeight: 500 }}>{caseData.htsCode}</p>
+                  </div>
                 </div>
-              </div>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <ShieldAlert size={20} className="text-secondary" style={{ marginTop: '2px' }} />
-                <div>
-                  <p className="text-secondary" style={{ fontSize: '0.8rem' }}>Entry Type</p>
-                  <p style={{ fontWeight: 500 }}>{caseData.entryType}</p>
+                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  <ShieldAlert size={20} className="text-secondary" style={{ marginTop: '2px' }} />
+                  <div>
+                    <p className="text-secondary" style={{ fontSize: '0.8rem' }}>Entry Type</p>
+                    <p style={{ fontWeight: 500 }}>{caseData.entryType}</p>
+                  </div>
                 </div>
               </div>
             </div>
+
+            {/* Workflow Stages */}
+            <div className="glass-panel" style={{ padding: '24px' }}>
+              <h3 style={{ marginBottom: '20px' }}>Maestro Workflow Stages</h3>
+              <StageTracker stages={caseData.stages} />
+            </div>
           </div>
 
-          {/* Workflow Stages */}
-          <div className="glass-panel" style={{ padding: '24px' }}>
-            <h3 style={{ marginBottom: '20px' }}>Maestro Workflow Stages</h3>
-            <StageTracker stages={caseData.stages} />
+          {/* Sidebar */}
+          <div>
+            <HumanTasks 
+              taskDetails={taskDetails}
+              onClaim={handleClaim}
+              onUnassign={handleUnassign}
+              onComplete={handleComplete}
+              claiming={claiming}
+              unclaiming={unclaiming}
+              completing={completing}
+              activeRole={activeRole}
+            />
           </div>
         </div>
-
-        {/* Sidebar */}
-        <div>
-          <HumanTasks 
-            taskDetails={taskDetails}
-            onClaim={handleClaim}
-            onUnassign={handleUnassign}
-            onComplete={handleComplete}
-            claiming={claiming}
-            unclaiming={unclaiming}
-            completing={completing}
-            activeRole={activeRole}
-          />
-        </div>
-      </div>
+      )}
     </div>
   );
 }
