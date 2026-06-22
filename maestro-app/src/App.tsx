@@ -6,9 +6,10 @@ import CallbackPage from './pages/CallbackPage';
 import Dashboard from './components/Dashboard';
 import CaseDetails from './components/CaseDetails';
 import TasksInbox from './components/TasksInbox';
+import ActionHistory from './components/ActionHistory';
 import { getMyTasks, getTradeOverview, type TradeOverview } from './services/casesService';
 import {
-  Package, LayoutDashboard, LogOut, Inbox,
+  Package, LayoutDashboard, LogOut, Inbox, History,
   Ship, Globe, FileText, ShieldCheck, Activity,
   ChevronRight, User, Clock, Settings, Anchor, RefreshCw
 } from 'lucide-react';
@@ -25,7 +26,7 @@ interface SelectedInstance {
   folderKey: string;
 }
 
-type ActiveView = 'dashboard' | 'inbox';
+type ActiveView = 'dashboard' | 'inbox' | 'history';
 
 // ─── Trade Stat Bar (live data) ───────────────────────────────────────────────
 
@@ -313,17 +314,19 @@ function BreadcrumbBar({ items }: BreadcrumbBarProps) {
 interface SidebarProps {
   isOnDashboard: boolean;
   isOnInbox: boolean;
+  isOnHistory: boolean;
   selectedCase: SelectedCase | null;
   selectedInstance: SelectedInstance | null;
   pendingTaskCount: number;
   onDashboard: () => void;
   onInbox: () => void;
+  onHistory: () => void;
   onBackToInstances: () => void;
 }
 
 function Sidebar({
-  isOnDashboard, isOnInbox, selectedCase, selectedInstance,
-  pendingTaskCount, onDashboard, onInbox, onBackToInstances
+  isOnDashboard, isOnInbox, isOnHistory, selectedCase, selectedInstance,
+  pendingTaskCount, onDashboard, onInbox, onHistory, onBackToInstances
 }: SidebarProps) {
   return (
     <aside className="sidebar">
@@ -337,10 +340,6 @@ function Sidebar({
             <div className="sidebar-brand-name">TradeFlow AI</div>
             <div className="sidebar-brand-sub">Case Management Portal</div>
           </div>
-        </div>
-        <div className="sidebar-trade-badge">
-          <span className="sidebar-trade-badge-dot" />
-          UAE &rarr; USA &nbsp;·&nbsp; Cross-Border Trade
         </div>
       </div>
 
@@ -366,6 +365,15 @@ function Sidebar({
           {pendingTaskCount > 0 && (
             <span className="nav-badge">{pendingTaskCount > 99 ? '99+' : pendingTaskCount}</span>
           )}
+        </button>
+
+        <button
+          className={`sidebar-nav-item ${isOnHistory ? 'active' : ''}`}
+          onClick={onHistory}
+          style={{ justifyContent: 'flex-start' }}
+        >
+          <History size={17} />
+          <span style={{ flex: 1, textAlign: 'left' }}>Action History</span>
         </button>
 
         {/* Case breadcrumb nav items */}
@@ -460,14 +468,22 @@ function MainLayout() {
     setSelectedInstance(null);
   };
 
+  const handleOpenHistory = () => {
+    setActiveView('history');
+    setSelectedCase(null);
+    setSelectedInstance(null);
+  };
+
   const isOnDashboard = activeView === 'dashboard' && !selectedCase;
   const isOnInbox = activeView === 'inbox';
+  const isOnHistory = activeView === 'history';
 
   // Build breadcrumbs
   const breadcrumbs: { label: string; onClick?: () => void }[] = [
     { label: 'Command Center', onClick: activeView !== 'dashboard' || selectedCase ? handleBackToDashboard : undefined },
   ];
   if (isOnInbox) breadcrumbs.push({ label: 'Tasks Inbox' });
+  if (isOnHistory) breadcrumbs.push({ label: 'Action History' });
   if (selectedCase) {
     breadcrumbs.push({ label: selectedCase.caseName, onClick: selectedInstance ? handleBackToInstances : undefined });
   }
@@ -481,11 +497,13 @@ function MainLayout() {
         <Sidebar
           isOnDashboard={isOnDashboard}
           isOnInbox={isOnInbox}
+          isOnHistory={isOnHistory}
           selectedCase={selectedCase}
           selectedInstance={selectedInstance}
           pendingTaskCount={pendingTaskCount}
           onDashboard={handleOpenDashboard}
           onInbox={handleOpenInbox}
+          onHistory={handleOpenHistory}
           onBackToInstances={handleBackToInstances}
         />
 
@@ -495,8 +513,9 @@ function MainLayout() {
 
           <div className="main-content-inner animate-fade-in">
             {isOnInbox && <TasksInbox onTaskCountChange={setPendingTaskCount} />}
+            {isOnHistory && <ActionHistory />}
 
-            {!isOnInbox && (
+            {!isOnInbox && !isOnHistory && (
               <>
                 {!selectedCase ? (
                   <Dashboard
@@ -646,10 +665,39 @@ function CaseInstancesPanel({ caseName, processKey, onBackToDashboard, onSelectI
 
 // ─── App Content ──────────────────────────────────────────────────────────────
 
+import { CodedActionApp } from '@uipath/coded-action-app';
+import EmbeddedTaskView from './components/EmbeddedTaskView';
+
 function AppContent() {
   const { isAuthenticated, isLoading } = useAuth();
+  const [isEmbedded, setIsEmbedded] = useState(false);
+  const [embeddedTask, setEmbeddedTask] = useState<any>(null);
+  const [detectingEmbedded, setDetectingEmbedded] = useState(true);
 
-  if (isLoading) {
+  useEffect(() => {
+    async function detect() {
+      // Check if we are running in an iframe
+      if (window.self !== window.top) {
+        try {
+          const service = new CodedActionApp();
+          // Wait up to 1.5 seconds for Action Center to respond
+          const task = await Promise.race([
+            service.getTask(),
+            new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 1500))
+          ]);
+          console.log("Coded Action App detected:", task);
+          setIsEmbedded(true);
+          setEmbeddedTask(task);
+        } catch (e) {
+          console.log("Not running inside UiPath Action Center iframe or detection timed out:", e);
+        }
+      }
+      setDetectingEmbedded(false);
+    }
+    detect();
+  }, []);
+
+  if (detectingEmbedded || isLoading) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -658,6 +706,10 @@ function AppContent() {
         </div>
       </div>
     );
+  }
+
+  if (isEmbedded && embeddedTask) {
+    return <EmbeddedTaskView initialTask={embeddedTask} />;
   }
 
   return (

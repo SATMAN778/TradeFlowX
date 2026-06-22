@@ -5,8 +5,10 @@ import type { TaskDetailsResponse } from '../types/cases';
 interface HumanTasksProps {
   taskDetails: TaskDetailsResponse | null;
   onClaim: () => Promise<void>;
+  onUnassign: () => Promise<void>;
   onComplete: (action: 'Approve' | 'Reject', data: Record<string, string>) => Promise<void>;
   claiming: boolean;
+  unclaiming: boolean;
   completing: boolean;
 }
 
@@ -18,7 +20,7 @@ function extractAssignedUser(raw: any): string | null {
   if (raw == null) return null;
   if (typeof raw === 'string') return raw;
   if (typeof raw === 'object') {
-    const val = raw.Name ?? raw.name ?? raw.Email ?? raw.email;
+    const val = raw.emailAddress ?? raw.EmailAddress ?? raw.Email ?? raw.email ?? raw.userName ?? raw.UserName ?? raw.Name ?? raw.name;
     if (typeof val === 'string') return val;
   }
   return String(raw);
@@ -38,8 +40,10 @@ function toFormValues(data: Record<string, any>): Record<string, string> {
 export default function HumanTasks({
   taskDetails,
   onClaim,
+  onUnassign,
   onComplete,
   claiming,
+  unclaiming,
   completing,
 }: HumanTasksProps) {
   const task = taskDetails?.task;
@@ -238,7 +242,7 @@ export default function HumanTasks({
 
           {/* Action buttons */}
           {!confirmAction && (
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
               {!isAssigned && (
                 <button
                   className="btn btn-primary"
@@ -251,24 +255,34 @@ export default function HumanTasks({
               )}
 
               {isAssignedToMe && (
-                <>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => setConfirmAction('Approve')}
-                    disabled={completing}
-                    style={{ flex: 1, justifyContent: 'center', background: 'var(--success)', borderColor: 'var(--success)' }}
-                  >
-                    <Check size={16} /> Approve
-                  </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => setConfirmAction('Approve')}
+                      disabled={completing || unclaiming}
+                      style={{ flex: 1, justifyContent: 'center', background: 'var(--success)', borderColor: 'var(--success)' }}
+                    >
+                      <Check size={16} /> Approve
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => setConfirmAction('Reject')}
+                      disabled={completing || unclaiming}
+                      style={{ flex: 1, justifyContent: 'center', color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
+                    >
+                      <X size={16} /> Reject
+                    </button>
+                  </div>
                   <button
                     className="btn btn-secondary"
-                    onClick={() => setConfirmAction('Reject')}
-                    disabled={completing}
-                    style={{ flex: 1, justifyContent: 'center', color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
+                    onClick={onUnassign}
+                    disabled={completing || unclaiming}
+                    style={{ width: '100%', justifyContent: 'center', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.8rem' }}
                   >
-                    <X size={16} /> Reject
+                    {unclaiming ? 'Releasing…' : 'Release / Unassign Task'}
                   </button>
-                </>
+                </div>
               )}
 
               {isAssigned && !isAssignedToMe && (

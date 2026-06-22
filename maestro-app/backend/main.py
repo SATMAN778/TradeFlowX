@@ -116,6 +116,11 @@ async def refresh_session_token_if_needed(session_id: str, session: Dict[str, An
 
 def get_current_session(request: Request) -> Dict[str, Any]:
     session_id = request.cookies.get("session_id")
+    has_session = session_id in session_store if session_id else False
+    
+    with open(os.path.join(backend_dir, "session.log"), "a", encoding="utf-8") as f:
+        f.write(f"PATH: {request.url.path} | METHOD: {request.method} | Cookie present: {bool(session_id)} | Session in store: {has_session}\n")
+        
     if not session_id or session_id not in session_store:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -369,6 +374,14 @@ async def get_task_details(instance_id: str, folderKey: str, session_data: dict 
                  raise HTTPException(status_code=task_res.status_code, detail=task_res.text)
                  
             task_obj = task_res.json()
+            # Ensure taskId and priority inside task data are populated if null/empty
+            task_data = task_obj.get("data") or task_obj.get("Data") or {}
+            if isinstance(task_data, dict):
+                if not task_data.get("taskId"):
+                    task_data["taskId"] = task_id
+                if not task_data.get("priority"):
+                    task_data["priority"] = task_obj.get("priority") or "Medium"
+                    
             current_user_email = extract_email_from_jwt(session["access_token"])
             
             return {
@@ -522,61 +535,143 @@ async def get_instance_details(instance_id: str, folderKey: str, session_data: d
 
 @app.post("/api/cases/tasks/complete")
 async def complete_task(payload: CompleteTaskRequest, session_data: dict = Depends(get_current_session)):
-    session_id = session_data["session_id"]
-    session = await refresh_session_token_if_needed(session_id, session_data["session"])
-    
-    url = f"{BASE_URL}/{ORG_NAME}/{TENANT_NAME}/orchestrator_/tasks/AppTasks/CompleteAppTask"
-    headers = {
-        "Authorization": f"Bearer {session['access_token']}",
-        "Accept": "application/json",
-        "X-UIPATH-OrganizationUnitId": str(payload.folderId)
-    }
-    
-    complete_body = {
-        "taskId": payload.taskId,
-        "data": payload.data,
-        "action": payload.action
-    }
-    
-    async with httpx.AsyncClient() as client:
-        try:
+    try:
+        with open(os.path.join(backend_dir, "session.log"), "a", encoding="utf-8") as f:
+            f.write(f"ENTERED complete_task body | taskId: {payload.taskId} | folderId: {payload.folderId}\n")
+        session_id = session_data["session_id"]
+        session = await refresh_session_token_if_needed(session_id, session_data["session"])
+        
+        url = f"{BASE_URL}/{ORG_NAME}/{TENANT_NAME}/orchestrator_/tasks/AppTasks/CompleteAppTask"
+        headers = {
+            "Authorization": f"Bearer {session['access_token']}",
+            "Accept": "application/json",
+            "X-UIPATH-OrganizationUnitId": str(payload.folderId)
+        }
+        
+        complete_body = {
+            "taskId": payload.taskId,
+            "data": payload.data,
+            "action": payload.action
+        }
+        
+        async with httpx.AsyncClient() as client:
             res = await client.post(url, headers=headers, json=complete_body)
             if res.status_code != 200:
                 raise HTTPException(status_code=res.status_code, detail=res.text)
             return {"success": True}
-        except httpx.RequestError as e:
-            raise HTTPException(status_code=502, detail=f"UiPath API connection failed: {e}")
+    except Exception as e:
+        import traceback
+        with open(os.path.join(backend_dir, "global_error.log"), "a", encoding="utf-8") as f:
+            f.write(f"COMPLETE TASK EXCEPTION: {e}\n{traceback.format_exc()}\n")
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/cases/tasks/assign")
 async def assign_task(payload: AssignTaskRequest, session_data: dict = Depends(get_current_session)):
-    session_id = session_data["session_id"]
-    session = await refresh_session_token_if_needed(session_id, session_data["session"])
-    
-    email = extract_email_from_jwt(session["access_token"])
-    if not email:
-        raise HTTPException(status_code=400, detail="Could not determine user email from token")
+    try:
+        with open(os.path.join(backend_dir, "session.log"), "a", encoding="utf-8") as f:
+            f.write(f"ENTERED assign_task body | taskId: {payload.taskId} | folderId: {payload.folderId}\n")
+        session_id = session_data["session_id"]
+        session = await refresh_session_token_if_needed(session_id, session_data["session"])
         
-    url = f"{BASE_URL}/{ORG_NAME}/{TENANT_NAME}/orchestrator_/odata/Tasks/UiPath.Server.Configuration.OData.AssignTasks"
-    headers = {
-        "Authorization": f"Bearer {session['access_token']}",
-        "Accept": "application/json",
-        "X-UIPATH-OrganizationUnitId": str(payload.folderId)
-    }
-    
-    assign_body = {
-        "taskAssignments": [
-            {"TaskId": payload.taskId, "UserNameOrEmail": email}
-        ]
-    }
-    
-    async with httpx.AsyncClient() as client:
-        try:
+        email = extract_email_from_jwt(session["access_token"])
+        if not email:
+            raise HTTPException(status_code=400, detail="Could not determine user email from token")
+            
+        url = f"{BASE_URL}/{ORG_NAME}/{TENANT_NAME}/orchestrator_/odata/Tasks/UiPath.Server.Configuration.OData.AssignTasks"
+        headers = {
+            "Authorization": f"Bearer {session['access_token']}",
+            "Accept": "application/json",
+            "X-UIPATH-OrganizationUnitId": str(payload.folderId)
+        }
+        
+        assign_body = {
+            "taskAssignments": [
+                {"TaskId": payload.taskId, "UserNameOrEmail": email}
+            ]
+        }
+        
+        async with httpx.AsyncClient() as client:
             res = await client.post(url, headers=headers, json=assign_body)
+            with open(os.path.join(backend_dir, "session.log"), "a", encoding="utf-8") as f:
+                f.write(f"AssignTasks Response: status={res.status_code} | body={res.text}\n")
             if res.status_code != 204 and res.status_code != 200:
                 raise HTTPException(status_code=res.status_code, detail=res.text)
+            
+            if res.status_code == 200:
+                try:
+                    resp_json = res.json()
+                    value_list = resp_json.get("value", [])
+                    if value_list and isinstance(value_list, list):
+                        error_item = value_list[0]
+                        if isinstance(error_item, dict):
+                            error_code = error_item.get("ErrorCode")
+                            error_msg = error_item.get("ErrorMessage")
+                            if error_code and error_code != 2417:
+                                raise HTTPException(status_code=400, detail=error_msg or "Failed to assign task")
+                except Exception as e:
+                    if isinstance(e, HTTPException):
+                        raise e
+                    pass
             return {"success": True}
-        except httpx.RequestError as e:
-            raise HTTPException(status_code=502, detail=f"UiPath API connection failed: {e}")
+    except Exception as e:
+        import traceback
+        with open(os.path.join(backend_dir, "global_error.log"), "a", encoding="utf-8") as f:
+            f.write(f"ASSIGN TASK EXCEPTION: {e}\n{traceback.format_exc()}\n")
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/cases/tasks/unassign")
+async def unassign_task(payload: AssignTaskRequest, session_data: dict = Depends(get_current_session)):
+    try:
+        with open(os.path.join(backend_dir, "session.log"), "a", encoding="utf-8") as f:
+            f.write(f"ENTERED unassign_task body | taskId: {payload.taskId} | folderId: {payload.folderId}\n")
+        session_id = session_data["session_id"]
+        session = await refresh_session_token_if_needed(session_id, session_data["session"])
+        
+        url = f"{BASE_URL}/{ORG_NAME}/{TENANT_NAME}/orchestrator_/odata/Tasks/UiPath.Server.Configuration.OData.UnassignTasks"
+        headers = {
+            "Authorization": f"Bearer {session['access_token']}",
+            "Accept": "application/json",
+            "X-UIPATH-OrganizationUnitId": str(payload.folderId)
+        }
+        
+        unassign_body = {
+            "taskIds": [payload.taskId]
+        }
+        
+        async with httpx.AsyncClient() as client:
+            res = await client.post(url, headers=headers, json=unassign_body)
+            with open(os.path.join(backend_dir, "session.log"), "a", encoding="utf-8") as f:
+                f.write(f"UnassignTasks Response: status={res.status_code} | body={res.text}\n")
+            if res.status_code != 204 and res.status_code != 200:
+                raise HTTPException(status_code=res.status_code, detail=res.text)
+            
+            if res.status_code == 200:
+                try:
+                    resp_json = res.json()
+                    value_list = resp_json.get("value", [])
+                    if value_list and isinstance(value_list, list):
+                        error_item = value_list[0]
+                        if isinstance(error_item, dict):
+                            error_code = error_item.get("ErrorCode")
+                            error_msg = error_item.get("ErrorMessage")
+                            if error_code:
+                                raise HTTPException(status_code=400, detail=error_msg or "Failed to unassign task")
+                except Exception as e:
+                    if isinstance(e, HTTPException):
+                        raise e
+                    pass
+            return {"success": True}
+    except Exception as e:
+        import traceback
+        with open(os.path.join(backend_dir, "global_error.log"), "a", encoding="utf-8") as f:
+            f.write(f"UNASSIGN TASK EXCEPTION: {e}\n{traceback.format_exc()}\n")
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/tasks/my-tasks")
 async def get_my_tasks(session_data: dict = Depends(get_current_session)):
@@ -605,7 +700,7 @@ async def get_my_tasks(session_data: dict = Depends(get_current_session)):
             tasks_url = (
                 f"{BASE_URL}/{ORG_NAME}/{TENANT_NAME}/orchestrator_/odata/Tasks"
                 f"/UiPath.Server.Configuration.OData.GetTasksAcrossFolders"
-                f"?$filter=Status eq 'Pending' or Status eq 'InProgress'"
+                f"?$filter=Status ne 'Completed'"
                 f"&$orderby=CreationTime desc&$top=100"
             )
             tasks_res = await client.get(tasks_url, headers=headers)
@@ -624,18 +719,6 @@ async def get_my_tasks(session_data: dict = Depends(get_current_session)):
 
             result_tasks = []
             for t in raw_tasks:
-                assigned_user = t.get("AssignedToUser")
-                if isinstance(assigned_user, dict):
-                    assigned_email = assigned_user.get("Email") or assigned_user.get("Name")
-                elif isinstance(assigned_user, str):
-                    assigned_email = assigned_user
-                else:
-                    assigned_email = None
-
-                # Show tasks that are unassigned OR assigned to the current user
-                if assigned_email and current_user_email and assigned_email.lower() != current_user_email.lower():
-                    continue
-
                 folder_id = t.get("OrganizationUnitId")
                 folder_info = folder_map.get(folder_id, {})
                 folder_key = folder_info.get("key", "")
@@ -644,6 +727,45 @@ async def get_my_tasks(session_data: dict = Depends(get_current_session)):
                 external_link = None
                 if task_id:
                     external_link = f"{BASE_URL}/{ORG_NAME}/{TENANT_NAME}/actions_/current-task/tasks/{task_id}"
+
+                # Fetch full task details to retrieve the custom form/action data
+                task_data_payload = {}
+                detail_obj = {}
+                if task_id and folder_id:
+                    detail_url = f"{BASE_URL}/{ORG_NAME}/{TENANT_NAME}/orchestrator_/tasks/AppTasks/GetAppTaskById?taskId={task_id}"
+                    detail_headers = {**headers, "X-UIPATH-OrganizationUnitId": str(folder_id)}
+                    try:
+                        detail_res = await client.get(detail_url, headers=detail_headers)
+                        if detail_res.status_code == 200:
+                            detail_obj = detail_res.json()
+                            task_data_payload = detail_obj.get("data") or detail_obj.get("Data") or {}
+                            # Fix: Ensure taskId and priority inside task data are populated if null/empty
+                            if isinstance(task_data_payload, dict):
+                                if not task_data_payload.get("taskId"):
+                                    task_data_payload["taskId"] = task_id
+                                if not task_data_payload.get("priority"):
+                                    task_data_payload["priority"] = t.get("Priority") or "Medium"
+                    except Exception as e:
+                        print(f"Error fetching task details for task {task_id}: {e}")
+
+                # Determine assignment using raw tasks (fallback) OR detail_obj (primary)
+                assigned_user = detail_obj.get("assignedToUser") or detail_obj.get("AssignedToUser") or t.get("AssignedToUser")
+                assigned_email = None
+                if assigned_user:
+                    if isinstance(assigned_user, dict):
+                        assigned_email = (
+                            assigned_user.get("emailAddress")
+                            or assigned_user.get("Email")
+                            or assigned_user.get("userName")
+                            or assigned_user.get("Name")
+                            or assigned_user.get("UserNameOrEmail")
+                        )
+                    elif isinstance(assigned_user, str):
+                        assigned_email = assigned_user
+
+                # Show tasks that are unassigned OR assigned to the current user
+                if assigned_email and current_user_email and assigned_email.lower() != current_user_email.lower():
+                    continue
 
                 result_tasks.append({
                     "taskId": task_id,
@@ -655,13 +777,117 @@ async def get_my_tasks(session_data: dict = Depends(get_current_session)):
                     "assignedToUser": assigned_email,
                     "caseInstanceId": str(t.get("JobKey") or t.get("JobId") or ""),
                     "createdAt": t.get("CreationTime", ""),
-                    "data": t.get("Data", {}),
+                    "data": task_data_payload,
                     "externalLink": external_link,
                     "currentUserEmail": current_user_email,
                 })
 
             return {"tasks": result_tasks, "count": len(result_tasks)}
 
+        except httpx.RequestError as e:
+            raise HTTPException(status_code=502, detail=f"UiPath API connection failed: {e}")
+
+@app.get("/api/tasks/history")
+async def get_tasks_history(session_data: dict = Depends(get_current_session)):
+    """Fetch completed HITL tasks across folders for the current user."""
+    session_id = session_data["session_id"]
+    session = await refresh_session_token_if_needed(session_id, session_data["session"])
+
+    current_user_email = extract_email_from_jwt(session["access_token"])
+
+    headers = {
+        "Authorization": f"Bearer {session['access_token']}",
+        "Accept": "application/json",
+    }
+
+    async with httpx.AsyncClient() as client:
+        try:
+            # 1. Get all folders the user has access to
+            folders_url = f"{BASE_URL}/{ORG_NAME}/{TENANT_NAME}/orchestrator_/api/Folders/GetAllForCurrentUser"
+            folders_res = await client.get(folders_url, headers=headers)
+            folders = []
+            if folders_res.status_code == 200:
+                folders_data = folders_res.json()
+                folders = folders_data.get("PageItems", [])
+
+            # 2. Fetch completed tasks across all folders
+            tasks_url = (
+                f"{BASE_URL}/{ORG_NAME}/{TENANT_NAME}/orchestrator_/odata/Tasks"
+                f"/UiPath.Server.Configuration.OData.GetTasksAcrossFolders"
+                f"?$filter=Status eq 'Completed'"
+                f"&$orderby=LastModificationTime desc&$top=100"
+            )
+            tasks_res = await client.get(tasks_url, headers=headers)
+            if tasks_res.status_code != 200:
+                raise HTTPException(status_code=tasks_res.status_code, detail=tasks_res.text)
+
+            tasks_data = tasks_res.json()
+            raw_tasks = tasks_data.get("value", [])
+
+            folder_map: dict = {}
+            for f in folders:
+                fid = f.get("Id")
+                if fid:
+                    folder_map[fid] = {"key": f.get("Key", ""), "name": f.get("FullyQualifiedName", f.get("DisplayName", ""))}
+
+            result_tasks = []
+            for t in raw_tasks:
+                folder_id = t.get("OrganizationUnitId")
+                folder_info = folder_map.get(folder_id, {})
+                folder_key = folder_info.get("key", "")
+
+                task_id = str(t.get("Id", ""))
+                
+                # Fetch full task details to retrieve the custom form/action data and final action taken
+                task_data_payload = {}
+                action_taken = None
+                detail_obj = {}
+                if task_id and folder_id:
+                    detail_url = f"{BASE_URL}/{ORG_NAME}/{TENANT_NAME}/orchestrator_/tasks/AppTasks/GetAppTaskById?taskId={task_id}"
+                    detail_headers = {**headers, "X-UIPATH-OrganizationUnitId": str(folder_id)}
+                    try:
+                        detail_res = await client.get(detail_url, headers=detail_headers)
+                        if detail_res.status_code == 200:
+                            detail_obj = detail_res.json()
+                            task_data_payload = detail_obj.get("data") or detail_obj.get("Data") or {}
+                            action_taken = detail_obj.get("action") or detail_obj.get("Action")
+                    except Exception as e:
+                        print(f"Error fetching task details for completed task {task_id}: {e}")
+
+                assigned_user = detail_obj.get("assignedToUser") or detail_obj.get("AssignedToUser") or t.get("AssignedToUser")
+                assigned_email = None
+                if assigned_user:
+                    if isinstance(assigned_user, dict):
+                        assigned_email = (
+                            assigned_user.get("emailAddress")
+                            or assigned_user.get("Email")
+                            or assigned_user.get("userName")
+                            or assigned_user.get("Name")
+                            or assigned_user.get("UserNameOrEmail")
+                        )
+                    elif isinstance(assigned_user, str):
+                        assigned_email = assigned_user
+
+                if assigned_email and current_user_email and assigned_email.lower() != current_user_email.lower():
+                    continue
+
+                result_tasks.append({
+                    "taskId": task_id,
+                    "folderId": folder_id,
+                    "folderKey": folder_key,
+                    "title": t.get("Title") or t.get("Name") or "Approval Task",
+                    "priority": t.get("Priority", "Medium"),
+                    "status": t.get("Status", "Completed"),
+                    "assignedToUser": assigned_email,
+                    "actionTaken": action_taken or t.get("Action") or "Completed",
+                    "caseInstanceId": str(t.get("JobKey") or t.get("JobId") or ""),
+                    "createdAt": t.get("CreationTime", ""),
+                    "completedAt": t.get("CompletionTime") or t.get("LastModificationTime") or "",
+                    "data": task_data_payload,
+                    "currentUserEmail": current_user_email,
+                })
+
+            return {"tasks": result_tasks, "count": len(result_tasks)}
         except httpx.RequestError as e:
             raise HTTPException(status_code=502, detail=f"UiPath API connection failed: {e}")
 

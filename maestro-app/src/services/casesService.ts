@@ -88,6 +88,16 @@ export async function assignTask(taskId: string, folderId: number): Promise<void
   if (!res.ok) throw new Error('Failed to assign task');
 }
 
+export async function unassignTask(taskId: string, folderId: number): Promise<void> {
+  const res = await fetch(`${BASE}/api/cases/tasks/unassign`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    credentials: 'include',
+    body: JSON.stringify({ taskId: Number(taskId), folderId }),
+  });
+  if (!res.ok) throw new Error('Failed to unassign task');
+}
+
 export async function completeTask(
   taskId: string,
   folderId: number,
@@ -117,6 +127,15 @@ export async function getMyTasks(): Promise<MyTask[]> {
     credentials: 'include',
   });
   if (!res.ok) throw new Error('Failed to fetch my tasks');
+  const data = await res.json();
+  return data.tasks ?? [];
+}
+
+export async function getTaskHistory(): Promise<MyTask[]> {
+  const res = await fetch(`${BASE}/api/tasks/history`, {
+    credentials: 'include',
+  });
+  if (!res.ok) throw new Error('Failed to fetch task history');
   const data = await res.json();
   return data.tasks ?? [];
 }

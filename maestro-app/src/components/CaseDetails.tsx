@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, MapPin, Building, DollarSign, ShieldAlert, RefreshCw } from 'lucide-react';
-import { getCaseDetails, getTaskDetails, assignTask, completeTask } from '../services/casesService';
+import { getCaseDetails, getTaskDetails, assignTask, unassignTask, completeTask } from '../services/casesService';
 import type { CaseDetailsResponse, TaskDetailsResponse } from '../types/cases';
 import StageTracker from './StageTracker';
 import HumanTasks from './HumanTasks';
@@ -17,6 +17,7 @@ export default function CaseDetails({ caseInstanceId, folderKey, onBack }: CaseD
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [claiming, setClaiming] = useState(false);
+  const [unclaiming, setUnclaiming] = useState(false);
   const [completing, setCompleting] = useState(false);
 
   const loadData = useCallback(async (silent = false) => {
@@ -61,6 +62,29 @@ export default function CaseDetails({ caseInstanceId, folderKey, onBack }: CaseD
       alert('Failed to claim task: ' + err.message);
     } finally {
       setClaiming(false);
+    }
+  };
+
+  const handleUnassign = async () => {
+    if (!taskDetails || !taskDetails.taskId || !taskDetails.folderId) return;
+    setUnclaiming(true);
+    try {
+      await unassignTask(taskDetails.taskId, taskDetails.folderId);
+      // Fast local update
+      if (taskDetails.task) {
+        setTaskDetails({
+          ...taskDetails,
+          task: {
+            ...taskDetails.task,
+            assignedToUser: null,
+          },
+        });
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert('Failed to release/unassign task: ' + err.message);
+    } finally {
+      setUnclaiming(false);
     }
   };
 
@@ -228,8 +252,10 @@ export default function CaseDetails({ caseInstanceId, folderKey, onBack }: CaseD
           <HumanTasks 
             taskDetails={taskDetails}
             onClaim={handleClaim}
+            onUnassign={handleUnassign}
             onComplete={handleComplete}
             claiming={claiming}
+            unclaiming={unclaiming}
             completing={completing}
           />
         </div>

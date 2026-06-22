@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  CheckCircle, XCircle, User, Clock, RefreshCw, Inbox,
+  CheckCircle, User, Clock, RefreshCw, Inbox,
   AlertTriangle, ExternalLink, ChevronDown, ChevronUp, Check, X
 } from 'lucide-react';
 import type { MyTask } from '../types/cases';
-import { getMyTasks, assignTask, completeTask } from '../services/casesService';
+import { getMyTasks, assignTask, unassignTask, completeTask } from '../services/casesService';
 
 interface TasksInboxProps {
   onTaskCountChange?: (count: number) => void;
@@ -44,6 +44,7 @@ function TaskModal({ task, onClose, onRefresh }: TaskModalProps) {
   const [confirmAction, setConfirmAction] = useState<ConfirmAction>(null);
   const [submitting, setSubmitting] = useState(false);
   const [claiming, setClaiming] = useState(false);
+  const [unclaiming, setUnclaiming] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -68,6 +69,23 @@ function TaskModal({ task, onClose, onRefresh }: TaskModalProps) {
       setErrorMsg('Failed to claim task: ' + err.message);
     } finally {
       setClaiming(false);
+    }
+  };
+
+  const handleUnassign = async () => {
+    setUnclaiming(true);
+    setErrorMsg(null);
+    try {
+      await unassignTask(task.taskId, task.folderId);
+      setSuccessMsg('Task released successfully! Refreshing...');
+      setTimeout(() => {
+        onRefresh();
+        onClose();
+      }, 1200);
+    } catch (err: any) {
+      setErrorMsg('Failed to release task: ' + err.message);
+    } finally {
+      setUnclaiming(false);
     }
   };
 
@@ -255,7 +273,7 @@ function TaskModal({ task, onClose, onRefresh }: TaskModalProps) {
 
           {/* Action buttons */}
           {!confirmAction && (
-            <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
+            <div style={{ display: 'flex', gap: '8px', marginTop: '4px', width: '100%' }}>
               {isUnassigned && (
                 <button
                   className="btn btn-primary"
@@ -267,24 +285,34 @@ function TaskModal({ task, onClose, onRefresh }: TaskModalProps) {
                 </button>
               )}
               {isAssignedToMe && (
-                <>
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => setConfirmAction('Approve')}
-                    disabled={submitting || !!successMsg}
-                    style={{ flex: 1, justifyContent: 'center', background: 'var(--success)', borderColor: 'var(--success)' }}
-                  >
-                    <Check size={16} /> Approve
-                  </button>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => setConfirmAction('Approve')}
+                      disabled={submitting || unclaiming || !!successMsg}
+                      style={{ flex: 1, justifyContent: 'center', background: 'var(--success)', borderColor: 'var(--success)' }}
+                    >
+                      <Check size={16} /> Approve
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      onClick={() => setConfirmAction('Reject')}
+                      disabled={submitting || unclaiming || !!successMsg}
+                      style={{ flex: 1, justifyContent: 'center', color: 'var(--danger)', borderColor: 'rgba(239,68,68,0.3)' }}
+                    >
+                      <X size={16} /> Reject
+                    </button>
+                  </div>
                   <button
                     className="btn btn-secondary"
-                    onClick={() => setConfirmAction('Reject')}
-                    disabled={submitting || !!successMsg}
-                    style={{ flex: 1, justifyContent: 'center', color: 'var(--danger)', borderColor: 'rgba(239,68,68,0.3)' }}
+                    onClick={handleUnassign}
+                    disabled={submitting || unclaiming || !!successMsg}
+                    style={{ width: '100%', justifyContent: 'center', borderColor: 'rgba(239, 68, 68, 0.3)', fontSize: '0.85rem' }}
                   >
-                    <X size={16} /> Reject
+                    {unclaiming ? 'Releasing…' : 'Release / Unclaim Task'}
                   </button>
-                </>
+                </div>
               )}
               {!isUnassigned && !isAssignedToMe && (
                 <div style={{ flex: 1, padding: '10px', textAlign: 'center', background: 'rgba(0,0,0,0.03)', borderRadius: '6px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
