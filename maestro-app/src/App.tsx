@@ -180,8 +180,20 @@ function TradeStatBar() {
 
 // ─── Top Header ──────────────────────────────────────────────────────────────
 
+// ─── Top Header ──────────────────────────────────────────────────────────────
+ 
 function TopHeader() {
-  const { logout } = useAuth();
+  const { logout, activeRole, switchRole, userName } = useAuth();
+  
+  const rolesList = [
+    { id: 'admin', name: 'System Admin', color: 'var(--accent-primary)' },
+    { id: 'manager', name: 'Compliance Mgr', color: '#c2410c' },
+    { id: 'reviewer_customs', name: 'Customs Specialist', color: '#0369a1' },
+    { id: 'reviewer_freight_forwarder', name: 'Freight Forwarder', color: '#0d9488' },
+    { id: 'reviewer_shipper', name: 'Shipper Ops', color: '#4f46e5' }
+  ];
+
+  const currentRole = rolesList.find(r => r.id === activeRole) || rolesList[0];
 
   return (
     <header className="top-header">
@@ -198,17 +210,39 @@ function TopHeader() {
       <span className="top-header-tagline">Global Import &amp; Customs Intelligence Platform</span>
 
       <div className="top-header-right">
+        {/* Active Role Selector */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(255,255,255,0.06)', padding: '4px 8px 4px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)' }}>
+          <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)', fontWeight: 500 }}>Active Role:</span>
+          <select
+            value={activeRole}
+            onChange={(e) => switchRole(e.target.value as any)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'white',
+              fontSize: '0.82rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              outline: 'none',
+              paddingRight: '4px',
+            }}
+          >
+            {rolesList.map(r => (
+              <option key={r.id} value={r.id} style={{ color: 'var(--text-primary)', background: 'var(--bg-primary)' }}>
+                {r.name}
+              </option>
+            ))}
+          </select>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: currentRole.color, marginLeft: '2px' }} />
+        </div>
+
         <div className="top-header-trade-pill">
           <span className="dot" />
           UAE–USA Cross-Border
         </div>
-        <div className="top-header-trade-pill">
-          <span className="dot" style={{ background: 'rgba(255,255,255,0.6)' }} />
-          Maestro Orchestration
-        </div>
         <div className="top-header-user">
           <User size={14} />
-          <span>Operator Portal</span>
+          <span>{userName || 'Operator Portal'}</span>
         </div>
         <button
           onClick={logout}
@@ -328,10 +362,12 @@ function Sidebar({
   isOnDashboard, isOnInbox, isOnHistory, selectedCase, selectedInstance,
   pendingTaskCount, onDashboard, onInbox, onHistory, onBackToInstances
 }: SidebarProps) {
+  const { activeRole } = useAuth();
+
   return (
     <aside className="sidebar">
       {/* Brand block */}
-      <div className="sidebar-brand">
+      <div className="sidebar-brand" style={{ paddingBottom: '16px', borderBottom: '1px solid var(--glass-border)' }}>
         <div className="sidebar-brand-logo">
           <div className="sidebar-brand-icon">
             <Ship size={18} color="white" />
@@ -339,6 +375,42 @@ function Sidebar({
           <div>
             <div className="sidebar-brand-name">TradeFlow AI</div>
             <div className="sidebar-brand-sub">Case Management Portal</div>
+          </div>
+        </div>
+
+        {/* Active Role Indicator in Sidebar */}
+        <div style={{
+          marginTop: '12px',
+          padding: '8px 12px',
+          borderRadius: '6px',
+          background: 'rgba(255,255,255,0.03)',
+          border: '1px solid var(--glass-border)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          fontSize: '0.78rem'
+        }}>
+          <span style={{
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background:
+              activeRole === 'admin' ? 'var(--accent-primary)' :
+              activeRole === 'manager' ? '#c2410c' :
+              activeRole === 'reviewer_customs' ? '#0369a1' :
+              activeRole === 'reviewer_freight_forwarder' ? '#0d9488' : '#4f46e5',
+            flexShrink: 0
+          }} />
+          <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+            <span style={{ fontWeight: 600, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {
+                activeRole === 'admin' ? 'System Administrator' :
+                activeRole === 'manager' ? 'Compliance Manager' :
+                activeRole === 'reviewer_customs' ? 'Customs Specialist' :
+                activeRole === 'reviewer_freight_forwarder' ? 'Freight Forwarder' : 'Shipper Operations'
+              }
+            </span>
+            <span className="text-secondary" style={{ fontSize: '0.7rem', marginTop: '1px' }}>Active Workspace</span>
           </div>
         </div>
       </div>

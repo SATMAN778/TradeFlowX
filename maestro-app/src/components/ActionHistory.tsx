@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { History, User, Clock, RefreshCw, AlertTriangle, ChevronDown, ChevronUp, Check, X, FileText } from 'lucide-react';
+import { History, User, Clock, RefreshCw, AlertTriangle, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import type { MyTask } from '../types/cases';
 import { getTaskHistory } from '../services/casesService';
 

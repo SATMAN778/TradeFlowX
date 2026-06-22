@@ -88,4 +88,6 @@ export interface MyTask {
   data: Record<string, any>;
   externalLink?: string | null;
   currentUserEmail?: string | null;
+  actionTaken?: string;
+  completedAt?: string;
 }

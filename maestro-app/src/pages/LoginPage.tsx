@@ -2,7 +2,7 @@ import { useAuth } from '../context/AuthContext';
 import { Anchor, Ship, ShieldCheck, Globe, FileText, LogIn } from 'lucide-react';
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, mockLogin } = useAuth();
 
   return (
     <div className="login-shell">
@@ -22,9 +22,9 @@ export function LoginPage() {
       </header>
 
       {/* Body */}
-      <div className="login-body">
+      <div className="login-body" style={{ maxWidth: '1000px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', padding: '0 20px', margin: '40px auto 60px' }}>
         {/* Feature list (visible on wide screens) */}
-        <div className="login-feature-list">
+        <div className="login-feature-list" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div style={{ marginBottom: '8px' }}>
             <h2 style={{ fontSize: '1.6rem', lineHeight: 1.3, color: 'var(--accent-primary)' }}>
               UAE–USA Cross-Border<br />Trade Management
@@ -40,20 +40,20 @@ export function LoginPage() {
             { icon: FileText, title: 'ISF 10+2 Filing', desc: 'Automated Importer Security Filing for US Customs & Border Protection' },
             { icon: Globe, title: 'HTS Code Classification', desc: 'AI-powered Harmonized Tariff Schedule classification with duty calculation' },
           ].map(({ icon: Icon, title, desc }) => (
-            <div key={title} className="login-feature-item">
-              <div className="login-feature-icon">
+            <div key={title} className="login-feature-item" style={{ display: 'flex', gap: '14px' }}>
+              <div className="login-feature-icon" style={{ width: '36px', height: '36px', borderRadius: '8px', background: 'rgba(41,69,134,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)', flexShrink: 0 }}>
                 <Icon size={18} />
               </div>
               <div className="login-feature-text">
-                <h4>{title}</h4>
-                <p>{desc}</p>
+                <h4 style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--text-primary)' }}>{title}</h4>
+                <p className="text-secondary" style={{ fontSize: '0.8rem', marginTop: '3px', lineHeight: 1.4 }}>{desc}</p>
               </div>
             </div>
           ))}
         </div>
 
         {/* Login card */}
-        <div className="login-card animate-fade-in">
+        <div className="login-card animate-fade-in" style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', gap: '20px', boxShadow: 'var(--glass-shadow)', backdropFilter: 'blur(12px)' }}>
           {/* Card header */}
           <div style={{ textAlign: 'center' }}>
             <div style={{ width: 56, height: 56, background: 'var(--accent-gradient)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', boxShadow: '0 8px 20px rgba(41,69,134,0.25)' }}>
@@ -61,21 +61,64 @@ export function LoginPage() {
             </div>
             <h2 style={{ fontSize: '1.5rem', marginBottom: '6px' }}>Operator Sign In</h2>
             <p className="text-secondary" style={{ fontSize: '0.875rem' }}>
-              Access your trade case management portal using your UiPath identity credentials.
+              Access your trade case management portal using your UiPath identity credentials or choose an operator role.
             </p>
-          </div>
-
-          {/* Divider */}
-          <div className="section-divider">
-            <div className="section-divider-line" />
-            <span className="section-divider-label">UiPath SSO</span>
-            <div className="section-divider-line" />
           </div>
 
           {/* Login button */}
           <button onClick={login} className="btn btn-primary" style={{ width: '100%', padding: '13px', fontSize: '0.95rem', justifyContent: 'center', gap: '10px' }}>
-            <LogIn size={18} /> Login with UiPath
+            <LogIn size={18} /> Login with UiPath SSO
           </button>
+
+          {/* Developer & Operator Quick Sign In */}
+          <div className="section-divider">
+            <div className="section-divider-line" />
+            <span className="section-divider-label">Operator Roles (Quick Access)</span>
+            <div className="section-divider-line" />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+            {[
+              { role: 'admin', label: 'System Administrator', desc: 'Full permissions & dashboard override', color: 'var(--accent-primary)' },
+              { role: 'manager', label: 'Compliance & Ops Manager', desc: 'OFAC screenings, audits & escalations', color: '#c2410c' },
+              { role: 'reviewer_customs', label: 'Customs Specialist (Broker)', desc: 'HTS classification & PGA agency checks', color: '#0369a1' },
+              { role: 'reviewer_freight_forwarder', label: 'Freight Forwarder', desc: 'Logistics coordination & CBP exams', color: '#0d9488' },
+              { role: 'reviewer_shipper', label: 'Shipper Operations', desc: 'PO validation & supplier COO auditing', color: '#4f46e5' },
+            ].map(({ role, label, desc, color }) => (
+              <button
+                key={role}
+                onClick={() => mockLogin(role as any)}
+                className="btn btn-secondary"
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  padding: '10px 14px',
+                  border: '1px solid var(--glass-border)',
+                  background: 'rgba(255,255,255,0.03)',
+                  transition: 'transform 0.15s, background 0.15s',
+                  textAlign: 'left'
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'rgba(41,69,134,0.05)';
+                  e.currentTarget.style.transform = 'translateX(2px)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
+                  e.currentTarget.style.transform = 'none';
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '100%' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
+                  <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{label}</strong>
+                </div>
+                <span className="text-secondary" style={{ fontSize: '0.75rem', marginTop: '2px', paddingLeft: '14px' }}>
+                  {desc}
+                </span>
+              </button>
+            ))}
+          </div>
 
           {/* Trust badges */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>

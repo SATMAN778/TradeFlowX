@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { User, Check, X, Shield, AlertTriangle, Clock, Hash, ExternalLink } from 'lucide-react';
+import { User, Check, X, Shield, AlertTriangle, Clock, Hash, ExternalLink, ShieldAlert } from 'lucide-react';
 import type { TaskDetailsResponse } from '../types/cases';
+import type { UserRole } from '../types/auth';
+import { getRequiredRolesForTask, getRoleBadge } from './TasksInbox';
 
 interface HumanTasksProps {
   taskDetails: TaskDetailsResponse | null;
@@ -10,6 +12,7 @@ interface HumanTasksProps {
   claiming: boolean;
   unclaiming: boolean;
   completing: boolean;
+  activeRole: UserRole; // New prop
 }
 
 function formatLabel(key: string): string {
@@ -45,6 +48,7 @@ export default function HumanTasks({
   claiming,
   unclaiming,
   completing,
+  activeRole,
 }: HumanTasksProps) {
   const task = taskDetails?.task;
   const data = task?.data ?? {};
@@ -72,6 +76,10 @@ export default function HumanTasks({
     isAssigned &&
     taskDetails?.currentUserEmail &&
     assignedToUser.toLowerCase() === taskDetails.currentUserEmail.toLowerCase();
+
+  const requiredRoles = getRequiredRolesForTask(title);
+  const isRoleAuthorized = activeRole === 'admin' || requiredRoles.includes(activeRole);
+  const badgeInfo = getRoleBadge(requiredRoles);
 
   const handleConfirmAction = async () => {
     if (!confirmAction) return;
@@ -123,7 +131,32 @@ export default function HumanTasks({
         <div style={{ height: '3px', background: isAssignedToMe ? 'var(--success)' : 'var(--accent-gradient)' }} />
 
         <div style={{ padding: '16px' }}>
-          <h4 style={{ fontSize: '1rem', color: 'var(--accent-primary)', marginBottom: '12px' }}>{title}</h4>
+          <h4 style={{ fontSize: '1rem', color: 'var(--accent-primary)', marginBottom: '4px' }}>{title}</h4>
+          
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '12px' }}>
+            <span style={{
+              fontSize: '0.72rem',
+              fontWeight: 600,
+              padding: '2px 8px',
+              borderRadius: '4px',
+              background: badgeInfo.bg,
+              color: badgeInfo.text,
+              border: '1px solid rgba(0,0,0,0.05)'
+            }}>
+              {badgeInfo.label}
+            </span>
+          </div>
+
+          {/* Authorization Check */}
+          {!isRoleAuthorized && (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', padding: '12px 16px', background: 'rgba(239, 68, 68, 0.06)', border: '1px solid rgba(239, 68, 68, 0.15)', borderRadius: '8px', color: '#b91c1c', fontSize: '0.82rem', marginBottom: '12px' }}>
+              <ShieldAlert size={16} style={{ marginTop: '2px', flexShrink: 0 }} />
+              <div>
+                <strong style={{ display: 'block', marginBottom: '2px' }}>Role Permission Warning</strong>
+                Your active role does not have authorization to modify or complete this task. You must switch to a matching role (e.g., <strong>{badgeInfo.label}</strong>) or log in as an Administrator.
+              </div>
+            </div>
+          )}
 
           {/* Meta info */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
@@ -147,13 +180,13 @@ export default function HumanTasks({
             )}
           </div>
 
-          {/* Task data — editable if assigned to me, read-only otherwise */}
+          {/* Task data — editable if assigned to me and role is authorized, read-only otherwise */}
           {Object.keys(data).length > 0 && (
             <div style={{ marginBottom: '16px' }}>
               <p style={{ fontSize: '0.75rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-secondary)', marginBottom: '10px' }}>
                 Task Data
               </p>
-              {isAssignedToMe ? (
+              {isAssignedToMe && isRoleAuthorized ? (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                   {Object.keys(data).map((key) => (
                     <div key={key} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -247,7 +280,7 @@ export default function HumanTasks({
                 <button
                   className="btn btn-primary"
                   onClick={onClaim}
-                  disabled={claiming}
+                  disabled={claiming || !isRoleAuthorized}
                   style={{ width: '100%', justifyContent: 'center' }}
                 >
                   {claiming ? 'Assigning…' : 'Assign to myself'}
@@ -260,7 +293,7 @@ export default function HumanTasks({
                     <button
                       className="btn btn-primary"
                       onClick={() => setConfirmAction('Approve')}
-                      disabled={completing || unclaiming}
+                      disabled={completing || unclaiming || !isRoleAuthorized}
                       style={{ flex: 1, justifyContent: 'center', background: 'var(--success)', borderColor: 'var(--success)' }}
                     >
                       <Check size={16} /> Approve
@@ -268,7 +301,7 @@ export default function HumanTasks({
                     <button
                       className="btn btn-secondary"
                       onClick={() => setConfirmAction('Reject')}
-                      disabled={completing || unclaiming}
+                      disabled={completing || unclaiming || !isRoleAuthorized}
                       style={{ flex: 1, justifyContent: 'center', color: 'var(--danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
                     >
                       <X size={16} /> Reject

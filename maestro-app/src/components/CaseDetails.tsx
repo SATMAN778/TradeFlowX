@@ -4,6 +4,7 @@ import { getCaseDetails, getTaskDetails, assignTask, unassignTask, completeTask 
 import type { CaseDetailsResponse, TaskDetailsResponse } from '../types/cases';
 import StageTracker from './StageTracker';
 import HumanTasks from './HumanTasks';
+import { useAuth } from '../context/AuthContext';
 
 interface CaseDetailsProps {
   caseInstanceId: string;
@@ -12,6 +13,7 @@ interface CaseDetailsProps {
 }
 
 export default function CaseDetails({ caseInstanceId, folderKey, onBack }: CaseDetailsProps) {
+  const { activeRole } = useAuth();
   const [details, setDetails] = useState<CaseDetailsResponse | null>(null);
   const [taskDetails, setTaskDetails] = useState<TaskDetailsResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -170,6 +172,7 @@ export default function CaseDetails({ caseInstanceId, folderKey, onBack }: CaseD
         </div>
         
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          {/* Title */}
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <h1 className="text-gradient" style={{ fontSize: '2rem' }}>{caseData.id}</h1>
@@ -257,6 +260,7 @@ export default function CaseDetails({ caseInstanceId, folderKey, onBack }: CaseD
             claiming={claiming}
             unclaiming={unclaiming}
             completing={completing}
+            activeRole={activeRole}
           />
         </div>
       </div>

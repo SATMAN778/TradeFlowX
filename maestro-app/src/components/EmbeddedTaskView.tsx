@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Check, X, AlertTriangle, Clock, Shield, Info, Edit3, MessageSquare } from 'lucide-react';
+import { Check, X, AlertTriangle, Clock, Edit3, MessageSquare } from 'lucide-react';
 import { CodedActionApp, MessageSeverity } from '@uipath/coded-action-app';
 
 interface EmbeddedTaskViewProps {
