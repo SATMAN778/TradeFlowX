@@ -194,6 +194,7 @@ class AgentState(BaseModel):
     candidates: list[HeadingCandidate] = []
     result: Optional[ClassificationResult] = None
     plan: str = ""                                      # todo.md content written by Orchestrator
+    chapter_hint: Optional[str] = None                  # 2-digit chapter hint
     retry_counts: dict[str, int] = {}                   # node_name → retry count
     audit_bucket_path: Optional[str] = None             # Storage Bucket path after persist
     job_status: str = "running"
