@@ -1,0 +1,11 @@
+{
+  "shipment_ref": "TF-CASE-001",
+  "declared_coo": "UAE",
+  "supplier_name": "Gulf Tech Trading LLC",
+  "supplier_address": "Jebel Ali Free Zone, Dubai, UAE",
+  "jafza_flag": true,
+  "hts_code": "8471.30.0100",
+  "product_description": "Laptop computers — Dell Latitude 5540, assembled in China, re-exported via JAFZA free zone trading company",
+  "coo_certificate": null,
+  "human_review_notes": null
+}

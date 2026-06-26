@@ -1,0 +1,11 @@
+﻿node.exe : Error: 
+At C:\Users\gupta\AppData\Roaming\npm\uip.ps1:24 char:5
++     & "node$exe"  "$basedir/node_modules/@uipath/cli/dist/index.js" $ ...
++     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Error: :String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+Request URL: https://staging.uipath.com/llm/api/discovery
+HTTP Method: GET
+Status Code: 404
+Response Content: Service: orchestrator not found in Organization: llm Tenant: api

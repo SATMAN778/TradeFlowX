@@ -2,7 +2,7 @@ import { useAuth } from '../context/AuthContext';
 import { Anchor, Ship, ShieldCheck, Globe, FileText, LogIn } from 'lucide-react';
 
 export function LoginPage() {
-  const { login, mockLogin } = useAuth();
+  const { login } = useAuth();
 
   return (
     <div className="login-shell">
@@ -13,7 +13,7 @@ export function LoginPage() {
             <Anchor size={17} color="white" />
           </div>
           <span style={{ fontWeight: 700, fontSize: '1rem', color: 'white', letterSpacing: '0.02em' }}>
-            Trade<span style={{ color: 'var(--accent-secondary)' }}>Flow</span> AI
+            Trade<span style={{ color: 'var(--accent-secondary)' }}>Flow</span> Portal
           </span>
         </div>
         <span style={{ marginLeft: '16px', fontSize: '0.72rem', color: 'rgba(255,255,255,0.55)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -61,7 +61,7 @@ export function LoginPage() {
             </div>
             <h2 style={{ fontSize: '1.5rem', marginBottom: '6px' }}>Operator Sign In</h2>
             <p className="text-secondary" style={{ fontSize: '0.875rem' }}>
-              Access your trade case management portal using your UiPath identity credentials or choose an operator role.
+              Access your trade case management portal using your UiPath identity credentials.
             </p>
           </div>
 
@@ -70,55 +70,7 @@ export function LoginPage() {
             <LogIn size={18} /> Login with UiPath SSO
           </button>
 
-          {/* Developer & Operator Quick Sign In */}
-          <div className="section-divider">
-            <div className="section-divider-line" />
-            <span className="section-divider-label">Operator Roles (Quick Access)</span>
-            <div className="section-divider-line" />
-          </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-            {[
-              { role: 'admin', label: 'System Administrator', desc: 'Full permissions & dashboard override', color: 'var(--accent-primary)' },
-              { role: 'manager', label: 'Compliance & Ops Manager', desc: 'OFAC screenings, audits & escalations', color: '#c2410c' },
-              { role: 'reviewer_customs', label: 'Customs Specialist (Broker)', desc: 'HTS classification & PGA agency checks', color: '#0369a1' },
-              { role: 'reviewer_freight_forwarder', label: 'Freight Forwarder', desc: 'Logistics coordination & CBP exams', color: '#0d9488' },
-              { role: 'reviewer_shipper', label: 'Shipper Operations', desc: 'PO validation & supplier COO auditing', color: '#4f46e5' },
-            ].map(({ role, label, desc, color }) => (
-              <button
-                key={role}
-                onClick={() => mockLogin(role as any)}
-                className="btn btn-secondary"
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  padding: '10px 14px',
-                  border: '1px solid var(--glass-border)',
-                  background: 'rgba(255,255,255,0.03)',
-                  transition: 'transform 0.15s, background 0.15s',
-                  textAlign: 'left'
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = 'rgba(41,69,134,0.05)';
-                  e.currentTarget.style.transform = 'translateX(2px)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                  e.currentTarget.style.transform = 'none';
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', width: '100%' }}>
-                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: color }} />
-                  <strong style={{ fontSize: '0.85rem', color: 'var(--text-primary)' }}>{label}</strong>
-                </div>
-                <span className="text-secondary" style={{ fontSize: '0.75rem', marginTop: '2px', paddingLeft: '14px' }}>
-                  {desc}
-                </span>
-              </button>
-            ))}
-          </div>
 
           {/* Trust badges */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
@@ -143,7 +95,7 @@ export function LoginPage() {
 
       {/* Mini footer */}
       <div style={{ padding: '14px 32px', background: 'var(--accent-primary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)', flexWrap: 'wrap', gap: '8px' }}>
-        <span>&copy; {new Date().getFullYear()} <span style={{ color: 'var(--accent-secondary)' }}>TradeFlow AI</span> &mdash; All rights reserved</span>
+        <span>&copy; {new Date().getFullYear()} <span style={{ color: 'var(--accent-secondary)' }}>TradeFlow Portal</span> &mdash; All rights reserved</span>
         <span>OFAC Screening &bull; ISF Filing &bull; CBP Release &bull; HTS Classification</span>
       </div>
     </div>

@@ -87,121 +87,7 @@ export function getRoleBadge(roles: UserRole[]) {
 
 // ─── Demo / Blueprint Tasks ─────────────────────────────────────────────────
 
-const getDemoTasks = (currentUserEmail: string | null): MyTask[] => [
-  {
-    taskId: "demo-ht-01",
-    folderId: 1,
-    folderKey: "dubai-usa-import",
-    title: "HT-01: Complete missing PO fields (expectedShipDate)",
-    priority: "Medium",
-    status: "Pending",
-    assignedToUser: null,
-    caseInstanceId: "TF-88201",
-    createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    data: {
-      poNumber: "PO-991204",
-      supplierName: "Al-Ghurair Industrial LLC (Dubai)",
-      goodsDescription: "Industrial aluminum sheets & coils",
-      missingFields: "expectedShipDate, portOfLoading",
-      incoterms: "CIF Newark"
-    },
-    currentUserEmail: currentUserEmail || "operator@tradeflow.ai"
-  },
-  {
-    taskId: "demo-ht-02",
-    folderId: 1,
-    folderKey: "dubai-usa-import",
-    title: "HT-02: Transshipment flag raised — verify true COO",
-    priority: "High",
-    status: "Pending",
-    assignedToUser: null,
-    caseInstanceId: "TF-88201",
-    createdAt: new Date(Date.now() - 3600000 * 4).toISOString(),
-    data: {
-      supplierAddress: "Plot S30219, JAFZA Free Zone, Dubai, UAE",
-      declaredCountryOfOrigin: "UAE",
-      flagReason: "Supplier address is inside a Free Zone. High risk of transshipment from third countries.",
-      suggestedTransformationCheck: "Verify substantial transformation in UAE (Form A or local chamber certificate).",
-    },
-    currentUserEmail: currentUserEmail || "operator@tradeflow.ai"
-  },
-  {
-    taskId: "demo-ht-06",
-    folderId: 1,
-    folderKey: "dubai-usa-import",
-    title: "HT-06: Review and confirm HTS classification (Confidence: 78%)",
-    priority: "Medium",
-    status: "Pending",
-    assignedToUser: null,
-    caseInstanceId: "TF-88204",
-    createdAt: new Date(Date.now() - 3600000 * 6).toISOString(),
-    data: {
-      productDescription: "Anodized aluminum alloy plates, grade 6061-T6, thickness 5mm",
-      declaredHtsCode: "7606.12.3030",
-      aiSuggestedCode: "7606.12.3045",
-      confidenceScore: "78%",
-      usitcRulingCitation: "CBP NY Cross Ruling N302481"
-    },
-    currentUserEmail: currentUserEmail || "operator@tradeflow.ai"
-  },
-  {
-    taskId: "demo-ht-11",
-    folderId: 1,
-    folderKey: "dubai-usa-import",
-    title: "HT-11: OFAC screening potential fuzzy match (Similarity: 87%)",
-    priority: "High",
-    status: "Pending",
-    assignedToUser: null,
-    caseInstanceId: "TF-88206",
-    createdAt: new Date(Date.now() - 3600000 * 1).toISOString(),
-    data: {
-      screenedPartyName: "Al-Ghurair Logistics FZE",
-      matchingSanctionsRecord: "AL GHURAIR ENTERPRISES (OFAC SDN List, Iraq/Syria programs)",
-      similarityScore: "87%",
-      screeningSource: "OFAC SDN API / amber-road-dpl",
-      actionRequired: "Review match details. Decide whether to CLEAR party or HOLD case for legal review."
-    },
-    currentUserEmail: currentUserEmail || "operator@tradeflow.ai"
-  },
-  {
-    taskId: "demo-ht-13",
-    folderId: 1,
-    folderKey: "dubai-usa-import",
-    title: "HT-13: CBP exam selected — coordinate with Newark port agent",
-    priority: "Critical",
-    status: "Pending",
-    assignedToUser: null,
-    caseInstanceId: "TF-88208",
-    createdAt: new Date(Date.now() - 3600000 * 8).toISOString(),
-    data: {
-      containerNumber: "MSKU8842109",
-      vesselName: "Maersk Horizon",
-      voyageNumber: "V-2604N",
-      portOfEntry: "Port of Newark, NJ (Entry Port Code: 1001)",
-      examinationType: "CBP Non-Intrusive Inspection (NII / X-Ray)",
-      brokerContact: "J. F. Hillebrand Brokers"
-    },
-    currentUserEmail: currentUserEmail || "operator@tradeflow.ai"
-  },
-  {
-    taskId: "demo-ht-16",
-    folderId: 1,
-    folderKey: "dubai-usa-import",
-    title: "HT-16: Document discrepancy review (CI vs. Packing List weights)",
-    priority: "Medium",
-    status: "Pending",
-    assignedToUser: null,
-    caseInstanceId: "TF-88210",
-    createdAt: new Date(Date.now() - 3600000 * 12).toISOString(),
-    data: {
-      commercialInvoiceNetWeight: "22,400 kg",
-      packingListNetWeight: "22,850 kg",
-      variance: "+450 kg (2.0%)",
-      reconciliationRequired: "Confirm correct net weight from container weight ticket or bill of lading."
-    },
-    currentUserEmail: currentUserEmail || "operator@tradeflow.ai"
-  }
-];
+const getDemoTasks = (currentUserEmail: string | null): MyTask[] => [];
 
 type ConfirmAction = 'Approve' | 'Reject' | null;
 
@@ -817,18 +703,7 @@ export default function TasksInbox({ onTaskCountChange }: TasksInboxProps) {
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {/* Demo Mode Toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(204,177,108,0.06)', border: '1px solid rgba(204,177,108,0.2)', borderRadius: '6px' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--accent-secondary)' }}>Blueprint Demo Tasks</span>
-            <input 
-              type="checkbox"
-              checked={demoTasksEnabled}
-              onChange={(e) => {
-                setDemoTasksEnabled(e.target.checked);
-              }}
-              style={{ width: '15px', height: '15px', cursor: 'pointer' }}
-            />
-          </div>
+
 
           <button
             className="btn btn-secondary"

@@ -1,6 +1,6 @@
 [project]
-name = "hts-classifier-agent"
-version = "0.0.6"
+name = "hts-classifier-agent-v2"
+version = "0.0.1"
 description = "HTS Classifier Agent — LangGraph deep agent for US import tariff classification"
 authors = [{ name = "John Doe", email = "john.doe@myemail.com" }]
 dependencies = [

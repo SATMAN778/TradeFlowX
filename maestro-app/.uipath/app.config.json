@@ -1,10 +1,9 @@
 {
   "appName": "maestro-app",
-  "appVersion": "1.0.0",
+  "displayName": "maestro-app",
+  "appVersion": "1.0.1",
   "systemName": "IDc2919ae5c13849c19a459682f04cd021",
   "appUrl": null,
-  "registeredAt": "2026-06-21T08:16:20.141Z",
-  "appType": "Action",
-  "deploymentId": "8a5f4dc4-3257-47b5-850b-47a91f3c7676",
-  "deployedAt": "2026-06-21T08:16:48.805Z"
+  "registeredAt": "2026-06-26T14:08:23.047Z",
+  "appType": "Action"
 }

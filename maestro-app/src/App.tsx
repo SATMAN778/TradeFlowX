@@ -7,11 +7,14 @@ import Dashboard from './components/Dashboard';
 import CaseDetails from './components/CaseDetails';
 import TasksInbox from './components/TasksInbox';
 import ActionHistory from './components/ActionHistory';
+import AuditLog from './components/AuditLog';
+import { RetentionDashboard } from './components/DocumentLifecycle';
+import DataRegistry from './components/DataRegistry';
 import { getMyTasks, getTradeOverview, type TradeOverview } from './services/casesService';
 import {
   Package, LayoutDashboard, LogOut, Inbox, History,
   Ship, Globe, FileText, ShieldCheck, Activity,
-  ChevronRight, User, Clock, Settings, Anchor, RefreshCw
+  ChevronRight, User, Clock, Settings, Anchor, RefreshCw, Database
 } from 'lucide-react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -26,7 +29,7 @@ interface SelectedInstance {
   folderKey: string;
 }
 
-type ActiveView = 'dashboard' | 'inbox' | 'history';
+type ActiveView = 'dashboard' | 'inbox' | 'history' | 'audit' | 'retention' | 'registry';
 
 // ─── Trade Stat Bar (live data) ───────────────────────────────────────────────
 
@@ -202,7 +205,7 @@ function TopHeader() {
           <Anchor size={18} color="white" />
         </div>
         <span className="top-header-brand">
-          Trade<span>Flow</span> AI
+          Trade<span>Flow</span> Portal
         </span>
       </div>
 
@@ -264,7 +267,7 @@ function AppFooter() {
     <footer className="app-footer">
       <div className="app-footer-top">
         <div className="app-footer-col">
-          <h4>TradeFlow AI</h4>
+          <h4>TradeFlow Portal</h4>
           <p>
             An intelligent Maestro-powered platform for UAE-to-USA cross-border shipment
             clearance, OFAC compliance screening, ISF filing automation, and CBP release
@@ -304,7 +307,7 @@ function AppFooter() {
       </div>
       <div className="app-footer-bottom">
         <span>
-          &copy; {year} <span className="footer-gold">TradeFlow AI</span> &mdash; Powered by UiPath Maestro &amp; Python Intelligence Layer
+          &copy; {year} <span className="footer-gold">TradeFlow Portal</span> &mdash; Powered by UiPath Maestro &amp; Python Intelligence Layer
         </span>
         <div className="app-footer-bottom-links">
           <span>Customs &amp; Border Protection</span>
@@ -349,18 +352,24 @@ interface SidebarProps {
   isOnDashboard: boolean;
   isOnInbox: boolean;
   isOnHistory: boolean;
+  isOnAudit: boolean;
+  isOnRetention: boolean;
+  isOnRegistry: boolean;
   selectedCase: SelectedCase | null;
   selectedInstance: SelectedInstance | null;
   pendingTaskCount: number;
   onDashboard: () => void;
   onInbox: () => void;
   onHistory: () => void;
+  onAudit: () => void;
+  onRetention: () => void;
+  onRegistry: () => void;
   onBackToInstances: () => void;
 }
 
 function Sidebar({
-  isOnDashboard, isOnInbox, isOnHistory, selectedCase, selectedInstance,
-  pendingTaskCount, onDashboard, onInbox, onHistory, onBackToInstances
+  isOnDashboard, isOnInbox, isOnHistory, isOnAudit, isOnRetention, isOnRegistry, selectedCase, selectedInstance,
+  pendingTaskCount, onDashboard, onInbox, onHistory, onAudit, onRetention, onRegistry, onBackToInstances
 }: SidebarProps) {
   const { activeRole } = useAuth();
 
@@ -373,7 +382,7 @@ function Sidebar({
             <Ship size={18} color="white" />
           </div>
           <div>
-            <div className="sidebar-brand-name">TradeFlow AI</div>
+            <div className="sidebar-brand-name">TradeFlow Portal</div>
             <div className="sidebar-brand-sub">Case Management Portal</div>
           </div>
         </div>
@@ -417,7 +426,7 @@ function Sidebar({
 
       {/* Navigation */}
       <nav className="sidebar-nav">
-        <div className="sidebar-nav-section-label">Navigation</div>
+        <div className="sidebar-nav-section-label">Operations</div>
 
         <button
           className={`sidebar-nav-item ${isOnDashboard ? 'active' : ''}`}
@@ -448,10 +457,41 @@ function Sidebar({
           <span style={{ flex: 1, textAlign: 'left' }}>Action History</span>
         </button>
 
+        <button
+          className={`sidebar-nav-item ${isOnRegistry ? 'active' : ''}`}
+          onClick={onRegistry}
+          style={{ justifyContent: 'flex-start' }}
+        >
+          <Database size={17} />
+          <span style={{ flex: 1, textAlign: 'left' }}>Data Fabric Registry</span>
+        </button>
+
+        <div className="sidebar-nav-section-label" style={{ marginTop: '12px' }}>Compliance &amp; Audit</div>
+
+        <button
+          className={`sidebar-nav-item ${isOnAudit ? 'active' : ''}`}
+          onClick={onAudit}
+          style={{ justifyContent: 'flex-start' }}
+        >
+          <ShieldCheck size={17} />
+          <span style={{ flex: 1, textAlign: 'left' }}>Compliance Audit</span>
+        </button>
+
+        {activeRole === 'admin' && (
+          <button
+            className={`sidebar-nav-item ${isOnRetention ? 'active' : ''}`}
+            onClick={onRetention}
+            style={{ justifyContent: 'flex-start' }}
+          >
+            <Clock size={17} />
+            <span style={{ flex: 1, textAlign: 'left' }}>Document Retention</span>
+          </button>
+        )}
+
         {/* Case breadcrumb nav items */}
         {selectedCase && (
           <>
-            <div className="sidebar-nav-section-label" style={{ marginTop: '8px' }}>Active Case</div>
+            <div className="sidebar-nav-section-label" style={{ marginTop: '12px' }}>Active Case</div>
             <button
               className={`sidebar-nav-item ${selectedCase && !selectedInstance ? 'active' : ''}`}
               onClick={onBackToInstances}
@@ -463,21 +503,6 @@ function Sidebar({
             </button>
           </>
         )}
-
-        <div className="sidebar-nav-section-label" style={{ marginTop: '8px' }}>Workflow</div>
-
-        <div className="sidebar-nav-item" style={{ cursor: 'default', opacity: 0.55 }}>
-          <FileText size={17} />
-          ISF Filing
-        </div>
-        <div className="sidebar-nav-item" style={{ cursor: 'default', opacity: 0.55 }}>
-          <ShieldCheck size={17} />
-          OFAC Screening
-        </div>
-        <div className="sidebar-nav-item" style={{ cursor: 'default', opacity: 0.55 }}>
-          <Globe size={17} />
-          CBP Release
-        </div>
       </nav>
 
       {/* Footer */}
@@ -546,9 +571,29 @@ function MainLayout() {
     setSelectedInstance(null);
   };
 
+  const handleOpenAudit = () => {
+    setActiveView('audit');
+    setSelectedCase(null);
+    setSelectedInstance(null);
+  };
+
+  const handleOpenRetention = () => {
+    setActiveView('retention');
+    setSelectedCase(null);
+    setSelectedInstance(null);
+  };
+
+  const handleOpenRegistry = () => {
+    setActiveView('registry');
+    setSelectedCase(null);
+    setSelectedInstance(null);
+  };
+
   const isOnDashboard = activeView === 'dashboard' && !selectedCase;
   const isOnInbox = activeView === 'inbox';
   const isOnHistory = activeView === 'history';
+  const isOnAudit = activeView === 'audit';
+  const isOnRegistry = activeView === 'registry';
 
   // Build breadcrumbs
   const breadcrumbs: { label: string; onClick?: () => void }[] = [
@@ -556,6 +601,9 @@ function MainLayout() {
   ];
   if (isOnInbox) breadcrumbs.push({ label: 'Tasks Inbox' });
   if (isOnHistory) breadcrumbs.push({ label: 'Action History' });
+  if (isOnAudit) breadcrumbs.push({ label: 'Compliance Audit' });
+  if (activeView === 'retention') breadcrumbs.push({ label: 'Document Retention' });
+  if (isOnRegistry) breadcrumbs.push({ label: 'Data Fabric Registry' });
   if (selectedCase) {
     breadcrumbs.push({ label: selectedCase.caseName, onClick: selectedInstance ? handleBackToInstances : undefined });
   }
@@ -570,12 +618,18 @@ function MainLayout() {
           isOnDashboard={isOnDashboard}
           isOnInbox={isOnInbox}
           isOnHistory={isOnHistory}
+          isOnAudit={isOnAudit}
+          isOnRetention={activeView === 'retention'}
+          isOnRegistry={isOnRegistry}
           selectedCase={selectedCase}
           selectedInstance={selectedInstance}
           pendingTaskCount={pendingTaskCount}
           onDashboard={handleOpenDashboard}
           onInbox={handleOpenInbox}
           onHistory={handleOpenHistory}
+          onAudit={handleOpenAudit}
+          onRetention={handleOpenRetention}
+          onRegistry={handleOpenRegistry}
           onBackToInstances={handleBackToInstances}
         />
 
@@ -586,8 +640,19 @@ function MainLayout() {
           <div className="main-content-inner animate-fade-in">
             {isOnInbox && <TasksInbox onTaskCountChange={setPendingTaskCount} />}
             {isOnHistory && <ActionHistory />}
+            {isOnAudit && <AuditLog />}
+            {activeView === 'retention' && <RetentionDashboard />}
+            {isOnRegistry && (
+              <DataRegistry
+                onInspectCase={(instId, fKey) => {
+                  setSelectedCase({ processKey: 'maestro-app', caseName: 'Shipment Detail' });
+                  setSelectedInstance({ instanceId: instId, folderKey: fKey });
+                  setActiveView('dashboard');
+                }}
+              />
+            )}
 
-            {!isOnInbox && !isOnHistory && (
+            {!isOnInbox && !isOnHistory && !isOnAudit && !isOnRegistry && activeView !== 'retention' && (
               <>
                 {!selectedCase ? (
                   <Dashboard
@@ -774,7 +839,7 @@ function AppContent() {
       <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Activity size={28} className="text-gradient animate-spin" />
-          <span className="text-secondary" style={{ fontWeight: 500 }}>Initializing TradeFlow AI Portal…</span>
+          <span className="text-secondary" style={{ fontWeight: 500 }}>Initializing TradeFlow Portal…</span>
         </div>
       </div>
     );

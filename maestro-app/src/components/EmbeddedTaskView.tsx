@@ -46,21 +46,23 @@ export default function EmbeddedTaskView({ initialTask }: EmbeddedTaskViewProps)
     setStatusMessage(null);
     setSubmitting(true);
     
+    const outcome = confirmAction === 'Approve' ? 'Approved' : confirmAction === 'Reject' ? 'Rejected' : confirmAction;
+
     // Build output payload conforming to schema
     const payload = {
       ...formValues,
-      decision: confirmAction,
+      decision: outcome,
       comments: comments,
       reviewedBy: task.assignedToUser?.emailAddress || task.assignedToUser?.userName || "CodedActionApp Reviewer",
       reviewedAt: new Date().toISOString()
     };
 
     try {
-      const result = await service.completeTask(confirmAction, payload);
+      const result = await service.completeTask(outcome, payload);
       if (result.success) {
-        service.showMessage(`Task completed successfully: ${confirmAction}`, MessageSeverity.Success);
+        service.showMessage(`Task completed successfully: ${outcome}`, MessageSeverity.Success);
         setStatusMessage({
-          text: `Task submitted successfully as '${confirmAction}'!`,
+          text: `Task submitted successfully as '${outcome}'!`,
           type: 'success'
         });
         // Retrieve updated state
@@ -120,7 +122,7 @@ export default function EmbeddedTaskView({ initialTask }: EmbeddedTaskViewProps)
               </span>
             </div>
             <p className="text-secondary" style={{ fontSize: '0.85rem', marginTop: '6px' }}>
-              TradeFlow AI Maestro Coded Task Action
+              TradeFlow Portal Maestro Coded Task Action
             </p>
           </div>
           <div style={{ display: 'flex', gap: '8px', fontSize: '0.82rem', color: 'var(--text-secondary)' }}>

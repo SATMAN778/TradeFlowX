@@ -1,0 +1,335 @@
+{
+    "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+    "$id": "entry-points.json",
+    "entryPoints": [
+        {
+            "filePath": "agent",
+            "uniqueId": "4a69a47b-c854-4157-9d5d-2bb50328f89e",
+            "type": "agent",
+            "input": {
+                "type": "object",
+                "properties": {
+                    "shipment_ref": {
+                        "title": "Shipment Ref",
+                        "type": "string"
+                    },
+                    "declared_coo": {
+                        "title": "Declared Coo",
+                        "type": "string"
+                    },
+                    "supplier_name": {
+                        "title": "Supplier Name",
+                        "type": "string"
+                    },
+                    "supplier_address": {
+                        "title": "Supplier Address",
+                        "type": "string"
+                    },
+                    "jafza_flag": {
+                        "title": "Jafza Flag",
+                        "type": "boolean"
+                    },
+                    "hts_code": {
+                        "title": "Hts Code",
+                        "type": "string"
+                    },
+                    "product_description": {
+                        "title": "Product Description",
+                        "type": "string"
+                    },
+                    "coo_certificate": {
+                        "type": "string"
+                    },
+                    "supplier_type": {
+                        "type": "string"
+                    },
+                    "substantial_transform": {
+                        "type": "boolean"
+                    },
+                    "watchlist_hits": {
+                        "default": [],
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Watchlist Hits",
+                        "type": "array"
+                    },
+                    "third_country_origin": {
+                        "type": "string"
+                    },
+                    "section_301_applicable": {
+                        "type": "boolean"
+                    },
+                    "add_cvd_applicable": {
+                        "type": "boolean"
+                    },
+                    "iran_russia_nexus": {
+                        "type": "boolean"
+                    },
+                    "risk_score": {
+                        "type": "integer"
+                    },
+                    "risk_level": {
+                        "type": "string"
+                    },
+                    "true_coo_verdict": {
+                        "type": "string"
+                    },
+                    "human_escalation": {
+                        "default": false,
+                        "title": "Human Escalation",
+                        "type": "boolean"
+                    },
+                    "human_review_notes": {
+                        "type": "string"
+                    },
+                    "job_status": {
+                        "default": "running",
+                        "title": "Job Status",
+                        "type": "string"
+                    },
+                    "messages": {
+                        "default": [],
+                        "items": {},
+                        "title": "Messages",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "shipment_ref",
+                    "declared_coo",
+                    "supplier_name",
+                    "supplier_address",
+                    "jafza_flag",
+                    "hts_code",
+                    "product_description"
+                ]
+            },
+            "output": {
+                "type": "object",
+                "properties": {
+                    "shipment_ref": {
+                        "title": "Shipment Ref",
+                        "type": "string"
+                    },
+                    "declared_coo": {
+                        "title": "Declared Coo",
+                        "type": "string"
+                    },
+                    "supplier_name": {
+                        "title": "Supplier Name",
+                        "type": "string"
+                    },
+                    "supplier_address": {
+                        "title": "Supplier Address",
+                        "type": "string"
+                    },
+                    "jafza_flag": {
+                        "title": "Jafza Flag",
+                        "type": "boolean"
+                    },
+                    "hts_code": {
+                        "title": "Hts Code",
+                        "type": "string"
+                    },
+                    "product_description": {
+                        "title": "Product Description",
+                        "type": "string"
+                    },
+                    "coo_certificate": {
+                        "type": "string"
+                    },
+                    "supplier_type": {
+                        "type": "string"
+                    },
+                    "substantial_transform": {
+                        "type": "boolean"
+                    },
+                    "watchlist_hits": {
+                        "default": [],
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Watchlist Hits",
+                        "type": "array"
+                    },
+                    "third_country_origin": {
+                        "type": "string"
+                    },
+                    "section_301_applicable": {
+                        "type": "boolean"
+                    },
+                    "add_cvd_applicable": {
+                        "type": "boolean"
+                    },
+                    "iran_russia_nexus": {
+                        "type": "boolean"
+                    },
+                    "risk_score": {
+                        "type": "integer"
+                    },
+                    "risk_level": {
+                        "type": "string"
+                    },
+                    "true_coo_verdict": {
+                        "type": "string"
+                    },
+                    "human_escalation": {
+                        "default": false,
+                        "title": "Human Escalation",
+                        "type": "boolean"
+                    },
+                    "human_review_notes": {
+                        "type": "string"
+                    },
+                    "job_status": {
+                        "default": "running",
+                        "title": "Job Status",
+                        "type": "string"
+                    },
+                    "messages": {
+                        "default": [],
+                        "items": {},
+                        "title": "Messages",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "shipment_ref",
+                    "declared_coo",
+                    "supplier_name",
+                    "supplier_address",
+                    "jafza_flag",
+                    "hts_code",
+                    "product_description"
+                ]
+            },
+            "graph": {
+                "nodes": [
+                    {
+                        "id": "__start__",
+                        "name": "__start__",
+                        "type": "__start__",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "intake_router",
+                        "name": "intake_router",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "supplier_profiler",
+                        "name": "supplier_profiler",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "coo_document_analyzer",
+                        "name": "coo_document_analyzer",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "origin_tracer",
+                        "name": "origin_tracer",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "human_escalation",
+                        "name": "human_escalation",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "risk_scorer",
+                        "name": "risk_scorer",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "verdict_publisher",
+                        "name": "verdict_publisher",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "__end__",
+                        "name": "__end__",
+                        "type": "__end__",
+                        "subgraph": null,
+                        "metadata": {}
+                    }
+                ],
+                "edges": [
+                    {
+                        "source": "__start__",
+                        "target": "intake_router",
+                        "label": null
+                    },
+                    {
+                        "source": "coo_document_analyzer",
+                        "target": "origin_tracer",
+                        "label": "denied"
+                    },
+                    {
+                        "source": "coo_document_analyzer",
+                        "target": "risk_scorer",
+                        "label": "confirmed"
+                    },
+                    {
+                        "source": "human_escalation",
+                        "target": "risk_scorer",
+                        "label": null
+                    },
+                    {
+                        "source": "intake_router",
+                        "target": "supplier_profiler",
+                        "label": "full_analysis"
+                    },
+                    {
+                        "source": "intake_router",
+                        "target": "verdict_publisher",
+                        "label": "low_risk_exit"
+                    },
+                    {
+                        "source": "origin_tracer",
+                        "target": "human_escalation",
+                        "label": "critical_flag"
+                    },
+                    {
+                        "source": "origin_tracer",
+                        "target": "risk_scorer",
+                        "label": "clear"
+                    },
+                    {
+                        "source": "risk_scorer",
+                        "target": "verdict_publisher",
+                        "label": null
+                    },
+                    {
+                        "source": "supplier_profiler",
+                        "target": "coo_document_analyzer",
+                        "label": null
+                    },
+                    {
+                        "source": "verdict_publisher",
+                        "target": "__end__",
+                        "label": null
+                    }
+                ]
+            }
+        }
+    ]
+}

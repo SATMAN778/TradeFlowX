@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, MapPin, Building, DollarSign, ShieldAlert, RefreshCw } from 'lucide-react';
-import { getCaseDetails, getTaskDetails, assignTask, unassignTask, completeTask } from '../services/casesService';
-import type { CaseDetailsResponse, TaskDetailsResponse } from '../types/cases';
+import { getCaseDetails, getTaskDetails, assignTask, unassignTask, completeTask, getDocuments } from '../services/casesService';
+import type { CaseDetailsResponse, TaskDetailsResponse, ShipmentDoc } from '../types/cases';
 import StageTracker from './StageTracker';
 import HumanTasks from './HumanTasks';
 import S3DocumentViewer from './S3DocumentViewer';
+import DocumentLifecycle from './DocumentLifecycle';
 import { useAuth } from '../context/AuthContext';
 
 interface CaseDetailsProps {
@@ -17,6 +18,8 @@ export default function CaseDetails({ caseInstanceId, folderKey, onBack }: CaseD
   const { activeRole } = useAuth();
   const [details, setDetails] = useState<CaseDetailsResponse | null>(null);
   const [taskDetails, setTaskDetails] = useState<TaskDetailsResponse | null>(null);
+  const [documents, setDocuments] = useState<ShipmentDoc[]>([]);
+  const [detailTab, setDetailTab] = useState<'info' | 'docs'>('info');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [claiming, setClaiming] = useState(false);
@@ -26,12 +29,14 @@ export default function CaseDetails({ caseInstanceId, folderKey, onBack }: CaseD
   const loadData = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const [detailsData, taskData] = await Promise.all([
+      const [detailsData, taskData, docsData] = await Promise.all([
         getCaseDetails(caseInstanceId, folderKey),
         getTaskDetails(caseInstanceId, folderKey).catch(() => null),
+        getDocuments(caseInstanceId).catch(() => []),
       ]);
       setDetails(detailsData);
       setTaskDetails(taskData);
+      setDocuments(docsData);
       setError(null);
     } catch (err) {
       console.error(err);
@@ -192,7 +197,49 @@ export default function CaseDetails({ caseInstanceId, folderKey, onBack }: CaseD
         </div>
       </div>
 
-      {taskDetails?.task ? (
+      {/* Sleek Tab Bar for file Cycle checklist integration */}
+      <div style={{ display: 'flex', gap: '16px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '2px', marginBottom: '8px' }}>
+        <button 
+          onClick={() => setDetailTab('info')}
+          style={{
+            background: 'none',
+            border: 'none',
+            borderBottom: detailTab === 'info' ? '2px solid var(--accent-primary)' : '2px solid transparent',
+            color: detailTab === 'info' ? 'var(--text-primary)' : 'var(--text-secondary)',
+            padding: '8px 16px 12px',
+            fontWeight: detailTab === 'info' ? 600 : 500,
+            fontSize: '0.92rem',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          {taskDetails?.task ? 'Active Human Task Review' : 'Shipment Overview & Stages'}
+        </button>
+        <button 
+          onClick={() => setDetailTab('docs')}
+          style={{
+            background: 'none',
+            border: 'none',
+            borderBottom: detailTab === 'docs' ? '2px solid var(--accent-primary)' : '2px solid transparent',
+            color: detailTab === 'docs' ? 'var(--text-primary)' : 'var(--text-secondary)',
+            padding: '8px 16px 12px',
+            fontWeight: detailTab === 'docs' ? 600 : 500,
+            fontSize: '0.92rem',
+            cursor: 'pointer',
+            transition: 'all 0.2s'
+          }}
+        >
+          File Cycle Checklists ({documents.filter(d => ['Commercial Invoice', 'Packing List', 'Bill of Lading', 'Certificate of Origin', 'Arrival Notice', 'CBP Form 3461', 'CBP Form 7501', 'PGA Permit', 'Delivery Order'].includes(d.documentType)).length}/9)
+        </button>
+      </div>
+
+      {detailTab === 'docs' ? (
+        <DocumentLifecycle 
+          caseInstanceId={caseInstanceId}
+          documents={documents}
+          onRefresh={() => loadData(true)}
+        />
+      ) : taskDetails?.task ? (
         <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.8fr', gap: '24px', minHeight: 'calc(100vh - 280px)' }}>
           {/* Left Side: S3 Document Viewer */}
           <div style={{ height: '100%', minHeight: '600px' }}>

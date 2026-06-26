@@ -80,3 +80,7 @@ def build_graph():
 
 
 __all__ = ["build_graph", "check_review_needed"]
+
+
+graph = build_graph()
+__all__.append('graph')

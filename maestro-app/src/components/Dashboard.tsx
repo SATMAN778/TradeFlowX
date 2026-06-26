@@ -98,6 +98,26 @@ export default function Dashboard({ onSelectCase, onOpenInbox }: DashboardProps)
           </div>
         </div>
 
+        {/* Performance Metric card */}
+        <div className="glass-panel" style={{ padding: '24px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ padding: '12px', background: 'rgba(168, 85, 247, 0.1)', borderRadius: '6px', color: '#a855f7' }}>
+            <Clock size={24} />
+          </div>
+          <div>
+            <p className="text-secondary" style={{ fontSize: '0.875rem' }}>Avg Execution Time</p>
+            <h2 style={{ fontSize: '1.75rem', marginTop: '4px' }}>
+              {(() => {
+                const durations = cases.map(c => c.avgDurationMs).filter(d => d != null && d > 0) as number[];
+                if (durations.length === 0) return '—';
+                const avgMs = durations.reduce((a, b) => a + b, 0) / durations.length;
+                const minutes = Math.round(avgMs / 60000);
+                if (minutes > 0) return `${minutes} min`;
+                return `${Math.round(avgMs / 1000)} sec`;
+              })()}
+            </h2>
+          </div>
+        </div>
+
         {/* Pending Approvals card */}
         <div
           className="glass-panel"
@@ -179,6 +199,7 @@ export default function Dashboard({ onSelectCase, onOpenInbox }: DashboardProps)
                 <th style={{ padding: '12px', fontWeight: 500 }}>Case Name</th>
                 <th style={{ padding: '12px', fontWeight: 500 }}>Folder Location</th>
                 <th style={{ padding: '12px', fontWeight: 500 }}>Total Executions</th>
+                <th style={{ padding: '12px', fontWeight: 500 }}>Avg Duration</th>
                 <th style={{ padding: '12px', fontWeight: 500 }}>Status Summary</th>
                 <th style={{ padding: '12px', fontWeight: 500 }}>Action</th>
               </tr>
@@ -189,6 +210,9 @@ export default function Dashboard({ onSelectCase, onOpenInbox }: DashboardProps)
                   <td style={{ padding: '16px 12px', fontWeight: 500 }}>{c.name}</td>
                   <td style={{ padding: '16px 12px', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>{c.location}</td>
                   <td style={{ padding: '16px 12px' }}>{c.total} runs</td>
+                  <td style={{ padding: '16px 12px', color: 'var(--text-secondary)' }}>
+                    {c.avgDurationMs ? `${Math.round(c.avgDurationMs / 1000)}s` : '—'}
+                  </td>
                   <td style={{ padding: '16px 12px' }}>
                     <div style={{ display: 'flex', gap: '6px' }}>
                       {c.running > 0 && <span className="status-badge status-info">{c.running} running</span>}

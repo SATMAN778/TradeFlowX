@@ -1,0 +1,338 @@
+{
+    "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+    "$id": "entry-points.json",
+    "entryPoints": [
+        {
+            "filePath": "agent",
+            "uniqueId": "588a5fad-0be6-4b76-b671-d035ba0ba20b",
+            "type": "agent",
+            "input": {
+                "type": "object",
+                "properties": {
+                    "shipment_ref": {
+                        "title": "Shipment Ref",
+                        "type": "string"
+                    },
+                    "shipment_doc_path": {
+                        "type": "string"
+                    },
+                    "hts_code": {
+                        "title": "Hts Code",
+                        "type": "string"
+                    },
+                    "declared_coo": {
+                        "title": "Declared Coo",
+                        "type": "string"
+                    },
+                    "shipment_value_usd": {
+                        "default": 0.0,
+                        "title": "Shipment Value Usd",
+                        "type": "number"
+                    },
+                    "estimated_duty_usd": {
+                        "default": 0.0,
+                        "title": "Estimated Duty Usd",
+                        "type": "number"
+                    },
+                    "actual_duty_usd": {
+                        "type": "number"
+                    },
+                    "jafza_flag": {
+                        "default": false,
+                        "title": "Jafza Flag",
+                        "type": "boolean"
+                    },
+                    "transshipment_flag": {
+                        "default": false,
+                        "title": "Transshipment Flag",
+                        "type": "boolean"
+                    },
+                    "has_reexport_intent": {
+                        "default": false,
+                        "title": "Has Reexport Intent",
+                        "type": "boolean"
+                    },
+                    "finance_review_notes": {
+                        "type": "string"
+                    },
+                    "counsel_review_notes": {
+                        "type": "string"
+                    },
+                    "extracted_hts_code": {
+                        "type": "string"
+                    },
+                    "variance_usd": {
+                        "type": "number"
+                    },
+                    "variance_pct": {
+                        "type": "number"
+                    },
+                    "opportunity_type": {
+                        "type": "string"
+                    },
+                    "estimated_savings_usd": {
+                        "default": 0.0,
+                        "title": "Estimated Savings Usd",
+                        "type": "number"
+                    },
+                    "counsel_recommendation": {
+                        "type": "string"
+                    },
+                    "requires_finance_review": {
+                        "default": false,
+                        "title": "Requires Finance Review",
+                        "type": "boolean"
+                    },
+                    "requires_counsel_review": {
+                        "default": false,
+                        "title": "Requires Counsel Review",
+                        "type": "boolean"
+                    },
+                    "action_center_task_id": {
+                        "type": "string"
+                    },
+                    "audit_bucket_path": {
+                        "type": "string"
+                    },
+                    "job_status": {
+                        "default": "running",
+                        "title": "Job Status",
+                        "type": "string"
+                    },
+                    "messages": {
+                        "default": [],
+                        "items": {},
+                        "title": "Messages",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "shipment_ref",
+                    "hts_code",
+                    "declared_coo"
+                ]
+            },
+            "output": {
+                "type": "object",
+                "properties": {
+                    "shipment_ref": {
+                        "title": "Shipment Ref",
+                        "type": "string"
+                    },
+                    "shipment_doc_path": {
+                        "type": "string"
+                    },
+                    "hts_code": {
+                        "title": "Hts Code",
+                        "type": "string"
+                    },
+                    "declared_coo": {
+                        "title": "Declared Coo",
+                        "type": "string"
+                    },
+                    "shipment_value_usd": {
+                        "default": 0.0,
+                        "title": "Shipment Value Usd",
+                        "type": "number"
+                    },
+                    "estimated_duty_usd": {
+                        "default": 0.0,
+                        "title": "Estimated Duty Usd",
+                        "type": "number"
+                    },
+                    "actual_duty_usd": {
+                        "type": "number"
+                    },
+                    "jafza_flag": {
+                        "default": false,
+                        "title": "Jafza Flag",
+                        "type": "boolean"
+                    },
+                    "transshipment_flag": {
+                        "default": false,
+                        "title": "Transshipment Flag",
+                        "type": "boolean"
+                    },
+                    "has_reexport_intent": {
+                        "default": false,
+                        "title": "Has Reexport Intent",
+                        "type": "boolean"
+                    },
+                    "finance_review_notes": {
+                        "type": "string"
+                    },
+                    "counsel_review_notes": {
+                        "type": "string"
+                    },
+                    "extracted_hts_code": {
+                        "type": "string"
+                    },
+                    "variance_usd": {
+                        "type": "number"
+                    },
+                    "variance_pct": {
+                        "type": "number"
+                    },
+                    "opportunity_type": {
+                        "type": "string"
+                    },
+                    "estimated_savings_usd": {
+                        "default": 0.0,
+                        "title": "Estimated Savings Usd",
+                        "type": "number"
+                    },
+                    "counsel_recommendation": {
+                        "type": "string"
+                    },
+                    "requires_finance_review": {
+                        "default": false,
+                        "title": "Requires Finance Review",
+                        "type": "boolean"
+                    },
+                    "requires_counsel_review": {
+                        "default": false,
+                        "title": "Requires Counsel Review",
+                        "type": "boolean"
+                    },
+                    "action_center_task_id": {
+                        "type": "string"
+                    },
+                    "audit_bucket_path": {
+                        "type": "string"
+                    },
+                    "job_status": {
+                        "default": "running",
+                        "title": "Job Status",
+                        "type": "string"
+                    },
+                    "messages": {
+                        "default": [],
+                        "items": {},
+                        "title": "Messages",
+                        "type": "array"
+                    }
+                },
+                "required": [
+                    "shipment_ref",
+                    "hts_code",
+                    "declared_coo"
+                ]
+            },
+            "graph": {
+                "nodes": [
+                    {
+                        "id": "__start__",
+                        "name": "__start__",
+                        "type": "__start__",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "reconciliation_analyst_agent",
+                        "name": "reconciliation_analyst_agent",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "tools",
+                        "name": "tools",
+                        "type": "tool",
+                        "subgraph": null,
+                        "metadata": {
+                            "tool_names": [
+                                "parse_customs_document_tool",
+                                "query_estimated_duty_tool",
+                                "check_drawback_savings_tool",
+                                "check_first_sale_savings_tool"
+                            ],
+                            "tool_count": 4
+                        }
+                    },
+                    {
+                        "id": "state_extractor",
+                        "name": "state_extractor",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "human_review_gate",
+                        "name": "human_review_gate",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "verdict_publisher",
+                        "name": "verdict_publisher",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "audit_trail_writer",
+                        "name": "audit_trail_writer",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "__end__",
+                        "name": "__end__",
+                        "type": "__end__",
+                        "subgraph": null,
+                        "metadata": {}
+                    }
+                ],
+                "edges": [
+                    {
+                        "source": "__start__",
+                        "target": "reconciliation_analyst_agent",
+                        "label": null
+                    },
+                    {
+                        "source": "human_review_gate",
+                        "target": "verdict_publisher",
+                        "label": null
+                    },
+                    {
+                        "source": "reconciliation_analyst_agent",
+                        "target": "state_extractor",
+                        "label": null
+                    },
+                    {
+                        "source": "reconciliation_analyst_agent",
+                        "target": "tools",
+                        "label": null
+                    },
+                    {
+                        "source": "state_extractor",
+                        "target": "human_review_gate",
+                        "label": null
+                    },
+                    {
+                        "source": "state_extractor",
+                        "target": "verdict_publisher",
+                        "label": null
+                    },
+                    {
+                        "source": "tools",
+                        "target": "reconciliation_analyst_agent",
+                        "label": null
+                    },
+                    {
+                        "source": "verdict_publisher",
+                        "target": "audit_trail_writer",
+                        "label": null
+                    },
+                    {
+                        "source": "audit_trail_writer",
+                        "target": "__end__",
+                        "label": null
+                    }
+                ]
+            }
+        }
+    ]
+}

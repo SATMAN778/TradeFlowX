@@ -24,6 +24,8 @@ export interface CaseSummary {
   total: number;
   versions: number;
   location: string;
+  avgDurationMs?: number;
+  p95DurationMs?: number;
 }
 
 export interface CaseInstanceRaw {
@@ -91,3 +93,17 @@ export interface MyTask {
   actionTaken?: string;
   completedAt?: string;
 }
+
+export interface ShipmentDoc {
+  id: string;
+  caseRef: string;
+  fileName: string;
+  documentType: string;
+  uploadedAt: string;
+  uploadedBy: string;
+  idpConfidence: number;
+  retentionDaysLeft: number;
+  fileSize: string;
+  extractionData: Record<string, any>;
+}
+

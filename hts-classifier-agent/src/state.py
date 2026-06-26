@@ -120,7 +120,7 @@ class ClassificationResult(BaseModel):
     """The final HTS classification result produced by the Classification Reconciler.
 
     Validators enforce:
-      - final_hts_code must match ^\d{4}\.\d{2}\.\d{4}$ (Req 2.6)
+      - final_hts_code must match ^\\d{4}\\.\\d{2}\\.\\d{4}$ (Req 2.6)
       - if final_hts_code is absent/empty, requires_human_review must be True (Req 15.4)
 
     Requirements: 2.3, 2.6, 15.4
@@ -139,7 +139,7 @@ class ClassificationResult(BaseModel):
     def validate_hts_format(cls, v: str) -> str:
         """Enforce the standard 10-digit HTS format ####.##.####.
 
-        Requirement 2.6: final_hts_code must match ^\d{4}\.\d{2}\.\d{4}$.
+        Requirement 2.6: final_hts_code must match ^\\d{4}\\.\\d{2}\\.\\d{4}$.
         An empty string is allowed here only when requires_human_review is True;
         that cross-field constraint is enforced by the model_validator below.
         """

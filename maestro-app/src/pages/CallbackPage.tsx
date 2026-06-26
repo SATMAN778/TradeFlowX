@@ -1,37 +1,44 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { sendCallback } from '../services/authService';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { sdk } from '../lib/sdk';
 import { Activity } from 'lucide-react';
 
 export function CallbackPage() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { setAuthenticated } = useAuth();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const code = searchParams.get('code');
-    const state = searchParams.get('state');
+    const checkAuth = async () => {
+      // The SDK might have already processed the callback in AuthContext and stripped the code!
+      if (sdk.isAuthenticated()) {
+        setAuthenticated(true);
+        navigate('/', { replace: true });
+        return;
+      }
 
-    if (!code) {
-      setError('No authorization code received');
-      return;
-    }
-
-    sendCallback(code, state || '')
-      .then((result) => {
-        if (result.authenticated) {
-          setAuthenticated(true);
-          navigate('/', { replace: true });
-        } else {
-          setError('Authentication failed');
+      if (sdk.isInOAuthCallback()) {
+        try {
+          const success = await sdk.completeOAuth();
+          if (success) {
+            setAuthenticated(true);
+            navigate('/', { replace: true });
+          } else {
+            setError('Authentication failed via SDK callback');
+          }
+        } catch (err: any) {
+          setError(err.message || 'SDK token verification failed');
         }
-      })
-      .catch((err) => {
-        setError(err.message || 'Token exchange failed');
-      });
-  }, [searchParams, navigate, setAuthenticated]);
+      } else {
+        // If we are not authenticated, and there's no code in the URL, the OAuth flow was interrupted.
+        setError('No active OAuth callback signature detected');
+      }
+    };
+    
+    // Slight delay to let AuthContext initialize if it's currently processing it
+    setTimeout(checkAuth, 500);
+  }, [navigate, setAuthenticated]);
 
   if (error) {
     return (

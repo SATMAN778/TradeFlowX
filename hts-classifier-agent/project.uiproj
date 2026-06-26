@@ -1,5 +1,6 @@
-﻿{
+{
   "ProjectType": "Agent",
-  "Name": "hts-classifier-agent",
-  "Description": "HTS Classifier Agent - LangGraph deep agent for US import HTS tariff classification using GRI methodology, CBP CROSS rulings, and human-in-the-loop review via UiPath Action Center."
+  "Name": "hts-classifier-agent-v2",
+  "Description": "HTS Classifier Agent - LangGraph deep agent for US import HTS tariff classification using GRI methodology, CBP CROSS rulings, and human-in-the-loop review via UiPath Action Center.",
+  "MainFile": null
 }

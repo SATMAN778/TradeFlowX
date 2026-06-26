@@ -1,0 +1,10 @@
+{
+  "shipmentDocument": {
+    "ID": "00000000-0000-0000-0000-000000000001",
+    "FullName": "laptop_invoice.pdf",
+    "MimeType": "application/pdf"
+  },
+  "documentType": "commercial_invoice",
+  "chapterHint": "84",
+  "countryOfOrigin": "UAE"
+}

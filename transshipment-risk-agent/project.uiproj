@@ -1,0 +1,6 @@
+{
+  "ProjectType": "Agent",
+  "Name": "transshipment-risk-agent-v2",
+  "Description": "Transshipment Risk Agent \u2014 LangGraph deep agent for trade compliance origin verification",
+  "MainFile": null
+}

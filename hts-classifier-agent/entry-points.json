@@ -3,52 +3,214 @@
     "$id": "entry-points.json",
     "entryPoints": [
         {
-            "filePath": "main",
-            "uniqueId": "b159f33a-ee93-471d-8d7b-b28c20a816de",
-            "type": "function",
+            "filePath": "agent",
+            "uniqueId": "74f9aa89-c5c1-4fb5-bd28-29daa6ba2429",
+            "type": "agent",
             "input": {
                 "type": "object",
                 "properties": {
-                    "shipmentDocument": {
+                    "job_id": {
+                        "title": "Job Id",
+                        "type": "string"
+                    },
+                    "shipment_doc_path": {
+                        "title": "Shipment Doc Path",
+                        "type": "string"
+                    },
+                    "product_facts": {
+                        "description": "Structured product information extracted from a shipment document.\n\nPopulated by the Product_Spec_Extractor sub-agent. Default values are\napplied for fields that cannot be determined from the source document:\n  - material_composition defaults to [\"unknown\"]\n  - assembly_state defaults to \"finished good\"\n\nRequirement: 2.1",
                         "properties": {
-                            "FullName": {
+                            "description": {
+                                "title": "Description",
                                 "type": "string"
                             },
-                            "ID": {
-                                "description": "Orchestrator attachment key",
-                                "title": "Id",
-                                "type": "string"
-                            },
-                            "Metadata": {
-                                "additionalProperties": {
+                            "material_composition": {
+                                "items": {
                                     "type": "string"
                                 },
-                                "type": "object"
+                                "title": "Material Composition",
+                                "type": "array"
                             },
-                            "MimeType": {
+                            "function": {
+                                "title": "Function",
+                                "type": "string"
+                            },
+                            "end_use": {
+                                "title": "End Use",
+                                "type": "string"
+                            },
+                            "assembly_state": {
+                                "title": "Assembly State",
+                                "type": "string"
+                            },
+                            "country_of_origin": {
+                                "title": "Country Of Origin",
+                                "type": "string"
+                            },
+                            "packaging": {
+                                "title": "Packaging",
                                 "type": "string"
                             }
                         },
                         "required": [
-                            "ID"
+                            "description",
+                            "material_composition",
+                            "function",
+                            "end_use",
+                            "assembly_state",
+                            "country_of_origin",
+                            "packaging"
                         ],
-                        "title": "JobAttachment",
+                        "title": "ProductFacts",
                         "type": "object"
                     },
-                    "documentType": {
+                    "candidates": {
+                        "default": [],
+                        "items": {
+                            "description": "A candidate HTS heading returned by the HTS Heading Candidate Search.\n\nconfidence starts as the search relevance score (0.0\u20131.0) and is updated\nby the GRI Reasoning Agent and Ruling Precedent Agent. supporting_notes\nand ruling_citations accumulate citations across those stages.\n\nRequirement: 2.2",
+                            "properties": {
+                                "hts_code": {
+                                    "title": "Hts Code",
+                                    "type": "string"
+                                },
+                                "chapter": {
+                                    "title": "Chapter",
+                                    "type": "string"
+                                },
+                                "heading_text": {
+                                    "title": "Heading Text",
+                                    "type": "string"
+                                },
+                                "confidence": {
+                                    "title": "Confidence",
+                                    "type": "number"
+                                },
+                                "supporting_notes": {
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "title": "Supporting Notes",
+                                    "type": "array"
+                                },
+                                "ruling_citations": {
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "title": "Ruling Citations",
+                                    "type": "array"
+                                },
+                                "dataset_version": {
+                                    "title": "Dataset Version",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "hts_code",
+                                "chapter",
+                                "heading_text",
+                                "confidence",
+                                "supporting_notes",
+                                "ruling_citations",
+                                "dataset_version"
+                            ],
+                            "title": "HeadingCandidate",
+                            "type": "object"
+                        },
+                        "title": "Candidates",
+                        "type": "array"
+                    },
+                    "result": {
+                        "description": "The final HTS classification result produced by the Classification Reconciler.\n\nValidators enforce:\n  - final_hts_code must match ^\\d{4}\\.\\d{2}\\.\\d{4}$ (Req 2.6)\n  - if final_hts_code is absent/empty, requires_human_review must be True (Req 15.4)\n\nRequirements: 2.3, 2.6, 15.4",
+                        "properties": {
+                            "final_hts_code": {
+                                "title": "Final Hts Code",
+                                "type": "string"
+                            },
+                            "duty_rate": {
+                                "anyOf": [
+                                    {
+                                        "type": "number"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "title": "Duty Rate"
+                            },
+                            "confidence": {
+                                "title": "Confidence",
+                                "type": "number"
+                            },
+                            "gri_rule_applied": {
+                                "title": "Gri Rule Applied",
+                                "type": "string"
+                            },
+                            "reasoning_summary": {
+                                "title": "Reasoning Summary",
+                                "type": "string"
+                            },
+                            "citations": {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "title": "Citations",
+                                "type": "array"
+                            },
+                            "requires_human_review": {
+                                "title": "Requires Human Review",
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "final_hts_code",
+                            "duty_rate",
+                            "confidence",
+                            "gri_rule_applied",
+                            "reasoning_summary",
+                            "citations",
+                            "requires_human_review"
+                        ],
+                        "title": "ClassificationResult",
+                        "type": "object"
+                    },
+                    "plan": {
+                        "default": "",
+                        "title": "Plan",
                         "type": "string"
                     },
-                    "chapterHint": {
+                    "chapter_hint": {
                         "type": "string"
                     },
-                    "countryOfOrigin": {
+                    "retry_counts": {
+                        "additionalProperties": {
+                            "type": "integer"
+                        },
+                        "default": {},
+                        "title": "Retry Counts",
+                        "type": "object"
+                    },
+                    "audit_bucket_path": {
+                        "type": "string"
+                    },
+                    "job_status": {
+                        "default": "running",
+                        "title": "Job Status",
+                        "type": "string"
+                    },
+                    "reviewer_identity": {
+                        "type": "string"
+                    },
+                    "reviewer_timestamp": {
+                        "type": "string"
+                    },
+                    "action_center_task_id": {
                         "type": "string"
                     }
                 },
                 "required": [
-                    "shipmentDocument"
-                ],
-                "title": "ClassificationInput"
+                    "job_id",
+                    "shipment_doc_path"
+                ]
             },
             "output": {
                 "type": "object",
@@ -57,79 +219,328 @@
                         "title": "Job Id",
                         "type": "string"
                     },
-                    "final_hts_code": {
-                        "title": "Final Hts Code",
+                    "shipment_doc_path": {
+                        "title": "Shipment Doc Path",
                         "type": "string"
                     },
-                    "duty_rate": {
-                        "type": "number"
-                    },
-                    "confidence": {
-                        "title": "Confidence",
-                        "type": "number"
-                    },
-                    "gri_rule_applied": {
-                        "title": "Gri Rule Applied",
-                        "type": "string"
-                    },
-                    "reasoning_summary": {
-                        "title": "Reasoning Summary",
-                        "type": "string"
-                    },
-                    "citations": {
-                        "items": {
-                            "type": "string"
+                    "product_facts": {
+                        "description": "Structured product information extracted from a shipment document.\n\nPopulated by the Product_Spec_Extractor sub-agent. Default values are\napplied for fields that cannot be determined from the source document:\n  - material_composition defaults to [\"unknown\"]\n  - assembly_state defaults to \"finished good\"\n\nRequirement: 2.1",
+                        "properties": {
+                            "description": {
+                                "title": "Description",
+                                "type": "string"
+                            },
+                            "material_composition": {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "title": "Material Composition",
+                                "type": "array"
+                            },
+                            "function": {
+                                "title": "Function",
+                                "type": "string"
+                            },
+                            "end_use": {
+                                "title": "End Use",
+                                "type": "string"
+                            },
+                            "assembly_state": {
+                                "title": "Assembly State",
+                                "type": "string"
+                            },
+                            "country_of_origin": {
+                                "title": "Country Of Origin",
+                                "type": "string"
+                            },
+                            "packaging": {
+                                "title": "Packaging",
+                                "type": "string"
+                            }
                         },
-                        "title": "Citations",
+                        "required": [
+                            "description",
+                            "material_composition",
+                            "function",
+                            "end_use",
+                            "assembly_state",
+                            "country_of_origin",
+                            "packaging"
+                        ],
+                        "title": "ProductFacts",
+                        "type": "object"
+                    },
+                    "candidates": {
+                        "default": [],
+                        "items": {
+                            "description": "A candidate HTS heading returned by the HTS Heading Candidate Search.\n\nconfidence starts as the search relevance score (0.0\u20131.0) and is updated\nby the GRI Reasoning Agent and Ruling Precedent Agent. supporting_notes\nand ruling_citations accumulate citations across those stages.\n\nRequirement: 2.2",
+                            "properties": {
+                                "hts_code": {
+                                    "title": "Hts Code",
+                                    "type": "string"
+                                },
+                                "chapter": {
+                                    "title": "Chapter",
+                                    "type": "string"
+                                },
+                                "heading_text": {
+                                    "title": "Heading Text",
+                                    "type": "string"
+                                },
+                                "confidence": {
+                                    "title": "Confidence",
+                                    "type": "number"
+                                },
+                                "supporting_notes": {
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "title": "Supporting Notes",
+                                    "type": "array"
+                                },
+                                "ruling_citations": {
+                                    "items": {
+                                        "type": "string"
+                                    },
+                                    "title": "Ruling Citations",
+                                    "type": "array"
+                                },
+                                "dataset_version": {
+                                    "title": "Dataset Version",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "hts_code",
+                                "chapter",
+                                "heading_text",
+                                "confidence",
+                                "supporting_notes",
+                                "ruling_citations",
+                                "dataset_version"
+                            ],
+                            "title": "HeadingCandidate",
+                            "type": "object"
+                        },
+                        "title": "Candidates",
                         "type": "array"
                     },
-                    "requires_human_review": {
-                        "title": "Requires Human Review",
-                        "type": "boolean"
+                    "result": {
+                        "description": "The final HTS classification result produced by the Classification Reconciler.\n\nValidators enforce:\n  - final_hts_code must match ^\\d{4}\\.\\d{2}\\.\\d{4}$ (Req 2.6)\n  - if final_hts_code is absent/empty, requires_human_review must be True (Req 15.4)\n\nRequirements: 2.3, 2.6, 15.4",
+                        "properties": {
+                            "final_hts_code": {
+                                "title": "Final Hts Code",
+                                "type": "string"
+                            },
+                            "duty_rate": {
+                                "anyOf": [
+                                    {
+                                        "type": "number"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "title": "Duty Rate"
+                            },
+                            "confidence": {
+                                "title": "Confidence",
+                                "type": "number"
+                            },
+                            "gri_rule_applied": {
+                                "title": "Gri Rule Applied",
+                                "type": "string"
+                            },
+                            "reasoning_summary": {
+                                "title": "Reasoning Summary",
+                                "type": "string"
+                            },
+                            "citations": {
+                                "items": {
+                                    "type": "string"
+                                },
+                                "title": "Citations",
+                                "type": "array"
+                            },
+                            "requires_human_review": {
+                                "title": "Requires Human Review",
+                                "type": "boolean"
+                            }
+                        },
+                        "required": [
+                            "final_hts_code",
+                            "duty_rate",
+                            "confidence",
+                            "gri_rule_applied",
+                            "reasoning_summary",
+                            "citations",
+                            "requires_human_review"
+                        ],
+                        "title": "ClassificationResult",
+                        "type": "object"
+                    },
+                    "plan": {
+                        "default": "",
+                        "title": "Plan",
+                        "type": "string"
+                    },
+                    "chapter_hint": {
+                        "type": "string"
+                    },
+                    "retry_counts": {
+                        "additionalProperties": {
+                            "type": "integer"
+                        },
+                        "default": {},
+                        "title": "Retry Counts",
+                        "type": "object"
+                    },
+                    "audit_bucket_path": {
+                        "type": "string"
                     },
                     "job_status": {
+                        "default": "running",
                         "title": "Job Status",
                         "type": "string"
                     },
-                    "audit_bucket_path": {
+                    "reviewer_identity": {
+                        "type": "string"
+                    },
+                    "reviewer_timestamp": {
+                        "type": "string"
+                    },
+                    "action_center_task_id": {
                         "type": "string"
                     }
                 },
                 "required": [
                     "job_id",
-                    "final_hts_code",
-                    "confidence",
-                    "gri_rule_applied",
-                    "reasoning_summary",
-                    "citations",
-                    "requires_human_review",
-                    "job_status"
-                ],
-                "title": "ClassificationOutput"
+                    "shipment_doc_path"
+                ]
             },
             "graph": {
                 "nodes": [
                     {
-                        "id": "main.py:120",
-                        "name": "main",
-                        "type": "function",
-                        "metadata": {
-                            "file": "main.py"
-                        }
+                        "id": "__start__",
+                        "name": "__start__",
+                        "type": "__start__",
+                        "subgraph": null,
+                        "metadata": {}
                     },
                     {
-                        "id": "src/agent.py:79",
-                        "name": "build_graph",
-                        "type": "function",
-                        "metadata": {
-                            "file": "src/agent.py"
-                        }
+                        "id": "orchestrator_planner",
+                        "name": "orchestrator_planner",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "product_spec_extractor",
+                        "name": "product_spec_extractor",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "hts_heading_candidate_search",
+                        "name": "hts_heading_candidate_search",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "gri_reasoning_agent",
+                        "name": "gri_reasoning_agent",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "ruling_precedent_agent",
+                        "name": "ruling_precedent_agent",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "classification_reconciler",
+                        "name": "classification_reconciler",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "human_review_gate",
+                        "name": "human_review_gate",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "audit_trail_writer",
+                        "name": "audit_trail_writer",
+                        "type": "node",
+                        "subgraph": null,
+                        "metadata": {}
+                    },
+                    {
+                        "id": "__end__",
+                        "name": "__end__",
+                        "type": "__end__",
+                        "subgraph": null,
+                        "metadata": {}
                     }
                 ],
                 "edges": [
                     {
-                        "source": "main.py:120",
-                        "target": "src/agent.py:79"
+                        "source": "__start__",
+                        "target": "orchestrator_planner",
+                        "label": null
+                    },
+                    {
+                        "source": "classification_reconciler",
+                        "target": "audit_trail_writer",
+                        "label": null
+                    },
+                    {
+                        "source": "classification_reconciler",
+                        "target": "human_review_gate",
+                        "label": null
+                    },
+                    {
+                        "source": "gri_reasoning_agent",
+                        "target": "ruling_precedent_agent",
+                        "label": null
+                    },
+                    {
+                        "source": "hts_heading_candidate_search",
+                        "target": "gri_reasoning_agent",
+                        "label": null
+                    },
+                    {
+                        "source": "human_review_gate",
+                        "target": "audit_trail_writer",
+                        "label": null
+                    },
+                    {
+                        "source": "orchestrator_planner",
+                        "target": "product_spec_extractor",
+                        "label": null
+                    },
+                    {
+                        "source": "product_spec_extractor",
+                        "target": "hts_heading_candidate_search",
+                        "label": null
+                    },
+                    {
+                        "source": "ruling_precedent_agent",
+                        "target": "classification_reconciler",
+                        "label": null
+                    },
+                    {
+                        "source": "audit_trail_writer",
+                        "target": "__end__",
+                        "label": null
                     }
                 ]
             }
