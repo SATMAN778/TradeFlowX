@@ -1,0 +1,471 @@
+Created At: 2026-06-26T19:19:20Z
+Completed At: 2026-06-26T19:19:20Z
+File Path: `file:///c:/Users/gupta/OneDrive/Documents/UiPath/TradeFlowAICase/maestro-app/src/services/casesService.ts`
+Total Lines: 381
+Total Bytes: 11799
+Showing lines 1 to 381
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import { 
+2:   casesSvc, 
+3:   caseInstancesSvc, 
+4:   tasksSvc, 
+5:   entitiesSvc 
+6: } from '../lib/sdk';
+7: import type { 
+8:   CaseInstance, 
+9:   CaseSummary, 
+10:   TaskDetailsResponse, 
+11:   CaseDetailsResponse, 
+12:   MyTask,
+13:   Stage
+14: } from '../types/cases';
+15: 
+16: 
+17: export async function getCases(): Promise<CaseSummary[]> {
+18:   try {
+19:     const result = await casesSvc.getAll();
+20:     return result.map(c => ({
+21:       processKey: c.processKey,
+22:       name: c.name,
+23:       running: c.runningCount,
+24:       completed: c.completedCount,
+25:       faulted: c.faultedCount,
+26:       total:
+27:         c.pendingCount +
+28:         c.runningCount +
+29:         c.completedCount +
+30:         c.pausedCount +
+31:         c.cancelledCount +
+32:         c.faultedCount +
+33:         c.retryingCount +
+34:         c.resumingCount +
+35:         c.pausingCount +
+36:         c.cancelingCount,
+37:       versions: c.versionCount,
+38:       location: c.folderName,
+39:     }));
+40:   } catch (error) {
+41:     console.error('getCases direct SDK call failed:', error);
+42:     return [];
+43:   }
+44: }
+45: 
+46: export async function getCaseInstances(processKey: string): Promise<CaseInstance[]> {
+47:   try {
+48:     const result = await caseInstancesSvc.getAll({ processKey });
+49:     return result.items.map(inst => ({
+50:       instanceId: inst.instanceId,
+51:       id: inst.instanceDisplayName || inst.instanceId.substring(0, 8),
+52:       version: inst.packageVersion,
+53:       startedAt: new Date(inst.startedTime).toLocaleString(),
+54:       status: inst.latestRunStatus,
+55:       folderKey: inst.folderKey,
+56:     }));
+57:   } catch (error) {
+58:     console.error(`getCaseInstances failed for ${processKey}:`, error);
+59:     return [];
+60:   }
+61: }
+62: 
+63: export async function getHitlLink(_instanceId: string, _folderKey: string): Promise<string | null> {
+64:   return null;
+65: }
+66: 
+67: export async function getTaskDetails(instanceId: string, _folderKey: string): Promise<TaskDetailsResponse> {
+68:   try {
+69:     const tasksList = await tasksSvc.getAll({ 
+70:       filter: `status eq 'Unassigned' or status eq 'Pending'`,
+71:       pageSize: 50
+72:     });
+73: 
+74:     const activeTask = tasksList.items.find(t => ((t as any).caseInstanceId || t.taskSource?.sourceId) === instanceId);
+75:     return {
+76:       taskId: activeTask?.id.toString(),
+77:       folderId: activeTask?.folderId,
+78:       externalLink: activeTask?.externalTag || null,
+79:       task: activeTask ? {
+80:         id: activeTask.id,
+81:         title: activeTask.title,
+82:         priority: activeTask.priority,
+83:         status: activeTask.status,
+84:         assignedToUser: activeTask.assignedToUser?.emailAddress || null,
+85:         caseInstanceId: (activeTask as any).caseInstanceId || activeTask.taskSource?.sourceId || null,
+86:         data: activeTask.data || {}
+87:       } : null,
+88:       currentUserEmail: 'operator@tradeflow.ai'
+89:     };
+90:   } catch (error) {
+91:     console.error(`getTaskDetails failed for ${instanceId}:`, error);
+92:     return {
+93:       taskId: undefined,
+94:       folderId: undefined,
+95:       externalLink: null,
+96:       task: null,
+97:       currentUserEmail: 'operator@tradeflow.ai'
+98:     };
+99:   }
+100: }
+101: 
+102: export async function assignTask(taskId: string, _folderId: number): Promise<void> {
+103:   try {
+104:     await tasksSvc.assign({
+105:       taskId: Number(taskId),
+106:       userNameOrEmail: 'operator@tradeflow.ai'
+107:     });
+108:   } catch (error) {
+109:     console.error(`assignTask failed for ${taskId}:`, error);
+110:     throw error;
+111:   }
+112: }
+113: 
+114: export async function unassignTask(taskId: string, _folderId: number): Promise<void> {
+115:   try {
+116:     await tasksSvc.unassign(Number(taskId));
+117:   } catch (error) {
+118:     console.error(`unassignTask failed for ${taskId}:`, error);
+119:     throw error;
+120:   }
+121: }
+122: 
+123: export async function completeTask(
+124:   taskId: string,
+125:   folderId: number,
+126:   data: Record<string, unknown>,
+127:   action: string,
+128: ): Promise<void> {
+129:   try {
+130:     const outcome = action === 'Approve' ? 'Approved' : action === 'Reject' ? 'Rejected' : action;
+131:     await tasksSvc.complete({
+132:       type: 4, // FormTask type signature mapping
+133:       taskId: Number(taskId),
+134:       data,
+135:       action: outcome
+136:     } as any, folderId);
+137:   } catch (error) {
+138:     console.error(`completeTask failed for ${taskId}:`, error);
+139:     throw error;
+140:   }
+141: }
+142: 
+143: export async function getCaseDetails(instanceId: string, folderKey: string): Promise<CaseDetailsResponse> {
+144:   try {
+145:     const inst = await caseInstancesSvc.getById(instanceId, folderKey);
+146:     const stagesSummary = await caseInstancesSvc.getStagesSlaSummary({ caseInstanceId: instanceId });
+147:     
+148:     // Convert SDK SlaStage structures to client-facing Stages
+149:     const mappedStages: Stage[] = (stagesSummary[0]?.stages || []).map(s => ({
+150:       id: s.elementId,
+151:       title: s.name,
+152:       status: s.latestStatus.toLowerCase() === 'completed' ? 'completed' 
+153:             : s.latestStatus.toLowerCase() === 'running' ? 'in_progress' : 'pending',
+154:       description: s.name + ' compliance check'
+155:     }));
+156: 
+157:     return {
+158:       instance: {
+159:         instanceId: inst.instanceId,
+160:         externalId: inst.instanceDisplayName || inst.instanceId.substring(0, 8),
+161:         packageVersion: inst.packageVersion,
+162:         startedTimeUtc: inst.startedTime,
+163:         latestRunStatus: inst.latestRunStatus,
+164:         folderKey: inst.folderKey
+165:       },
+166:       variables: {}, // variables can be loaded from global variables endpoints
+167:       stages: mappedStages
+168:     };
+169:   } catch (error) {
+170:     console.error(`getCaseDetails failed for ${instanceId}:`, error);
+171:     return {
+172:       instance: {
+173:         instanceId,
+174:         externalId: 'TF-UNKNOWN',
+175:         packageVersion: '1.0.0',
+176:         startedTimeUtc: new Date().toISOString(),
+177:         latestRunStatus: 'Faulted',
+178:         folderKey
+179:       },
+180:       variables: {},
+181:       stages: []
+182:     };
+183:   }
+184: }
+185: 
+186: export async function getMyTasks(): Promise<MyTask[]> {
+187:   try {
+188:     const result = await tasksSvc.getAll({
+189:       filter: `status eq 'Unassigned' or status eq 'Pending'`,
+190:       pageSize: 50
+191:     });
+192:     return result.items.map(t => ({
+193:       taskId: t.id.toString(),
+194:       folderId: t.folderId,
+195:       folderKey: 'mock-folder-key-guid', // placeholder key
+196:       title: t.title,
+197:       priority: t.priority,
+198:       status: t.status,
+199:       assignedToUser: t.assignedToUser?.emailAddress || null,
+200:       caseInstanceId: (t as any).caseInstanceId || t.taskSource?.sourceId || null,
+201:       createdAt: t.createdTime,
+202:       data: t.data || {}
+203:     }));
+204:   } catch (error) {
+205:     console.error('getMyTasks failed:', error);
+206:     return [];
+207:   }
+208: }
+209: 
+210: export async function getTaskHistory(): Promise<MyTask[]> {
+211:   try {
+212:     const result = await tasksSvc.getAll({
+213:       filter: `status eq 'Completed'`,
+214:       pageSize: 50
+215:     });
+216:     return result.items.map(t => ({
+217:       taskId: t.id.toString(),
+218:       folderId: t.folderId,
+219:       folderKey: 'mock-folder-key-guid', // placeholder key
+220:       title: t.title,
+221:       priority: t.priority,
+222:       status: t.status,
+223:       assignedToUser: t.assignedToUser?.emailAddress || null,
+224:       caseInstanceId: (t as any).caseInstanceId || t.taskSource?.sourceId || null,
+225:       createdAt: t.createdTime,
+226:       completedAt: t.completedTime || undefined,
+227:       actionTaken: t.action || undefined,
+228:       data: t.data || {}
+229:     }));
+230:   } catch (error) {
+231:     console.error('getTaskHistory failed:', error);
+232:     return [];
+233:   }
+234: }
+235: 
+236: export interface TradeOverview {
+237:   routes: string[];
+238:   ofac: Record<string, number>;
+239:   isf: Record<string, number>;
+240:   activeInstances: number;
+241:   completedInstances: number;
+242:   sampledInstances: number;
+243:   error?: string;
+244: }
+245: 
+246: export async function getTradeOverview(): Promise<TradeOverview> {
+247:   const emptyOverview: TradeOverview = {
+248:     routes: [],
+249:     ofac: {},
+250:     isf: {},
+251:     activeInstances: 0,
+252:     completedInstances: 0,
+253:     sampledInstances: 0
+254:   };
+255: 
+256:   try {
+257:     // Query Case Entity inside Data Fabric
+258:     const entityId = import.meta.env.VITE_ENTITY_CASE;
+259:     if (!entityId || entityId.startsWith('importcaserecord')) {
+260:       return emptyOverview;
+261:     }
+262:     
+263:     const records = await entitiesSvc.getAllRecords(entityId);
+264:     const active = records.items.filter((r: any) => r.CaseState === 'ACTIVE').length;
+265:     const completed = records.items.filter((r: any) => r.CaseState === 'CLOSED').length;
+266:     
+267:     return {
+268:       routes: ['Dubai / Jebel Ali → Port of Newark'],
+269:       ofac: { 'Clear': records.items.filter((r: any) => r.OfacResult === 'Clear').length },
+270:       isf: { 'Matched': records.items.filter((r: any) => r.IsfStatus === 'Matched').length },
+271:       activeInstances: active,
+272:       completedInstances: completed,
+273:       sampledInstances: records.items.length
+274:     };
+275:   } catch (error) {
+276:     console.error('getTradeOverview aggregation query failed:', error);
+277:     return emptyOverview;
+278:   }
+279: }
+280: 
+281: // ─── 3. Document Lifecycle (File Cycle) State & Helpers ───────────────────────
+282: 
+283: import type { ShipmentDoc } from '../types/cases';
+284: 
+285: export async function getDocuments(caseInstanceId: string): Promise<ShipmentDoc[]> {
+286:   try {
+287:     const entityId = import.meta.env.VITE_ENTITY_DOC;
+288:     if (!entityId || entityId.startsWith('shipmentdocument')) {
+289:       return [];
+290:     }
+291:     
+292:     // Query records filtering by CaseRef
+293:     const records = await entitiesSvc.queryRecordsById(entityId, {
+294:       filterGroup: {
+295:         queryFilters: [{
+296:           fieldName: 'CaseRef',
+297:           operator: '=' as any,
+298:           value: caseInstanceId
+299:         }]
+300:       }
+301:     });
+302: 
+303:     return records.items.map((r: any) => ({
+304:       id: r.Id,
+305:       caseRef: r.CaseRef,
+306:       fileName: r.FileName || 'Document',
+307:       documentType: r.DocumentType || 'Other',
+308:       uploadedAt: r.UploadedAt || r.CreatedTime || new Date().toISOString(),
+309:       uploadedBy: r.UploadedBy || 'system',
+310:       idpConfidence: r.IdpConfidence || 95,
+311:       retentionDaysLeft: r.RetentionDaysLeft || 2555,
+312:       fileSize: r.FileSize || '500 KB',
+313:       extractionData: r.ExtractionData ? JSON.parse(r.ExtractionData) : {}
+314:     }));
+315:   } catch (error) {
+316:     console.error(`getDocuments failed for ${caseInstanceId}:`, error);
+317:     return [];
+318:   }
+319: }
+320: 
+321: export async function uploadDocument(
+322:   caseInstanceId: string,
+323:   docType: string,
+324:   file: File,
+325:   uploader: string
+326: ): Promise<ShipmentDoc> {
+327:   const entityId = import.meta.env.VITE_ENTITY_DOC;
+328:   if (!entityId || entityId.startsWith('shipmentdocument')) {
+329:     throw new Error('Data Fabric Document Entity not configured in environment variables');
+330:   }
+331: 
+332:   const sizeStr = `${(file.size / 1024).toFixed(0)} KB`;
+333:   const defaultExtraction = {
+334:     poNumber: 'PO-' + Math.floor(100000 + Math.random() * 900000),
+335:     supplierName: uploader.includes('shipper') ? 'Dubai Tech Manufacturing' : 'JAFZA Logistics',
+336:     netWeight: '22,400 kg',
+337:     htsCode: '8542.31.00'
+338:   };
+339: 
+340:   // Insert record via SDK
+341:   const inserted = await entitiesSvc.insertRecordById(entityId, {
+342:     CaseRef: caseInstanceId,
+343:     FileName: file.name,
+344:     DocumentType: docType,
+345:     UploadedAt: new Date().toISOString(),
+346:     UploadedBy: uploader,
+347:     IdpConfidence: Math.floor(90 + Math.random() * 10),
+348:     RetentionDaysLeft: 2555, // 7 years default
+349:     FileSize: sizeStr,
+350:     ExtractionData: JSON.stringify(defaultExtraction)
+351:   });
+352: 
+353:   // Upload attachment binary
+354:   try {
+355:     await entitiesSvc.uploadAttachment(entityId, inserted.Id, 'FileAttachment', file);
+356:   } catch (e) {
+357:     console.warn("Attachment upload failed or skipped:", e);
+358:   }
+359: 
+360:   return {
+361:     id: inserted.Id,
+362:     caseRef: caseInstanceId,
+363:     fileName: file.name,
+364:     documentType: docType,
+365:     uploadedAt: inserted.UploadedAt || new Date().toISOString(),
+366:     uploadedBy: uploader,
+367:     idpConfidence: inserted.IdpConfidence || 95,
+368:     retentionDaysLeft: inserted.RetentionDaysLeft || 2555,
+369:     fileSize: sizeStr,
+370:     extractionData: defaultExtraction
+371:   };
+372: }
+373: 
+374: export async function deleteDocument(docId: string): Promise<void> {
+375:   const entityId = import.meta.env.VITE_ENTITY_DOC;
+376:   if (!entityId || entityId.startsWith('shipmentdocument')) {
+377:     throw new Error('Data Fabric Document Entity not configured in environment variables');
+378:   }
+379:   await entitiesSvc.deleteRecordById(entityId, docId);
+380: };
+381: 
+The above content shows the entire, complete file contents of the requested file.
+
+===
+Created At: 2026-06-26T20:02:03Z
+Completed At: 2026-06-26T20:02:04Z
+
+				The command completed successfully.
+				Output:
+				<truncated 75 lines>
+t.folderId,\n219:       folderKey: 'mock-folder-key-guid', // placeholder key\n220:       title: t.title,\n221:       
+priority: t.priority,\n222:       status: t.status,\n223:       assignedToUser: t.assignedToUser?.emailAddress || 
+null,\n224:       caseInstanceId: (t as any).caseInstanceId || t.taskSource?.sourceId || null,\n225:       createdAt: 
+t.createdTime,\n226:       completedAt: t.completedTime || undefined,\n227:       actionTaken: t.action || 
+undefined,\n228:       data: t.data || {}\n229:     }));\n230:   } catch (error) {\n231:     
+console.error('getTaskHistory failed:', error);\n232:     return [];\n233:   }\n234: }\n235: \n236: export interface 
+TradeOverview {\n237:   routes: string[];\n238:   ofac: Record<string, number>;\n239:   isf: Record<string, 
+number>;\n240:   activeInstances: number;\n241:   completedInstances: number;\n242:   sampledInstances: number;\n243:  
+ error?: string;\n244: }\n245: \n246: export async function getTradeOverview(): Promise<TradeOverview> {\n247:   const 
+emptyOverview: TradeOverview = {\n248:     routes: [],\n249:     ofac: {},\n250:     isf: {},\n251:     
+activeInstances: 0,\n252:     completedInstances: 0,\n253:     sampledInstances: 0\n254:   };\n255: \n256:   try 
+{\n257:     // Query Case Entity inside Data Fabric\n258:     const entityId = import.meta.env.VITE_ENTITY_CASE;\n259: 
+    if (!entityId || entityId.startsWith('importcaserecord')) {\n260:       return emptyOverview;\n261:     }\n262:    
+ \n263:     const records = await entitiesSvc.getAllRecords(entityId);\n264:     const active = 
+records.items.filter((r: any) => r.CaseState === 'ACTIVE').length;\n265:     const completed = 
+records.items.filter((r: any) => r.CaseState === 'CLOSED').length;\n266:     \n267:     return {\n268:       routes: 
+['Dubai / Jebel Ali  Port of Newark'],\n269:       ofac: { 'Clear': records.items.filter((r: any) => r.OfacResult === 
+'Clear').length },\n270:       isf: { 'Matched': records.items.filter((r: any) => r.IsfStatus === 'Matched').length 
+},\n271:       activeInstances: active,\n272:       completedInstances: completed,\n273:       sampledInstances: 
+records.items.length\n274:     };\n275:   } catch (error) {\n276:     console.error('getTradeOverview aggregation 
+query failed:', error);\n277:     return emptyOverview;\n278:   }\n279: }\n280: \n281: // � 3. Document Lifecycle 
+(File Cycle) State & Helpers �\n282: \n283: import type { ShipmentDoc } from 
+'../types/cases';\n284: \n285: export async function getDocuments(caseInstanceId: string): Promise<ShipmentDoc[]> 
+{\n286:   try {\n287:     const entityId = import.meta.env.VITE_ENTITY_DOC;\n288:     if (!entityId || 
+entityId.startsWith('shipmentdocument')) {\n289:       return [];\n290:     }\n291:     \n292:     // Query records 
+filtering by CaseRef\n293:     const records = await entitiesSvc.queryRecordsById(entityId, {\n294:       filterGroup: 
+{\n295:         queryFilters: [{\n296:           fieldName: 'CaseRef',\n297:           operator: '=' as any,\n298:     
+      value: caseInstanceId\n299:         }]\n300:       }\n301:     });\n302: \n303:     return records.items.map((r: 
+any) => ({\n304:       id: r.Id,\n305:       caseRef: r.CaseRef,\n306:       fileName: r.FileName || 'Document',\n307: 
+      documentType: r.DocumentType || 'Other',\n308:       uploadedAt: r.UploadedAt || r.CreatedTime || new 
+Date().toISOString(),\n309:       uploadedBy: r.UploadedBy || 'system',\n310:       idpConfidence: r.IdpConfidence || 
+95,\n311:       retentionDaysLeft: r.RetentionDaysLeft || 2555,\n312:       fileSize: r.FileSize || '500 KB',\n313:    
+   extractionData: r.ExtractionData ? JSON.parse(r.ExtractionData) : {}\n314:     }));\n315:   } catch (error) {\n316: 
+    console.error(`getDocuments failed for ${caseInstanceId}:`, error);\n317:     return [];\n318:   }\n319: }\n320: 
+\n321: export async function uploadDocument(\n322:   caseInstanceId: string,\n323:   docType: string,\n324:   file: 
+File,\n325:   uploader: string\n326: ): Promise<ShipmentDoc> {\n327:   const entityId = 
+import.meta.env.VITE_ENTITY_DOC;\n328:   if (!entityId || entityId.startsWith('shipmentdocument')) {\n329:     throw 
+new Error('Data Fabric Document Entity not configured in environment variables');\n330:   }\n331: \n332:   const 
+sizeStr = `${(file.size / 1024).toFixed(0)} KB`;\n333:   const defaultExtraction = {\n334:     poNumber: 'PO-' + 
+Math.floor(100000 + Math.random() * 900000),\n335:     supplierName: uploader.includes('shipper') ? 'Dubai Tech 
+Manufacturing' : 'JAFZA Logistics',\n336:     netWeight: '22,400 kg',\n337:     htsCode: '8542.31.00'\n338:   };\n339: 
+\n340:   // Insert record via SDK\n341:   const inserted = await entitiesSvc.insertRecordById(entityId, {\n342:     
+CaseRef: caseInstanceId,\n343:     FileName: file.name,\n344:     DocumentType: docType,\n345:     UploadedAt: new 
+Date().toISOString(),\n346:     UploadedBy: uploader,\n347:     IdpConfidence: Math.floor(90 + Math.random() * 
+10),\n348:     RetentionDaysLeft: 2555, // 7 years default\n349:     FileSize: sizeStr,\n350:     ExtractionData: 
+JSON.stringify(defaultExtraction)\n351:   });\n352: \n353:   // Upload attachment binary\n354:   try {\n355:     await 
+entitiesSvc.uploadAttachment(entityId, inserted.Id, 'FileAttachment', file);\n356:   } catch (e) {\n357:     
+console.warn(\"Attachment upload failed or skipped:\", e);\n358:   }\n359: \n360:   return {\n361:     id: 
+inserted.Id,\n362:     caseRef: caseInstanceId,\n363:     fileName: file.name,\n364:     documentType: docType,\n365:  
+   uploadedAt: inserted.UploadedAt || new Date().toISOString(),\n366:     uploadedBy: uploader,\n367:     
+idpConfidence: inserted.IdpConfidence || 95,\n368:     retentionDaysLeft: inserted.RetentionDaysLeft || 2555,\n369:    
+ fileSize: sizeStr,\n370:     extractionData: defaultExtraction\n371:   };\n372: }\n373: \n374: export async function 
+deleteDocument(docId: string): Promise<void> {\n375:   const entityId = import.meta.env.VITE_ENTITY_DOC;\n376:   if 
+(!entityId || entityId.startsWith('shipmentdocument')) {\n377:     throw new Error('Data Fabric Document Entity not 
+configured in environment variables');\n378:   }\n379:   await entitiesSvc.deleteRecordById(entityId, docId);\n380: 
+};\n381: \nThe above content shows the entire, complete file contents of the requested file.\n"}
+C:\Users\gupta\.gemini\antigravity-ide\brain\0a30807c-567c-4783-8d41-9c77458648cf\.system_generated\logs\transcript_ful
+l.jsonl:1987:{"step_index":1840,"source":"MODEL","type":"PLANNER_RESPONSE","status":"DONE","created_at":"2026-06-26T20:
+01:49Z","thinking":"**Prioritizing Tool Usage**\n\nI'm now focusing on tool selection, emphasizing specific tools over 
+general ones where possible. The goal is to optimize efficiency by leveraging tools tailored to particular tasks, like 
+viewing files. This strategy promises a more targeted and less error-prone approach to problem-solving, which I will 
+continue to refine and implement moving forward.\n\n\n**Refining Tool Application**\n\nI'm now integrating new rules, 
+as I focus on applying specific tools instead of generic alternatives. I'm focusing on avoiding `cat` for file 
+creation and `grep` inside bash. I'm also ensuring I'm explicitly listing out and evaluating tools before execution. 
+Finally, I'm recalling the importance of starting my thought process with Critical Instructions 1 and 2. Recent 
+commits like \"Added Readme\" and \"feat: implement full-window split-screen workstation...\" are now being assessed 
+in the new framework.\n\n\n","tool_calls":[{"name":"run_command","args":{"CommandLine":"powershell -Command 
+\"Select-String -Path 'C:\\Users\\gupta\\.gemini\\antigravity-ide\\brain\\0a30807c-567c-4783-8d41-9c77458648cf\\.system
+_generated\\logs\\transcript_full.jsonl' -Pattern 'export async function getDocuments' -Context 20,20 | Select-Object 
+-Last 1\"","Cwd":"c:\\Users\\gupta\\OneDrive\\Documents\\UiPath\\TradeFlowAICase","WaitMsBeforeAsync":5000,"toolAction"
+:"Searching transcript for getDocuments","toolSummary":"Search transcript for code"}}]}
+
+
+

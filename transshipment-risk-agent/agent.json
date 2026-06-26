@@ -1,0 +1,17 @@
+{
+  "version": "1.1.0",
+  "settings": {
+    "model": "claude-3-5-sonnet-20241022",
+    "maxTokens": 128000,
+    "temperature": 0,
+    "engine": "basic-v2",
+    "maxIterations": 50,
+    "mode": "advanced"
+  },
+  "metadata": {
+    "storageVersion": "50.0.0",
+    "isConversational": false,
+    "targetRuntime": "pythonAgent",
+    "showProjectCreationExperience": false
+  }
+}

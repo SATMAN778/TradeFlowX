@@ -1,0 +1,6 @@
+{
+  "ProjectType": "Agent",
+  "Name": "duty-savings-agent-v2",
+  "Description": "Duty Savings Analysis Agent \u2014 LangGraph deep agent for import post-entry duty savings and variance analysis",
+  "MainFile": null
+}

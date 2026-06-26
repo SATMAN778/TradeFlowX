@@ -1,0 +1,11 @@
+{
+  "shipment_ref": "TF-CASE-001",
+  "hts_code": "8471.30.0100",
+  "declared_coo": "UAE",
+  "shipment_value_usd": 125000.0,
+  "estimated_duty_usd": 18750.0,
+  "actual_duty_usd": 18750.0,
+  "jafza_flag": true,
+  "transshipment_flag": true,
+  "has_reexport_intent": true
+}

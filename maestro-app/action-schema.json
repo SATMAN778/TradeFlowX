@@ -1,0 +1,73 @@
+{
+  "inputs": {
+    "type": "object",
+    "properties": {
+      "caseInstanceId": {
+        "type": "string",
+        "description": "The unique identifier of the trade case instance to review",
+        "required": true
+      },
+      "shipmentReference": {
+        "type": "string",
+        "description": "The shipment or purchase order reference number",
+        "required": false
+      },
+      "taskId": {
+        "type": "string",
+        "description": "The HiTL task ID assigned to the human reviewer",
+        "required": false
+      },
+      "priority": {
+        "type": "string",
+        "description": "Task priority level (Low, Medium, High, Critical)",
+        "required": false
+      }
+    }
+  },
+  "outputs": {
+    "type": "object",
+    "properties": {
+      "decision": {
+        "type": "string",
+        "description": "The human reviewer's decision (Approve or Reject)",
+        "required": false
+      },
+      "reviewedBy": {
+        "type": "string",
+        "description": "Email of the reviewer who completed the action",
+        "required": false
+      },
+      "reviewedAt": {
+        "type": "string",
+        "description": "ISO timestamp of when the review was completed",
+        "required": false
+      },
+      "comments": {
+        "type": "string",
+        "description": "Optional reviewer comments or notes",
+        "required": false
+      }
+    }
+  },
+  "inOuts": {
+    "type": "object",
+    "properties": {}
+  },
+  "outcomes": {
+    "type": "object",
+    "properties": {
+      "Approved": {
+        "type": "string",
+        "description": "The case was reviewed and approved for processing"
+      },
+      "Rejected": {
+        "type": "string",
+        "description": "The case was reviewed and rejected"
+      },
+      "Escalated": {
+        "type": "string",
+        "description": "The case was escalated to a senior reviewer"
+      }
+    }
+  }
+}

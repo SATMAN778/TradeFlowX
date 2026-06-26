@@ -1,0 +1,12 @@
+Metadata-Version: 2.4
+Name: hts-classifier-agent
+Version: 0.0.1
+Summary: HTS Classifier Agent — LangGraph deep agent for US import tariff classification
+Author-email: John Doe <john.doe@myemail.com>
+Requires-Python: >=3.11
+Requires-Dist: uipath<2.11.0,>=2.10.0
+Requires-Dist: uipath-langchain>=0.1.0
+Requires-Dist: langgraph>=0.2.0
+Requires-Dist: langchain-anthropic>=0.3.0
+Requires-Dist: deepagents>=0.1.0
+Requires-Dist: hypothesis==6.112.2
