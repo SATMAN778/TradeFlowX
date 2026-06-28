@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   CheckCircle, User, Clock, RefreshCw, Inbox,
   AlertTriangle, ExternalLink, ChevronDown, ChevronUp, Check, X, ShieldAlert
@@ -598,6 +598,11 @@ export default function TasksInbox({ onTaskCountChange }: TasksInboxProps) {
   const [filter, setFilter] = useState<'all' | 'mine' | 'unassigned'>('all');
   const [demoTasksEnabled, setDemoTasksEnabled] = useState<boolean>(true);
 
+  const onTaskCountChangeRef = useRef(onTaskCountChange);
+  useEffect(() => {
+    onTaskCountChangeRef.current = onTaskCountChange;
+  }, [onTaskCountChange]);
+
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     setError(null);
@@ -616,7 +621,6 @@ export default function TasksInbox({ onTaskCountChange }: TasksInboxProps) {
         currentUserEmail: userEmail
       }));
       setTasks(tasksWithUser);
-      onTaskCountChange?.(tasksWithUser.length);
     } catch (err: any) {
       if (demoTasksEnabled) {
         // If API fails but demo mode is on, fallback to demo tasks
@@ -626,14 +630,13 @@ export default function TasksInbox({ onTaskCountChange }: TasksInboxProps) {
           currentUserEmail: userEmail
         }));
         setTasks(demoWithUser);
-        onTaskCountChange?.(demoWithUser.length);
       } else {
         if (!silent) setError(err.message || 'Failed to load tasks');
       }
     } finally {
       if (!silent) setLoading(false);
     }
-  }, [onTaskCountChange, demoTasksEnabled, userEmail]);
+  }, [demoTasksEnabled, userEmail]);
 
   useEffect(() => {
     load();
@@ -658,19 +661,11 @@ export default function TasksInbox({ onTaskCountChange }: TasksInboxProps) {
 
   // Sync count on tasks change
   useEffect(() => {
-    onTaskCountChange?.(tasks.length);
-  }, [tasks, onTaskCountChange]);
+    onTaskCountChangeRef.current?.(tasks.length);
+  }, [tasks.length]);
 
   const filteredTasks = tasks.filter((t) => {
-    // 1. Role Filter: if not admin, only show tasks matching the role
-    if (activeRole !== 'admin') {
-      const requiredRoles = getRequiredRolesForTask(t.title);
-      if (requiredRoles.length > 0 && !requiredRoles.includes('admin') && !requiredRoles.includes(activeRole)) {
-        return false;
-      }
-    }
-
-    // 2. Tab filters
+    // Tab filters
     if (filter === 'mine') {
       return t.assignedToUser && t.currentUserEmail &&
         t.assignedToUser.toLowerCase() === t.currentUserEmail.toLowerCase();
