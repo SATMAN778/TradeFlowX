@@ -14,7 +14,19 @@ export const useTaskSubmit = () => {
   ) => {
     // Complete the task via Action Center SDK
     try {
-      await (tasksSvc as any).complete(taskId, { outcome, data: formData });
+      // 1. Fetch task details to resolve the folder ID and task type dynamically
+      const details = await tasksSvc.getById(Number(taskId));
+      const taskData = (details as any)?.Data || (details as any)?.data || details;
+      const folderId = taskData.FolderId || taskData.folderId;
+      const taskType = taskData.Type || taskData.type || 'AppTask';
+
+      // 2. Complete the task using the correct SDK options and folder ID
+      await tasksSvc.complete({
+        type: taskType as any,
+        taskId: Number(taskId),
+        action: outcome,
+        data: formData
+      }, folderId);
     } catch (err) {
       console.error('[useTaskSubmit] tasks.complete failed:', err);
       throw err;

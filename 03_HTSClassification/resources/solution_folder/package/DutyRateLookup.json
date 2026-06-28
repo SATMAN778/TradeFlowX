@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "DutyRateLookup",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "f569f8a7-6b7d-4253-92e1-5d4b442ad594",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "DutyRateLookup"
+    },
+    "locks": [],
+    "key": "cfc9b820-cc45-41d9-904b-c4aba06a725c",
+    "files": []
+  }
+}

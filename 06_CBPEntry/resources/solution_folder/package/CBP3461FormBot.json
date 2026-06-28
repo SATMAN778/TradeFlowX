@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "CBP3461FormBot",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "9c490342-0565-4417-850f-1ebe219542a0",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "CBP3461FormBot"
+    },
+    "locks": [],
+    "key": "82343b2e-ee51-4117-b066-1e4a419c91ed",
+    "files": []
+  }
+}

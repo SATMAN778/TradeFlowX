@@ -1,0 +1,44 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "ERP Landed Cost Workflow",
+    "kind": "process",
+    "type": "process",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "ad390a29-4817-47cf-b11f-207cff477316",
+    "isOverridable": true,
+    "dependencies": [
+      {
+        "kind": "package",
+        "name": "ERP Landed Cost Workflow"
+      }
+    ],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Process",
+      "name": "ERP Landed Cost Workflow",
+      "package": {
+        "key": "59a37c55-4f4e-490e-b292-4ae4a49eaf90"
+      },
+      "jobPriority": "Medium",
+      "jobRecording": "Disabled",
+      "targetFrameworkValue": "Portable",
+      "duration": 40,
+      "frequency": 500,
+      "quality": 100,
+      "remoteControlAccess": "None",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "df0f23de-e48d-4af5-83ae-d98f828cbdaf",
+    "files": []
+  }
+}

@@ -1,0 +1,238 @@
+{
+  "document": {
+    "dsl": "1.0.0",
+    "name": "CBPStatusPoller",
+    "version": "1.0.0",
+    "namespace": "default",
+    "metadata": {
+      "variables": {
+        "schema": {
+          "format": "json",
+          "document": {
+            "type": "object",
+            "properties": {
+              "cbpStatus": {
+                "type": "string",
+                "default": "PENDING",
+                "description": "CBP entry status: PENDING / RELEASED / EXAM / CF28_ISSUED / CF29_ISSUED"
+              },
+              "examType": {
+                "type": "string",
+                "default": "",
+                "description": "CBP exam type when EXAM: INTENSIVE, CET, NII"
+              },
+              "cf28Questions": {
+                "type": "string",
+                "default": "[]",
+                "description": "JSON array of CF-28 questions from CBP"
+              },
+              "cf29ActionType": {
+                "type": "string",
+                "default": "",
+                "description": "CF-29 action type from CBP"
+              },
+              "pollAttempts": {
+                "type": "number",
+                "default": 0,
+                "description": "Number of polling attempts made"
+              }
+            },
+            "title": "Variables"
+          }
+        }
+      }
+    }
+  },
+  "input": {
+    "schema": {
+      "format": "json",
+      "document": {
+        "type": "object",
+        "properties": {
+          "entryNumber": {
+            "type": "string",
+            "description": "CBP customs entry number to poll status for"
+          },
+          "mockStatus": {
+            "type": "string",
+            "default": "RELEASED",
+            "description": "Hackathon override: RELEASED | EXAM | CF28_ISSUED | CF29_ISSUED"
+          },
+          "maxAttempts": {
+            "type": "number",
+            "default": 10,
+            "description": "Maximum number of polling attempts before timeout"
+          }
+        },
+        "title": "Inputs"
+      }
+    }
+  },
+  "output": {
+    "schema": {
+      "format": "json",
+      "document": {
+        "type": "object",
+        "properties": {
+          "cbpStatus": {
+            "type": "string",
+            "description": "Final CBP status: RELEASED | EXAM | CF28_ISSUED | CF29_ISSUED | TIMEOUT"
+          },
+          "examType": {
+            "type": "string",
+            "description": "Exam type if status is EXAM"
+          },
+          "cf28Questions": {
+            "type": "string",
+            "description": "JSON string array of CF-28 questions"
+          },
+          "cf29ActionType": {
+            "type": "string",
+            "description": "CF-29 action type if status is CF29_ISSUED"
+          },
+          "pollAttempts": {
+            "type": "number",
+            "description": "Total polling attempts made"
+          }
+        },
+        "title": "Outputs"
+      }
+    }
+  },
+  "do": [
+    {
+      "Sequence_1": {
+        "do": [
+          {
+            "WorkflowStart": {
+              "set": "${Object.entries($workflow.definition?.document?.metadata?.variables?.schema?.document?.properties || {}).reduce((acc, [name, def]) => ({ ...acc, [name]: def?.default }), {}) }",
+              "output": { "as": "${$input}" },
+              "export": { "as": "{ ...$context, variables: { ...$context.variables, ...$output } }" },
+              "metadata": {
+                "activityType": "Assign",
+                "displayName": "Workflow start",
+                "fullName": "Assign",
+                "isTransparent": true
+              }
+            }
+          },
+          {
+            "Javascript_SimulateCBPPoll": {
+              "run": {
+                "script": {
+                  "language": "javascript",
+                  "arguments": "${{ \"$context\": $context, \"$workflow\": $workflow, \"$input\": $input }}",
+                  "code": "// CBP ACE Status Polling — Hackathon simulation\n// Real implementation would call:\n//   GET https://ace.cbp.dhs.gov/aceon/rest/entry/status/{entryNumber}\n// and parse the JSON response.\n\nconst entryNumber = $workflow.input.entryNumber || 'UNKNOWN';\nconst mockStatus = $workflow.input.mockStatus || 'RELEASED';\nconst maxAttempts = $workflow.input.maxAttempts || 10;\n\n// Simulate ACE API response mapping\nconst ACE_STATUS_MAP = {\n  'RELEASED': 'RELEASED',\n  'EXAM_SELECTED': 'EXAM',\n  'CF28': 'CF28_ISSUED',\n  'CF29': 'CF29_ISSUED',\n  'PENDING': 'PENDING'\n};\n\n// For hackathon: directly return the mockStatus after 1 simulated poll\nconst resolvedStatus = ACE_STATUS_MAP[mockStatus] || mockStatus;\n\n// Build conditional payloads based on resolved status\nlet examType = '';\nlet cf28Questions = JSON.stringify([]);\nlet cf29ActionType = '';\n\nif (resolvedStatus === 'EXAM') {\n  const examTypes = ['INTENSIVE', 'CET', 'NII'];\n  examType = examTypes[Math.floor(Math.abs(entryNumber.charCodeAt(0) || 0) % 3)];\n}\n\nif (resolvedStatus === 'CF28_ISSUED') {\n  cf28Questions = JSON.stringify([\n    {\n      id: 1,\n      question: 'Provide a certificate of origin from the country of manufacture.',\n      deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()\n    },\n    {\n      id: 2,\n      question: 'Submit the manufacturer invoice showing the actual transaction value.',\n      deadline: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString()\n    }\n  ]);\n}\n\nif (resolvedStatus === 'CF29_ISSUED') {\n  cf29ActionType = 'RATE_ADVANCE';\n}\n\nreturn {\n  cbpStatus: resolvedStatus,\n  examType: examType,\n  cf28Questions: cf28Questions,\n  cf29ActionType: cf29ActionType,\n  pollAttempts: 1,\n  simulatedEntryNumber: entryNumber,\n  polledAt: new Date().toISOString()\n};"
+                }
+              },
+              "export": {
+                "as": "{ ...$context, outputs: { ...$context?.outputs, 'Javascript_SimulateCBPPoll': $output } }"
+              },
+              "metadata": {
+                "activityType": "JsInvoke",
+                "displayName": "Simulate CBP ACE Status Poll",
+                "fullName": "JsInvoke"
+              }
+            }
+          },
+          {
+            "Assign_CbpStatus": {
+              "set": {
+                "cbpStatus": "${$context.outputs['Javascript_SimulateCBPPoll'].cbpStatus}"
+              },
+              "export": {
+                "as": "{ ...$context, variables: { ...$context.variables, ...$output } }"
+              },
+              "metadata": {
+                "activityType": "Assign",
+                "displayName": "Assign CBP Status",
+                "fullName": "Assign"
+              }
+            }
+          },
+          {
+            "Assign_ExamType": {
+              "set": {
+                "examType": "${$context.outputs['Javascript_SimulateCBPPoll'].examType}"
+              },
+              "export": {
+                "as": "{ ...$context, variables: { ...$context.variables, ...$output } }"
+              },
+              "metadata": {
+                "activityType": "Assign",
+                "displayName": "Assign Exam Type",
+                "fullName": "Assign"
+              }
+            }
+          },
+          {
+            "Assign_Cf28Questions": {
+              "set": {
+                "cf28Questions": "${$context.outputs['Javascript_SimulateCBPPoll'].cf28Questions}"
+              },
+              "export": {
+                "as": "{ ...$context, variables: { ...$context.variables, ...$output } }"
+              },
+              "metadata": {
+                "activityType": "Assign",
+                "displayName": "Assign CF28 Questions",
+                "fullName": "Assign"
+              }
+            }
+          },
+          {
+            "Assign_Cf29ActionType": {
+              "set": {
+                "cf29ActionType": "${$context.outputs['Javascript_SimulateCBPPoll'].cf29ActionType}"
+              },
+              "export": {
+                "as": "{ ...$context, variables: { ...$context.variables, ...$output } }"
+              },
+              "metadata": {
+                "activityType": "Assign",
+                "displayName": "Assign CF29 Action Type",
+                "fullName": "Assign"
+              }
+            }
+          },
+          {
+            "Assign_PollAttempts": {
+              "set": {
+                "pollAttempts": "${$context.outputs['Javascript_SimulateCBPPoll'].pollAttempts}"
+              },
+              "export": {
+                "as": "{ ...$context, variables: { ...$context.variables, ...$output } }"
+              },
+              "metadata": {
+                "activityType": "Assign",
+                "displayName": "Assign Poll Attempts",
+                "fullName": "Assign"
+              }
+            }
+          },
+          {
+            "Response_CBPStatus": {
+              "response": "${{ cbpStatus: $context.variables.cbpStatus, examType: $context.variables.examType, cf28Questions: $context.variables.cf28Questions, cf29ActionType: $context.variables.cf29ActionType, pollAttempts: $context.variables.pollAttempts }}",
+              "markJobAsFailed": false,
+              "then": "end",
+              "metadata": {
+                "activityType": "Response",
+                "displayName": "Return CBP Status Result",
+                "fullName": "Response"
+              }
+            }
+          }
+        ],
+        "metadata": {
+          "activityType": "Sequence",
+          "displayName": "CBP Status Polling Sequence",
+          "fullName": "Sequence"
+        }
+      }
+    }
+  ],
+  "evaluate": {
+    "mode": "strict",
+    "language": "javascript"
+  }
+}

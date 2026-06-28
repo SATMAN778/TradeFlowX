@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "IXPPipeline",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "654d89a3-6bef-42c1-bc8a-f055ac836bca",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "IXPPipeline"
+    },
+    "locks": [],
+    "key": "6444b762-21e7-434c-aecc-aa17cc3ac3f1",
+    "files": []
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "Name": "ERP Landed Cost Workflow",
+  "ProjectType": "Process",
+  "Description": "ERP Landed Cost Workflow",
+  "MainFile": "Main.xaml"
+}

@@ -798,9 +798,11 @@ h1, h2, h3, h4 {
   display: flex;
   flex-direction: column;
   background:
-    radial-gradient(ellipse at 70% 10%, rgba(41, 69, 134, 0.12), transparent 50%),
-    radial-gradient(ellipse at 20% 90%, rgba(204, 177, 108, 0.08), transparent 50%),
+    radial-gradient(ellipse at 70% 10%, rgba(41, 69, 134, 0.08), transparent 50%),
+    radial-gradient(ellipse at 20% 90%, rgba(204, 177, 108, 0.05), transparent 50%),
     var(--bg-primary);
+  position: relative;
+  overflow-x: hidden;
 }
 
 .login-header {
@@ -810,7 +812,8 @@ h1, h2, h3, h4 {
   align-items: center;
   padding: 0 32px;
   gap: 12px;
-  box-shadow: 0 2px 12px rgba(41, 69, 134, 0.3);
+  box-shadow: 0 2px 12px rgba(41, 69, 134, 0.25);
+  z-index: 10;
 }
 
 .login-body {
@@ -819,32 +822,46 @@ h1, h2, h3, h4 {
   align-items: center;
   justify-content: center;
   padding: 40px 24px;
-  gap: 64px;
+  z-index: 5;
 }
 
-.login-card {
+.login-container {
+  display: grid;
+  grid-template-columns: minmax(450px, 1.2fr) 1fr;
+  width: 100%;
+  max-width: 1050px;
   background: var(--bg-secondary);
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  box-shadow: 0 16px 48px rgba(41, 69, 134, 0.12);
-  padding: 40px;
-  width: 100%;
-  max-width: 400px;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 16px 48px rgba(41, 69, 134, 0.08);
+}
+
+.login-hero-panel {
+  position: relative;
+  background: url(/login-bg.jpg) center/cover no-repeat;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  justify-content: space-between;
+  padding: 48px;
+  min-height: 520px;
 }
 
-.login-feature-list {
-  display: none;
+.login-card-container {
+  padding: 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: var(--bg-secondary);
 }
 
-@media (min-width: 900px) {
-  .login-feature-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 360px;
+@media (max-width: 900px) {
+  .login-container {
+    grid-template-columns: 1fr;
+    max-width: 450px;
+  }
+  .login-hero-panel {
+    display: none;
   }
 }
 

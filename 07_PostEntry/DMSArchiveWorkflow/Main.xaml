@@ -1,0 +1,179 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="Main" VisualBasic.Settings="{x:Null}" sap2010:WorkflowViewState.IdRef="ActivityBuilder_1"
+  xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities"
+  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+  xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation"
+  xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation"
+  xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib"
+  xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib"
+  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <x:Members>
+    <x:Property Name="in_documentList" Type="InArgument(x:String)" />
+    <x:Property Name="in_poNumber" Type="InArgument(x:String)" />
+    <x:Property Name="in_entryNumber" Type="InArgument(x:String)" />
+    <x:Property Name="out_archivalStatus" Type="OutArgument(x:String)" />
+    <x:Property Name="out_documentationComplete" Type="OutArgument(x:Boolean)" />
+  </x:Members>
+
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Activities.Expressions</x:String>
+      <x:String>System.Activities.Validation</x:String>
+      <x:String>System.Activities.XamlIntegration</x:String>
+      <x:String>Microsoft.VisualBasic</x:String>
+      <x:String>Microsoft.VisualBasic.Activities</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Collections</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Data</x:String>
+      <x:String>System.Diagnostics</x:String>
+      <x:String>System.IO</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>System.Xml</x:String>
+      <x:String>System.Xml.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>Microsoft.VisualBasic</AssemblyReference>
+      <AssemblyReference>mscorlib</AssemblyReference>
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Activities</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+      <AssemblyReference>System.Core</AssemblyReference>
+      <AssemblyReference>System.Data</AssemblyReference>
+      <AssemblyReference>System.Data.Common</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Xaml</AssemblyReference>
+      <AssemblyReference>System.Xml</AssemblyReference>
+      <AssemblyReference>System.Xml.Linq</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+
+  <Sequence DisplayName="Main Sequence" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:Boolean" Name="allDocsPresent" />
+      <Variable x:TypeArguments="x:String" Name="archivalState" />
+      <Variable x:TypeArguments="x:Int32" Name="archivedCount" />
+      <Variable x:TypeArguments="x:String" Name="docListLower" />
+      <Variable x:TypeArguments="x:Boolean" Name="hasInvoice" />
+      <Variable x:TypeArguments="x:Boolean" Name="hasBol" />
+    </Sequence.Variables>
+
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+
+    <WriteLine DisplayName="Log - DMS Archive Start"
+               Text="[&quot;[DMS-Archive] Stage 7 | PO: &quot; &amp; in_poNumber &amp; &quot; | Entry: &quot; &amp; in_entryNumber]" />
+
+    <Assign DisplayName="Normalize doc list">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">[docListLower]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">[If(String.IsNullOrEmpty(in_documentList), &quot;&quot;, in_documentList.ToLower())]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Check invoice present">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Boolean">[hasInvoice]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Boolean">[docListLower.Contains(&quot;invoice&quot;) OrElse docListLower.Contains(&quot;commercial&quot;)]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Check BoL present">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Boolean">[hasBol]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Boolean">[docListLower.Contains(&quot;lading&quot;) OrElse docListLower.Contains(&quot;bol&quot;) OrElse docListLower.Contains(&quot;shipment&quot;)]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <!-- All docs present when list is non-empty and contains core docs -->
+    <Assign DisplayName="Evaluate allDocsPresent">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Boolean">[allDocsPresent]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Boolean">[Not String.IsNullOrEmpty(docListLower) AndAlso hasInvoice AndAlso hasBol]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Set archived count">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Int32">[archivedCount]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Int32">[If(allDocsPresent, 9, If(Not String.IsNullOrEmpty(docListLower), 7, 0))]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <If DisplayName="If All Docs Present" Condition="[allDocsPresent]">
+      <If.Then>
+        <Assign DisplayName="Status = ARCHIVED">
+          <Assign.To>
+            <OutArgument x:TypeArguments="x:String">[archivalState]</OutArgument>
+          </Assign.To>
+          <Assign.Value>
+            <InArgument x:TypeArguments="x:String">[&quot;ARCHIVED&quot;]</InArgument>
+          </Assign.Value>
+        </Assign>
+      </If.Then>
+      <If.Else>
+        <Sequence DisplayName="Else - Partial Archive">
+          <Assign DisplayName="Status = PARTIAL_ARCHIVE">
+            <Assign.To>
+              <OutArgument x:TypeArguments="x:String">[archivalState]</OutArgument>
+            </Assign.To>
+            <Assign.Value>
+              <InArgument x:TypeArguments="x:String">[&quot;PARTIAL_ARCHIVE&quot;]</InArgument>
+            </Assign.Value>
+          </Assign>
+          <WriteLine DisplayName="Log - Partial Archive Warning"
+                     Text="[&quot;[DMS-Archive] PARTIAL ARCHIVE - missing required documents | PO: &quot; &amp; in_poNumber]" />
+        </Sequence>
+      </If.Else>
+    </If>
+
+    <WriteLine DisplayName="Log - Archiving"
+               Text="[&quot;[DMS-Archive] Archiving &quot; &amp; archivedCount.ToString() &amp; &quot; documents | Retention: 7yr | Status: &quot; &amp; archivalState]" />
+
+    <Assign DisplayName="Set out_archivalStatus">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">[out_archivalStatus]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">[archivalState]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Set out_documentationComplete">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Boolean">[out_documentationComplete]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Boolean">[allDocsPresent]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <WriteLine DisplayName="Log - DMS Archive Complete"
+               Text="[&quot;[DMS-Archive] Complete | PO: &quot; &amp; in_poNumber &amp; &quot; | Status: &quot; &amp; archivalState &amp; &quot; | DocsComplete: &quot; &amp; allDocsPresent.ToString()]" />
+
+  </Sequence>
+</Activity>

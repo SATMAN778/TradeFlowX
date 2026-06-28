@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "ERP Landed Cost Workflow",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "ad390a29-4817-47cf-b11f-207cff477316",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "ERP Landed Cost Workflow"
+    },
+    "locks": [],
+    "key": "59a37c55-4f4e-490e-b292-4ae4a49eaf90",
+    "files": []
+  }
+}

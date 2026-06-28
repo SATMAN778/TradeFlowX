@@ -1,0 +1,17 @@
+{
+  "DocVersion": "1.0.0",
+  "StudioMinVersion": "2025.10.0",
+  "SolutionId": "bc23a528-38c0-4b09-96ba-3f54f63e6b56",
+  "Projects": [
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "DMSArchiveWorkflow/project.uiproj",
+      "Id": "b7a27a69-516f-4e89-8267-cef3540bf2f5"
+    },
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "ERPLandedCostWorkflow/project.uiproj",
+      "Id": "ad390a29-4817-47cf-b11f-207cff477316"
+    }
+  ]
+}

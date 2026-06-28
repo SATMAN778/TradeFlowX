@@ -1,0 +1,59 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "entryPoints": [
+    {
+      "filePath": "Workflow.json",
+      "uniqueId": "d4e5f6a7-b8c9-0123-defa-234567890123",
+      "type": "api",
+      "input": {
+        "type": "object",
+        "properties": {
+          "htsCode": {
+            "type": "string",
+            "description": "10-digit HTS code (e.g. 8471.30.0100)"
+          },
+          "totalValueUsd": {
+            "type": "number",
+            "description": "Total CIF value of the shipment in USD",
+            "minimum": -1.7976931348623157E+308,
+            "maximum": 1.7976931348623157E+308
+          },
+          "supplierCountry": {
+            "type": "string",
+            "default": "CN",
+            "description": "ISO-2 country code of the supplier/exporter"
+          }
+        },
+        "required": ["htsCode", "totalValueUsd"]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "dutyRatePct": {
+            "type": "number",
+            "minimum": -1.7976931348623157E+308,
+            "maximum": 1.7976931348623157E+308
+          },
+          "dutyAmountUsd": {
+            "type": "number",
+            "minimum": -1.7976931348623157E+308,
+            "maximum": 1.7976931348623157E+308
+          },
+          "mpfAmount": {
+            "type": "number",
+            "minimum": -1.7976931348623157E+308,
+            "maximum": 1.7976931348623157E+308
+          },
+          "hmfAmount": {
+            "type": "number",
+            "minimum": -1.7976931348623157E+308,
+            "maximum": 1.7976931348623157E+308
+          },
+          "dutyBreakdownJson": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  ]
+}

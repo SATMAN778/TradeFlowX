@@ -1,0 +1,37 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "entryPoints": [
+    {
+      "filePath": "Workflow.json",
+      "uniqueId": "e5f6a7b8-c9d0-1234-efab-345678901234",
+      "type": "api",
+      "input": {
+        "type": "object",
+        "properties": {
+          "htsCode": {
+            "type": "string",
+            "description": "10-digit HTS code (e.g. 8471.30.0100)"
+          },
+          "goodsDescription": {
+            "type": "string",
+            "default": "",
+            "description": "Goods description for additional PGA keyword matching"
+          }
+        },
+        "required": ["htsCode"]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "pgaFlag": {
+            "type": "boolean"
+          },
+          "pgaAgencies": {
+            "type": "string",
+            "description": "JSON array of PGA agency objects requiring review"
+          }
+        }
+      }
+    }
+  ]
+}

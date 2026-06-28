@@ -1,0 +1,93 @@
+{
+  "id": "pga-flag-workflow",
+  "version": "1.0.0",
+  "specVersion": "0.8",
+  "name": "PGAFlagWorkflow",
+  "description": "Evaluates an HTS code and goods description against the PGA flag matrix. Returns whether PGA review is required and the specific agencies involved.",
+  "start": "EvaluatePGAMatrix",
+  "states": [
+    {
+      "name": "EvaluatePGAMatrix",
+      "type": "operation",
+      "actions": [
+        {
+          "name": "MatchPGAAgencies",
+          "functionRef": {
+            "refName": "matchPgaAgencies",
+            "arguments": {
+              "htsCode": "${ .htsCode }",
+              "goodsDescription": "${ .goodsDescription // \"\" }"
+            }
+          },
+          "actionDataFilter": {
+            "results": "${ . }",
+            "toStateData": "${ .pgaResult }"
+          }
+        }
+      ],
+      "stateDataFilter": {
+        "output": "${ . }"
+      },
+      "transition": "BuildPGAOutput"
+    },
+    {
+      "name": "BuildPGAOutput",
+      "type": "operation",
+      "actions": [
+        {
+          "name": "SerializeAgencies",
+          "functionRef": {
+            "refName": "serializeAgencies",
+            "arguments": {
+              "agencies": "${ .pgaResult.agencies }"
+            }
+          },
+          "actionDataFilter": {
+            "results": "${ . }",
+            "toStateData": "${ .serialized }"
+          }
+        }
+      ],
+      "stateDataFilter": {
+        "output": "${ {pgaFlag: (.pgaResult.agencies | length > 0), pgaAgencies: .serialized.json} }"
+      },
+      "end": true
+    }
+  ],
+  "functions": [
+    {
+      "name": "matchPgaAgencies",
+      "type": "expression",
+      "operation": ".htsCode as $code | .goodsDescription as $desc |
+        [
+          if ($code | startswith(\"02\")) or ($code | startswith(\"03\")) or ($code | startswith(\"04\")) or ($code | startswith(\"07\")) or ($code | startswith(\"08\")) or ($code | startswith(\"16\")) or ($code | startswith(\"19\")) or ($code | startswith(\"21\")) or ($desc | test(\"food|beverage|supplement|drug|device|cosmetic\"; \"i\")) then
+            {agency: \"FDA\", fullName: \"Food and Drug Administration\", requirement: \"FDA Prior Notice or Import Alert review required\", programCode: \"FDAPN\"}
+          else empty end,
+          if ($code | startswith(\"01\")) or ($code | startswith(\"06\")) or ($code | startswith(\"07\")) or ($code | startswith(\"08\")) or ($code | startswith(\"10\")) or ($code | startswith(\"12\")) or ($desc | test(\"plant|seed|animal|livestock|poultry|meat\"; \"i\")) then
+            {agency: \"USDA\", fullName: \"U.S. Department of Agriculture\", requirement: \"USDA APHIS/FSIS phytosanitary or veterinary certificate required\", programCode: \"USDAPH\"}
+          else empty end,
+          if ($code | startswith(\"9705\")) or ($code | startswith(\"0106\")) or ($code | startswith(\"4302\")) or ($code | startswith(\"4303\")) or ($desc | test(\"wildlife|ivory|coral|fur|feather|specimen\"; \"i\")) then
+            {agency: \"FWS\", fullName: \"U.S. Fish and Wildlife Service\", requirement: \"CITES permit or FWS import declaration required\", programCode: \"FWSCI\"}
+          else empty end,
+          if ($code | startswith(\"38\")) or ($code | startswith(\"28\")) or ($code | startswith(\"29\")) or ($desc | test(\"chemical|pesticide|hazardous|ozone|toxic\"; \"i\")) then
+            {agency: \"EPA\", fullName: \"Environmental Protection Agency\", requirement: \"EPA TSCA certification or pesticide registration required\", programCode: \"EPAOC\"}
+          else empty end,
+          if ($code | startswith(\"9503\")) or ($code | startswith(\"9504\")) or ($code | startswith(\"6302\")) or ($desc | test(\"toy|children|juvenile|infant|baby|mattress\"; \"i\")) then
+            {agency: \"CPSC\", fullName: \"Consumer Product Safety Commission\", requirement: \"CPSC Children Product Certificate (CPC) or General Certificate of Conformity required\", programCode: \"CPCPC\"}
+          else empty end,
+          if ($code | startswith(\"9302\")) or ($code | startswith(\"9303\")) or ($code | startswith(\"9304\")) or ($code | startswith(\"9305\")) or ($code | startswith(\"9306\")) or ($desc | test(\"firearm|weapon|ammunition|explosive\"; \"i\")) then
+            {agency: \"ATF\", fullName: \"Bureau of Alcohol Tobacco Firearms and Explosives\", requirement: \"ATF Form 6 import permit required\", programCode: \"ATFIMP\"}
+          else empty end,
+          if ($code | startswith(\"8703\")) or ($code | startswith(\"8704\")) or ($code | startswith(\"8711\")) or ($desc | test(\"vehicle|automobile|motorcycle|engine emission\"; \"i\")) then
+            {agency: \"NHTSA\", fullName: \"National Highway Traffic Safety Administration\", requirement: \"NHTSA HS-7 Declaration and DOT compliance required\", programCode: \"DOTNH\"}
+          else empty end
+        ] as $agencies |
+        {agencies: $agencies}"
+    },
+    {
+      "name": "serializeAgencies",
+      "type": "expression",
+      "operation": "{json: (.agencies | tojson)}"
+    }
+  ]
+}

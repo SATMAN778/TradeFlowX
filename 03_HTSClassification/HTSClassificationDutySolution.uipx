@@ -1,0 +1,22 @@
+{
+  "DocVersion": "1.0.0",
+  "StudioMinVersion": "2025.10.0",
+  "SolutionId": "133fd931-cacf-4488-ace2-646976e93394",
+  "Projects": [
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "IXPPipeline/project.uiproj",
+      "Id": "654d89a3-6bef-42c1-bc8a-f055ac836bca"
+    },
+    {
+      "Type": "Api",
+      "ProjectRelativePath": "DutyRateLookup/project.json",
+      "Id": "f569f8a7-6b7d-4253-92e1-5d4b442ad594"
+    },
+    {
+      "Type": "Api",
+      "ProjectRelativePath": "PGAFlagWorkflow/project.json",
+      "Id": "f0aee031-18dd-4c5a-a237-50a7e4d021ec"
+    }
+  ]
+}
