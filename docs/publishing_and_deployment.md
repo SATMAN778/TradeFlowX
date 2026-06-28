@@ -1,12 +1,12 @@
 # Publishing and Deployment Guide
 
-This guide details how to build the TradeFlow import solution package, deploy it to a UiPath Orchestrator tenant, configure the necessary cloud assets, and establish integration service connections.
+This guide details how to build the TradeFlowX solution package, deploy it to a UiPath Orchestrator tenant, and establish integration service connections.
 
 ---
 
 ## 1. Solution Packaging
 
-The orchestrations, stages, variables, and rules for TradeFlow Maestro AI are bundled into a UiPath Solution Package (`.uipx`). 
+The orchestrations, stages, variables, and rules for TradeFlowX are bundled into a UiPath Solution Package (`.uipx`). 
 
 ### Build Package via UiPath CLI (`uip`)
 Ensure you have the UiPath CLI installed. Run the following command from the root of the repository to pack the solution:
@@ -48,30 +48,7 @@ uip solution deploy run \
   --output json
 ```
 
----
-
-## 3. Creating Required Orchestrator Assets
-
-Before running the case, you must provision several configuration assets in your target **UiPath Orchestrator Folder**. These assets contain API keys and base URLs used by both the RPA bots and the Python agents.
-
-| Asset Name | Type | Value / Description |
-|---|---|---|
-| `ACE_API_KEY` | Text | API token for the US Customs & Border Protection (CBP) ACE Portal environment. |
-| `OFAC_API_KEY` | Text | API key for the Office of Foreign Assets Control SDN list querying API. |
-| `USITC_API_BASE_URL` | Text | Base URL for USITC Harmonized Tariff Schedule API (default: `https://api.usitc.gov/`). |
-| `ERP_BASE_URL` | Text | Endpoint URL of the corporate ERP instance (SAP, NetSuite, Oracle, etc.). |
-| `ERP_API_KEY` | Credential | Credentials/Token to authorize transactions posted to the ERP. |
-| `LLM_API_KEY` | Credential | OpenAI API Key or Azure OpenAI endpoint credentials used by the LangGraph agents. |
-
-### Steps to Create Assets in Orchestrator:
-1.  Log in to **UiPath Automation Cloud** and navigate to **Orchestrator**.
-2.  Select your target **Folder** (e.g., `Shared` or `ImportOperations`).
-3.  Go to the **Assets** tab and click **Add Asset**.
-4.  Create each asset listed above, choosing the corresponding Type (Text or Credential) and inputting the values.
-
----
-
-## 4. Creating Storage Buckets
+## 3. Creating Storage Buckets
 
 The system stores commercial invoices, packing lists, and bills of lading in a UiPath Storage Bucket. 
 
@@ -82,7 +59,7 @@ The system stores commercial invoices, packing lists, and bills of lading in a U
 
 ---
 
-## 5. Configuring Integration Service Connections
+## 4. Configuring Integration Service Connections
 
 Maestro Case Triggers and tasks interact with Microsoft 365 and Salesforce through **UiPath Integration Service**.
 

@@ -1,6 +1,6 @@
-# 📚 TradeFlow Maestro AI — Documentation Directory
+# 📚 TradeFlowX — Documentation Directory
 
-Welcome to the documentation folder for the **TradeFlow Maestro AI** project. This directory contains detailed manuals, guides, and architectural references for the UAE-USA Cross-Border Import Operations platform.
+Welcome to the documentation folder for the **TradeFlowX** project. This directory contains detailed manuals, guides, and architectural references for the UAE-USA Cross-Border Import Operations platform.
 
 ## 📁 Directory Structure
 

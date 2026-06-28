@@ -1,4 +1,4 @@
-# 🚢 TradeFlow Maestro AI
+# 🚢 TradeFlowX
 
 ### Agentic Import Operations Platform · UAE (Dubai / JAFZA) → USA
 
@@ -11,7 +11,7 @@
 
 ## Overview
 
-**TradeFlow Maestro AI** is a fully orchestrated **Agentic Import Operations Platform** that autonomously manages the end-to-end US customs clearance lifecycle for shipments originating from **Dubai and JAFZA (UAE)**.
+**TradeFlowX** is a fully orchestrated **Agentic Import Operations Platform** that autonomously manages the end-to-end US customs clearance lifecycle for shipments originating from **Dubai and JAFZA (UAE)**.
 
 Built on UiPath Maestro, the platform acts as a **digital Import Operations Manager** — coordinating AI agents, RPA bots, live regulatory APIs, and human reviewers under a single governed workflow.
 
@@ -42,7 +42,7 @@ Importing goods from the UAE (Dubai/JAFZA) to the USA requires complex customs c
 - 🚨 **Transshipment & Sanction Risks**: Free Zones like JAFZA introduce high risks of undeclared Chinese/Iranian origin (escaping Section 301 tariffs) and OFAC screening gaps, as manual SDN checks are rarely re-run continuously.
 - 🏛️ **Fragmented PGA & Post-Entry Work**: Coordinating Partner Government Agencies (FDA, USDA, FCC) and manually reconciling CBP 7501 entries to ERP is slow and causes demurrage delays.
 
-Traditional task automation cannot solve this. **TradeFlow Maestro AI orchestrates the entire import clearance operation.**
+Traditional task automation cannot solve this. **TradeFlowX orchestrates the entire import clearance operation.**
 
 ---
 
@@ -575,15 +575,6 @@ The platform coordinates two categories of agents: **Coded Python (LangGraph) Ag
    uip login
    ```
 
-3. **Configure API credentials in Orchestrator Assets**:
-   Create the following assets in your Orchestrator folder (e.g. `Shared`):
-   - `ACE_API_KEY` (Text)
-   - `OFAC_API_KEY` (Text)
-   - `USITC_API_BASE_URL` (Text, default: `https://api.usitc.gov/`)
-   - `ERP_BASE_URL` (Text)
-   - `ERP_API_KEY` (Credential)
-   - `LLM_API_KEY` (Credential)
-
 ### Pack and Deploy the Solution
 
 The Case definition, triggers, stages, and bindings are bundled in the `00_CaseOrchestration` solution folder. To pack and deploy:
@@ -633,7 +624,7 @@ curl -X POST https://your-orchestrator/api/jobs/StartJobs \
 
 ## Business Impact
 
-| Metric | Traditional Process | TradeFlow Maestro AI |
+| Metric | Traditional Process | TradeFlowX |
 |---|---|---|
 | ISF filing time | Manual, 4–8 hrs average | Automated, < 30 min |
 | HTS classification accuracy | Depends on broker expertise | AI-assisted with confidence gating |
@@ -646,7 +637,7 @@ curl -X POST https://your-orchestrator/api/jobs/StartJobs \
 
 ## Hackathon Vision
 
-> *Most automation solutions focus on task automation. TradeFlow Maestro AI focuses on operational decision automation.*
+> *Most automation solutions focus on task automation. TradeFlowX focuses on operational decision automation.*
 
 Instead of automating one activity, this platform orchestrates an **entire import operation** using coordinated AI agents, business rules, human approvals, and RPA — all under a single Maestro governance model.
 

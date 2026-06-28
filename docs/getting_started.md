@@ -1,6 +1,6 @@
 # Getting Started Guide
 
-This guide describes how to set up your local development environment to run and develop the **TradeFlow Maestro AI** system.
+This guide describes how to set up your local development environment to run and develop the **TradeFlowX** system.
 
 ---
 
