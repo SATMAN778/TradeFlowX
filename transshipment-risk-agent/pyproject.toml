@@ -1,6 +1,6 @@
 [project]
 name = "transshipment-risk-agent-v2"
-version = "0.0.1"
+version = "0.0.2"
 description = "Transshipment Risk Agent — LangGraph deep agent for trade compliance origin verification"
 authors = [{ name = "John Doe", email = "john.doe@myemail.com" }]
 dependencies = [

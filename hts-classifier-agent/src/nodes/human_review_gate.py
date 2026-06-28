@@ -16,7 +16,7 @@ def flag_for_human_review(state: AgentState) -> str:
         task = sdk.tasks.create(
             title=f"HTS Classification Review - {state.job_id}",
             data=state.model_dump(mode="json"),
-            app_name="maestro-app"
+            app_name="tradeflow-portal"
         )
         return str(task.id)
     except Exception as e:

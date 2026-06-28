@@ -36,3 +36,20 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
+
+# Environment & Credentials
+.env
+.env.*
+!.env.example
+
+# UiPath Build & Temp files
+*.nupkg
+.uipath/build/
+__uipath/
+
+
+# Sample files
+samples/
+sample/
+
+

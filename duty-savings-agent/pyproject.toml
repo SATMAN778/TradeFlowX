@@ -1,6 +1,6 @@
 [project]
 name = "duty-savings-agent-v2"
-version = "0.0.1"
+version = "0.0.2"
 description = "Duty Savings Analysis Agent — LangGraph deep agent for import post-entry duty savings and variance analysis"
 authors = [{ name = "John Doe", email = "john.doe@myemail.com" }]
 dependencies = [
