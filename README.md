@@ -68,53 +68,88 @@ Traditional task automation cannot solve this. **TradeFlow Maestro AI orchestrat
 
 ## Architecture
 
-```
-╔══════════════════════════════════════════════════════════════════════╗
-║              TRADEFLOW MAESTRO AI — ORCHESTRATION LAYER              ║
-║                        UiPath Maestro Case App                       ║
-╠══════════════════════════════════════════════════════════════════════╣
-║                                                                      ║
-║  ┌─────────────┐   ┌──────────────┐   ┌───────────────────────────┐ ║
-║  │  S1 ORDER   │──▶│  S2 ISF 10+2 │   │     S3 HTS CLASSIFICATION │ ║
-║  │   INTAKE    │   │   FILING     │   │     + DUTY DETERMINATION  │ ║
-║  │  ERP/EDI/   │   │  ACE API /   │   │  AI Agent + USITC API +   │ ║
-║  │  Email RPA  │   │  RPA fallback│   │  CBP CROSS + ADD/CVD DB   │ ║
-║  └─────────────┘   └──────┬───────┘   └──────────────┬────────────┘ ║
-║         │                 │                           │              ║
-║         │         ╔═══════╧═══════════════════════════╧════════╗    ║
-║         │         ║    PARALLEL EXECUTION (Start at S1)        ║    ║
-║         │         ║  S2 + S3 + S5 run simultaneously           ║    ║
-║         │         ╚═══════════════════════════╤════════════════╝    ║
-║         │                                     │                     ║
-║         │   ┌─────────────────────────────────▼──────────────────┐  ║
-║         │   │            S5 OFAC + DENIED-PARTY SCREENING        │  ║
-║         │   │   OFAC SDN API · BIS Entity List · SAM.gov EPLS    │  ║
-║         │   │   Fuzzy-match scoring · Transshipment intel agent  │  ║
-║         │   └────────────────────────┬───────────────────────────┘  ║
-║         │                            │                              ║
-║         │   ┌─────────────┐          │   [PGA Flag = true]          ║
-║         │   │ S4 PGA      │◀─────────┘   FDA · USDA · EPA ·        ║
-║         │   │ SCREENING   │              FCC · CPSC · DOT          ║
-║         │   │ Conditional │              (conditional parallel)     ║
-║         │   └──────┬──────┘                                         ║
-║         │          │                                                 ║
-║         │   ╔══════╧══════════════════════════════════╗             ║
-║         │   ║  ALL-CLEAR CONVERGENCE GATE             ║             ║
-║         └──▶║  S2 ✓  +  S3 ✓  +  S5 ✓  = PROCEED    ║             ║
-║             ╚══════════════════════════════╤══════════╝             ║
-║                                            │                        ║
-║             ┌──────────────────────────────▼───────────────────┐    ║
-║             │         S6 CUSTOMS ENTRY FILING & CBP CLEARANCE  │    ║
-║             │   CBP Form 3461 · ACE API · Duty Calculation      │    ║
-║             │   CF-28 / CF-29 handling · Entry summary 7501    │    ║
-║             └──────────────────────────────┬───────────────────┘    ║
-║                                            │ CBP Release            ║
-║             ┌──────────────────────────────▼───────────────────┐    ║
-║             │      S7 DOCUMENT MANAGEMENT & POST-ENTRY         │    ║
-║             │   IDP · DMS Archive · ERP Reconciliation         │    ║
-║             │   Duty drawback · First-sale · C-TPAT audit      │    ║
-║             └──────────────────────────────────────────────────┘    ║
-╚══════════════════════════════════════════════════════════════════════╝
+```mermaid
+graph TD
+    %% Case Initiation
+    EmailTrigger[Email Trade Order Trigger] --> S1[Stage 1: Trade Order Intake]
+    SFDCTrigger[Salesforce Record Trigger] --> S1
+    
+    subgraph Stage 1: Intake
+        S1 --> POFetch[PO Data Fetch]
+        POFetch --> DocCollect[Email Document Collector]
+        DocCollect --> COORisk[COO Classification Agent]
+        COORisk --> HT01{Missing Fields?}
+        HT01 -- Yes --> HT01Task[HT-01: Complete PO Data]
+        HT01 -- No --> HT02{Transshipment Risk?}
+        HT02 -- Yes --> HT02Task[HT-02: Compliance COO Verification]
+        HT02 -- No --> Transition1[Transition Gate]
+    end
+
+    %% Parallel Processing Route
+    Transition1 --> ParallelStart{Fork Stages}
+    
+    subgraph Stage 2: ISF 10+2
+        ParallelStart --> S2[Stage 2: ISF Filing]
+        S2 --> ISFCollect[ISF Data Collector Agent]
+        ISFCollect --> ACEFile[ACE ISF Filing Workflow]
+        ACEFile --> ACEPoll[ACE ISF Status Poller]
+        ACEPoll --> HT04{Do Not Load?}
+        HT04 -- Yes --> HT04Task[HT-04: ISF Do Not Load Alert]
+        HT04 -- No --> S2Done[ISF Accepted]
+    end
+
+    subgraph Stage 3: HTS Classification
+        ParallelStart --> S3[Stage 3: HTS & Duty]
+        S3 --> IDPPipeline[IDP Document Pipeline]
+        IDPPipeline --> HTSAgent[HTS Classification Agent]
+        HTSAgent --> ConfGate{Confidence >= 90%?}
+        ConfGate -- Yes --> DutyLookup[Duty Rate Lookup]
+        ConfGate -- 70-90% --> HT06Task[HT-06: Broker HTS Review]
+        ConfGate -- <70% --> HT07Task[HT-07: Specialist Classification]
+        HT06Task --> DutyLookup
+        HT07Task --> DutyLookup
+        DutyLookup --> PGALookup[PGA Flag Workflow]
+    end
+
+    subgraph Stage 4: PGA Screening [Conditional]
+        PGALookup -- PGA Required --> S4[Stage 4: PGA Screening]
+        S4 --> PGACoord[PGA Agency Coordinator]
+        PGACoord --> PGAPoll[PGA Status Polling Bot]
+        PGAPoll --> S4Done[PGA May Proceed]
+    end
+    
+    subgraph Stage 5: OFAC Screening
+        ParallelStart --> S5[Stage 5: OFAC & Denied Party]
+        S5 --> PartyExtract[Party Extraction Agent]
+        PartyExtract --> TransRisk[Transshipment Risk Agent]
+        TransRisk --> OFACAPI[OFAC SDN API Workflow]
+        OFACAPI --> MatchGate{Fuzzy Match >= 85%?}
+        MatchGate -- Yes --> HT11Task[HT-11: OFAC Fuzzy Match Review]
+        MatchGate -- No --> S5Done[OFAC Cleared]
+        HT11Task --> S5Done
+    end
+
+    %% Synchronization
+    S2Done --> MergeGate{All Clear Merge Gate}
+    PGALookup -- No PGA --> MergeGate
+    S4Done --> MergeGate
+    S5Done --> MergeGate
+
+    subgraph Stage 6: Customs Entry
+        MergeGate --> S6[Stage 6: Customs Entry Filing]
+        S6 --> CBP3461[CBP 3461 Form Bot]
+        CBP3461 --> CBPPoll[CBP Status Polling]
+        CBPPoll --> DutyCalc[Duty Calculation Workflow]
+        DutyCalc --> S6Done[CBP Released]
+    end
+
+    subgraph Stage 7: Post-Entry
+        S6Done --> S7[Stage 7: Post-Entry Reconciliation]
+        S7 --> DMSArchive[DMS Archive Workflow]
+        DMSArchive --> ERPLand[ERP Landed Cost Workflow]
+        ERPLand --> SavingsAgent[Duty Savings Analysis Agent]
+        SavingsAgent --> CaseClose[Case Closed]
+    end
 ```
 
 ---
@@ -324,38 +359,50 @@ All human tasks are **UiPath Maestro Human Task activities** with defined SLA ti
 
 ## Maestro Parallel Execution Model
 
-```
-Case Created (S1)
-      │
-      ├──────────────────────────────────────┐
-      │                                      │
-      ▼                                      ▼
-S2 ISF Filing            S3 HTS Classification        S5 OFAC Screening
-(ACE API)                (AI Agent + USITC)            (OFAC + BIS + SAM)
-      │                         │                            │
-      │                         ▼                            │
-      │               [PGA Flag = true?]                     │
-      │                    │       │                         │
-      │                   YES      NO                        │
-      │                    │       │                         │
-      │                    ▼       └──────────────────────────┤
-      │              S4 PGA Screen                           │
-      │              (Conditional)                           │
-      │                    │                                 │
-      └────────────────────┴─────────────────────────────────┘
-                           │
-                    ╔══════╧══════╗
-                    ║ MERGE GATE  ║
-                    ║ S2+S3+S5=✓ ║
-                    ╚══════╤══════╝
-                           │
-                       S6 Entry Filing
-                           │
-                    CBP Release
-                           │
-                       S7 Post-Entry
-                           │
-                     Case Closed
+```mermaid
+graph TD
+    %% Define Nodes
+    S1["Stage 1: Trade Order Intake"]
+    S2["Stage 2: ISF 10+2 Filing"]
+    S3["Stage 3: HTS Classification & Duty"]
+    S4["Stage 4: PGA Screening (Conditional)"]
+    S5["Stage 5: OFAC & Denied-Party Screening"]
+    S6["Stage 6: Customs Entry Filing & CBP Clearance"]
+    S7["Stage 7: Document Management & Post-Entry"]
+
+    %% Define Case Entry
+    Start([Case Entered]) --> S1
+
+    %% Parallel Forking after S1 completion
+    S1 --> S2
+    S1 --> S3
+    S1 --> S5
+
+    %% Conditional PGA Screening after HTS/Duty Stage
+    S3 -->|pgaFlag == true| S4
+
+    %% All-Clear Convergence Gate
+    S2 -->|isfStatus == 'ACCEPTED'| Gate{All-Clear Merge Gate}
+    S3 -->|pgaFlag == false| Gate
+    S4 -->|pgaStatus == 'MAY_PROCEED'| Gate
+    S5 -->|ofacClearStatus == 'CLEAR'| Gate
+
+    %% Post-Gate Transition
+    Gate --> S6
+    
+    %% Final Transition
+    S6 -->|cbpStatus == 'RELEASED'| S7
+    S7 -->|Complete| End([Case Closed])
+
+    %% Styling
+    classDef default fill:#F8FAFC,stroke:#E2E8F0,stroke-width:1px,color:#0F172A;
+    classDef stage fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#1E3A8A;
+    classDef gate fill:#F5F3FF,stroke:#8B5CF6,stroke-width:2px,color:#4C1D95;
+    classDef event fill:#ECFDF5,stroke:#10B981,stroke-width:2px,color:#064E3B;
+    
+    class S1,S2,S3,S4,S5,S6,S7 stage;
+    class Gate gate;
+    class Start,End event;
 ```
 
 ---
