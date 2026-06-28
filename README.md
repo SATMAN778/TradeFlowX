@@ -35,36 +35,17 @@ The **TradeX Portal** is a Vite + React + TypeScript web application that serves
 
 ## The Problem & Manual Process Today
 
-Importing goods from the UAE (Dubai/JAFZA) into the USA is a highly regulated, high-stakes supply chain operation. The transaction spans multiple cross-border stakeholders, compliance frameworks, documents, and regulatory deadlines. 
+Importing goods from the UAE (Dubai/JAFZA) to the USA requires complex customs compliance under tight deadlines. Today, this process is highly manual, error-prone, and slow:
 
-### Key Corridor Metrics (PPT-Ready)
-*   🌐 **US–UAE trade hit $47.9B in 2024, growing 10.4% YoY** — yet the compliance infrastructure managing this corridor still runs on manual broker workflows and email chains that cannot scale. *(USTR, 2024)*
-*   📋 **HTS misclassification drives 42% of all CBP penalties** — with Section 301 and IEEPA tariffs stacking to 40%+, one wrong digit can shift your effective duty rate by 20–50 percentage points overnight. *(Greenwich Mercantile, 2026)*
-*   🚢 **60% of all GCC re-exports flow through UAE Free Zones** — making every JAFZA shipment a CBP scrutiny target for undeclared China/India origin, Section 301 exposure, and OFAC transshipment risk. *(UAE Customs Guide, 2026)*
-*   ⚠️ **Late ISF filing costs $5,000–$10,000 per shipment** — and a manual broker handling 40–60 entries a month cannot guarantee the 24-hour Jebel Ali deadline on every ocean vessel departure. *(CBP / Great Lakes Customs Law)*
-
-### What is Being Done Manually Today?
-
-Currently, import compliance operations rely heavily on fragmented manual workflows:
-*   📧 **Brokers collect shipment documents via email and manually re-key data into ACE** — commercial invoices, B/L, COO, and packing lists arrive as PDF attachments with no structured extraction; a single entry takes 2–4 hours of manual preparation with brokers reviewing just 5–10% of HTS codes before submission. *(Flexport Customs Brokerage — flexport.com, 2025)*
-*   ⏰ **ISF 10+2 is filed manually by a customs broker racing a 24-hour clock** — brokers chase suppliers for missing data elements over email, hand-key all 10+2 fields into ACE, and rely on personal reminders rather than automated SLA enforcement to avoid the $5,000–$10,000 per-shipment penalty. *(Great Lakes Customs Law — greatlakescustomslaw.com, 2026)*
-*   🔍 **HTS classification is done by a human expert per shipment, from scratch** — brokers manually search the 17,000-code HTSUS schedule, cross-reference CBP CROSS rulings, and check Section 301 lists individually; no institutional memory carries over from prior shipments of the same product. *(US International Trade Commission — hts.usitc.gov)*
-*   🚨 **OFAC screening is performed at supplier onboarding only — then never again** — most importers run a one-time manual name search on OFAC's public web tool; the SDN list updates multiple times per week, meaning a supplier cleared at setup may be sanctioned today with no re-check triggered. *(OFAC Treasury Sanctions List Search — ofac.treasury.gov · Sanctions Lawyers, 2026)*
-*   🏛️ **PGA requirements are researched manually per shipment across 5+ separate agency portals** — FDA, USDA, CPSC, EPA and FCC each maintain independent submission systems; importers discover PGA holds only after the container arrives at port, with demurrage running at $200–$400/day while documentation is gathered. *(USA Customs Clearance PGA Guide — usacustomsclearance.com · FreightAmigo, 2026)*
-*   📂 **Post-entry reconciliation and duty payments are manually posted to ERP by the finance team** — CBP 7501 entry summaries, broker fee invoices, and duty calculations are reconciled via spreadsheet with no automated cross-check against declared values; 5-year record retention is managed through shared drives and email folders. *(Clearit USA Import Lifecycle — clearitusa.com, 2025)*
-
-
-| Manual Challenge | Impact of Manual Failure |
-|---|---|
-| ISF 10+2 must file **24 hrs before vessel loads** at Jebel Ali | Missed deadlines trigger CBP penalties ($5,000–$10,000/violation) and cargo lading holds. |
-| HTS classification errors | Wrong duty rates applied, leading to CBP exams, delays, and post-entry liquidation penalties. |
-| JAFZA transshipment risk | Chinese-origin goods transiting UAE escape Section 301 tariffs, triggering major trade fraud violations. |
-| OFAC / BIS / SAM.gov screening | Manual list checking misses fuzzy name matches, causing severe sanctions compliance violations. |
-| Fragmented document handling | Discrepancies between invoice and packing list are only discovered at the port of entry, halting clearance. |
+- ⏳ **ISF 10+2 Filing Race**: Brokers manually gather and key in 10+2 data elements under a strict 24-hour pre-loading deadline, risking $5,000–$10,000 penalties for late filings.
+- 🔍 **Manual HTS Classification**: Humans manually classify products against the 17,000-code HTSUS schedule, risking misclassification penalties (42% of all CBP penalties) or incorrect duty applications.
+- 🚨 **Transshipment & Sanction Risks**: Free Zones like JAFZA introduce high risks of undeclared Chinese/Iranian origin (escaping Section 301 tariffs) and OFAC screening gaps, as manual SDN checks are rarely re-run continuously.
+- 🏛️ **Fragmented PGA & Post-Entry Work**: Coordinating Partner Government Agencies (FDA, USDA, FCC) and manually reconciling CBP 7501 entries to ERP is slow and causes demurrage delays.
 
 Traditional task automation cannot solve this. **TradeFlow Maestro AI orchestrates the entire import clearance operation.**
 
 ---
+
 
 ## Architecture
 
@@ -575,25 +556,57 @@ The platform coordinates two categories of agents: **Coded Python (LangGraph) Ag
 
 ### Prerequisites
 
-- UiPath Orchestrator (Cloud or On-Prem) with Maestro enabled
-- UiPath Studio 2024.10+
-- API credentials for: CBP ACE, OFAC SDN, USITC, BIS, SAM.gov
-- ERP API access (SAP / Oracle / NetSuite)
-- OpenAI API key (or enterprise LLM endpoint)
+- **UiPath CLI** (`@uipath/cli` installed via npm: `npm install -g @uipath/cli`)
+- **UiPath Automation Cloud** tenant with Maestro and Studio Web enabled
+- **Python 3.10+** (for LangGraph agents)
+- **Node.js v18+ & npm** (for TradeX Portal)
+- API credentials for CBP ACE, OFAC SDN, USITC, and OpenAI
 
-### Configuration
+### Setup & Configuration
 
-1. Clone this repository
-2. Import the Maestro case definition from `maestro/cases/DubaiUSAImport.case`
-3. Configure API credentials in UiPath Orchestrator Assets:
-   - `ACE_API_KEY`
-   - `OFAC_API_KEY`
-   - `USITC_API_BASE_URL`
-   - `ERP_BASE_URL` + `ERP_API_KEY`
-   - `LLM_API_KEY`
-4. Deploy workflows from `maestro/workflows/` to your Orchestrator tenant
-5. Publish human task forms from `maestro/human-tasks/`
-6. Configure SLA timers per the [Key SLA Timers](#key-sla-timers) table
+1. **Clone the repository**:
+   ```bash
+   git clone https://github.com/your-username/TradeFlowAICase.git
+   cd TradeFlowAICase
+   ```
+
+2. **Authenticate with the UiPath CLI**:
+   ```bash
+   uip login
+   ```
+
+3. **Configure API credentials in Orchestrator Assets**:
+   Create the following assets in your Orchestrator folder (e.g. `Shared`):
+   - `ACE_API_KEY` (Text)
+   - `OFAC_API_KEY` (Text)
+   - `USITC_API_BASE_URL` (Text, default: `https://api.usitc.gov/`)
+   - `ERP_BASE_URL` (Text)
+   - `ERP_API_KEY` (Credential)
+   - `LLM_API_KEY` (Credential)
+
+### Pack and Deploy the Solution
+
+The Case definition, triggers, stages, and bindings are bundled in the `00_CaseOrchestration` solution folder. To pack and deploy:
+
+```bash
+# 1. Sync resource bindings with cloud/local projects
+uip solution resources refresh --solution-folder 00_CaseOrchestration
+
+# 2. Pack the solution into a deployable zip package
+uip solution pack 00_CaseOrchestration ./dist --version 1.0.0 --output json
+
+# 3. Publish the package to your tenant solution feed
+uip solution publish ./dist/TradeFlowImportSolution.1.0.0.zip --output json
+
+# 4. Deploy and activate the solution package
+uip solution deploy run \
+  --name "TradeFlowImport-Dev" \
+  --package-name "TradeFlowImportSolution" \
+  --package-version "1.0.0" \
+  --folder-name "TradeFlowImport" \
+  --parent-folder-path "Shared" \
+  --output json
+```
 
 ### Running a Test Case
 

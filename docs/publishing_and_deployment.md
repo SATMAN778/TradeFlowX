@@ -13,36 +13,39 @@ Ensure you have the UiPath CLI installed. Run the following command from the roo
 
 ```bash
 # Sync resource bindings prior to packing
-uip solution resources refresh --solution-folder TradeXCase/TradeFlowImportSolution
+uip solution resources refresh --solution-folder 00_CaseOrchestration
 
-# Pack the solution into a deployable .uipx package
-uip solution pack --solution-folder TradeXCase/TradeFlowImportSolution --output-file TradeFlowImportSolution.uipx
+# Pack the solution into a deployable .zip package
+uip solution pack 00_CaseOrchestration ./dist --version 1.0.0 --output json
 ```
 
 ### Build Package via Studio Web
 Alternatively, you can pack the solution directly in **UiPath Studio Web**:
 1.  Open **Studio Web** in your Automation Cloud tenant.
-2.  Click **Import Project** and upload the `TradeXCase/TradeFlowImportSolution` folder or link it directly from your Git repository.
+2.  Click **Import Project** and upload the `00_CaseOrchestration` folder or link it directly from your Git repository.
 3.  Once open, select **Publish** from the top right to compile the project.
 
 ---
 
 ## 2. Deploying & Activating the Case
 
-Once you have compiled the `TradeFlowImportSolution.uipx` file, you need to publish and activate it on your tenant.
+Once you have compiled the solution package, you need to publish and activate it on your tenant.
 
 ### Deployment Commands
-You can upload the package directly using the UiPath CLI:
+You can publish and deploy the package using the UiPath CLI:
 
 ```bash
-# Upload the solution package to the tenant
-uip solution upload --file TradeFlowImportSolution.uipx --output json
+# Publish the solution package to your tenant solution feed
+uip solution publish ./dist/TradeFlowImportSolution.1.0.0.zip --output json
 
-# Deploy the solution (which provision processes, queue resources, etc.)
-uip solution deploy --package-id TradeFlowImportSolution --version 1.0.0
-
-# Activate the Case App in Maestro
-uip solution activate --package-id TradeFlowImportSolution
+# Deploy the solution (which provisions processes, queue resources, etc., and activates it)
+uip solution deploy run \
+  --name "TradeFlowImport-Dev" \
+  --package-name "TradeFlowImportSolution" \
+  --package-version "1.0.0" \
+  --folder-name "TradeFlowImport" \
+  --parent-folder-path "Shared" \
+  --output json
 ```
 
 ---

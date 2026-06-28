@@ -21,14 +21,15 @@ The repository is structured as a monorepo containing multiple agents and a fron
 
 ```
 TradeFlowAICase/
-├── docs/                             # Project documentation
-├── TradeX-Portal/                    # Vite + TypeScript React Web App / Coded App
-├── TradeXCase/                       # UiPath Maestro Case Solution definition
-│   └── TradeFlowImportSolution/      # Solution folder (.uipx package workspace)
-├── hts-classifier-agent/             # Python LangGraph agent for HTS code classification
-├── transshipment-risk-agent/         # Python LangGraph agent for transshipment checks
-├── duty-savings-agent/               # Python LangGraph agent for duty drawback opportunities
-└── README.md                         # Main readme file
+├── docs/                                      # Project documentation
+├── TradeX-Portal/                             # Vite + TypeScript React Web App
+├── 00_CaseOrchestration/                      # UiPath Maestro Case Solution folder (.uipx)
+├── 01_Agent_TransshipmentRisk_LangGraph/      # Python LangGraph agent for transshipment risk
+├── 03_Agent_HTSClassifier_LangGraph/          # Python LangGraph agent for HTS classification
+├── 07_Agent_DutySavings_LangGraph/            # Python LangGraph agent for duty drawback analysis
+├── 01_TradeOrderIntake/ to 07_PostEntry/      # RPA integration workflow stages
+├── App_CaseUI/                                # Action Center Custom Task App views
+└── README.md                                  # Main readme file
 ```
 
 ---
@@ -43,11 +44,11 @@ cd TradeFlowAICase
 ```
 
 ### Step B: Configure the Python Agents
-For each of the three agent directories (`hts-classifier-agent`, `transshipment-risk-agent`, `duty-savings-agent`), perform the following configuration steps:
+For each of the three agent directories (`03_Agent_HTSClassifier_LangGraph`, `01_Agent_TransshipmentRisk_LangGraph`, `07_Agent_DutySavings_LangGraph`), perform the following configuration steps:
 
 1.  **Navigate to the agent directory**:
     ```bash
-    cd hts-classifier-agent
+    cd 03_Agent_HTSClassifier_LangGraph
     ```
 2.  **Create a virtual environment**:
     ```bash
@@ -67,7 +68,7 @@ For each of the three agent directories (`hts-classifier-agent`, `transshipment-
     ```
     *Note: Ensure you configure your API keys (e.g. `OPENAI_API_KEY` or enterprise LLM endpoints, and `UIPATH_CLIENT_ID` / `UIPATH_CLIENT_SECRET` if connecting to queues/orchestrator).*
 
-Repeat these steps for `transshipment-risk-agent` and `duty-savings-agent`.
+Repeat these steps for `01_Agent_TransshipmentRisk_LangGraph` and `07_Agent_DutySavings_LangGraph`.
 
 ---
 
@@ -100,7 +101,7 @@ The custom operations dashboard resides in the `TradeX-Portal` directory.
 ## 5. Development Workflow
 
 1.  **Modifying Case Layout or Logic**:
-    Use UiPath Studio or Studio Web to import the Maestro case from `TradeXCase/TradeFlowImportSolution`.
+    Use UiPath Studio or Studio Web to import the Maestro case from `00_CaseOrchestration`.
 2.  **Modifying Agents**:
     Make edits inside the corresponding agent directory (`src/` or `main.py`). Test changes locally by feeding mock data from `test_input.json`:
     ```bash
