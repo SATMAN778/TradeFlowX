@@ -549,15 +549,25 @@ tradeflow-maestro-ai/
 
 ## Multi-Agent Roles
 
-| Agent | Responsibilities | Key Outputs |
-|---|---|---|
-| **Shipment Intake Agent** | Receive shipment package · classify type · create Maestro case · trigger orchestration | Case ID · stage triggers |
-| **Document Verification Agent** | Validate completeness · check consistency · detect missing fields | Verification report · confidence scores · missing data list |
-| **Trade Compliance Agent** | Review import requirements · validate HTS · identify risks · flag restricted goods | Compliance status · risk assessment · escalation recommendations |
-| **OFAC Screening Agent** | Screen all trade parties · fuzzy-match scoring · transshipment intel | Screening record · clear / hold / block decision |
-| **Shipment Readiness Agent** | Consolidate all findings · calculate readiness score · determine next action | Ready / Needs Review / Blocked |
-| **Communication Agent** | Notify stakeholders · request missing documents · generate status updates | Email / Teams / UiPath Apps notifications |
-| **Exception Resolution Agent** | Analyze errors · recommend corrective actions · route to humans | Escalation tasks · corrective action log |
+The platform coordinates two categories of agents: **Coded Python (LangGraph) Agents** for complex reasoning/RAG workflows, and **Orchestration Agents** for data gathering and compliance validation.
+
+### 🧠 Coded Python (LangGraph) Agents
+
+| Agent Name (Process Key) | Responsibilities | Key Outputs |
+|:---|:---|:---|
+| **Transshipment Risk Agent**<br>`(transshipment-risk-agent-v2)` | Traces shipment routing histories and profiles suppliers to detect JAFZA/UAE transshipment risk. | Transshipment risk level, supplier profile audits |
+| **HTS Classifier Agent**<br>`(hts-classifier-agent-v2)` | References HTSUS schedules and CBP CROSS rulings via RAG to auto-classify items. | 10-digit HTS code, confidence rating, duty pre-fills |
+| **Duty Savings Agent**<br>`(07_Agent_DutySavings_LangGraph)` | Compares estimated vs. actual duties, computes variances, and flags duty drawback/first-sale opportunities. | Variance report, savings opportunity types, recommendations |
+
+### ⚙️ Orchestration Agents
+
+| Agent Name (Process Key) | Responsibilities | Key Outputs |
+|:---|:---|:---|
+| **Email Intake Agent**<br>`(TradeX_EmailIntake_Agent)` | Scans monitored corporate inboxes, extracts PDF attachments, and extracts raw PO data. | Extracted PO data fields, raw attachment files |
+| **COO Agent**<br>`(TradeX_COOAgent)` | Processes origin documents and invoices to verify the declared Country of Origin. | COO verification status, transshipment flags |
+| **ISF Data Agent**<br>`(ISF_DataCollection_Agent)` | Aggregates the 10 mandatory importer elements from trade case variables. | Consolidated 10+2 data package |
+| **PGA Coordination Agent**<br>`(PGA_CoordinationAgent)` | Compiles and submits required declarations to partner agencies (FDA, USDA, FCC). | Prior notices, agency submission status logs |
+| **OFAC Screening Agent**<br>`(OFAC_Screening_Agent)` | Screens all logistics entities (forwarder, carrier, notify party, bank) against OFAC SDN lists. | Entity screening logs, clear/block/hold decisions |
 
 ---
 
