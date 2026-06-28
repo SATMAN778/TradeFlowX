@@ -164,7 +164,7 @@ export async function completeTask(
   action: string,
 ): Promise<void> {
   await tasksSvc.complete({
-    type: 'App' as any,
+    type: 'AppTask' as any,
     taskId: Number(taskId),
     data,
     action
