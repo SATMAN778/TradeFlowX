@@ -22,7 +22,7 @@ def create_task(title: str, task_code: str, state_dict: dict) -> str:
         task = sdk.tasks.create(
             title=title,
             data=state_dict,
-            app_name="maestro-app"
+            app_name="tradeflow-portal"
         )
         logger.info(f"Successfully created Action Center task ID: {task.id}")
         return str(task.id)

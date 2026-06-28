@@ -1,0 +1,241 @@
+{
+    "id": "case-TradeXCase0",
+    "version": "23.0.0",
+    "name": "TradeXCase",
+    "description": "Manages the full cross-border import lifecycle — PO intake, ISF 10+2 filing, HTS classification, PGA screening, OFAC denied-party screening, CBP customs entry, and post-entry duty reconciliation.",
+    "metadata": {
+        "caseIdentifier": "=vars.poNumber",
+        "caseIdentifierType": "external",
+        "caseAppEnabled": true,
+        "publishVersion": 2,
+        "caseUnifiedSchemaEnabled": true,
+        "caseDirectlyPassTaskOutputs": true,
+        "intsvcActivityConfig": "v2"
+    },
+    "bindings": [],
+    "variables": {
+        "inputs": [],
+        "outputs": [],
+        "inputOutputs": [
+            { "id": "triggerSource", "var": "triggerSource", "name": "triggerSource", "type": "string", "default": "MANUAL" },
+            { "id": "emailSubject", "var": "emailSubject", "name": "emailSubject", "type": "string", "default": "" },
+            { "id": "senderEmail", "var": "senderEmail", "name": "senderEmail", "type": "string", "default": "" },
+            { "id": "sfRecordId", "var": "sfRecordId", "name": "sfRecordId", "type": "string", "default": "" },
+            { "id": "poNumber", "var": "poNumber", "name": "poNumber", "type": "string", "default": "" },
+            { "id": "supplierName", "var": "supplierName", "name": "supplierName", "type": "string", "default": "" },
+            { "id": "supplierAddress", "var": "supplierAddress", "name": "supplierAddress", "type": "string", "default": "" },
+            { "id": "supplierCountry", "var": "supplierCountry", "name": "supplierCountry", "type": "string", "default": "" },
+            { "id": "goodsDescription", "var": "goodsDescription", "name": "goodsDescription", "type": "string", "default": "" },
+            { "id": "quantity", "var": "quantity", "name": "quantity", "type": "integer", "default": "0" },
+            { "id": "unitPriceUsd", "var": "unitPriceUsd", "name": "unitPriceUsd", "type": "float", "default": "0" },
+            { "id": "totalValueUsd", "var": "totalValueUsd", "name": "totalValueUsd", "type": "float", "default": "0" },
+            { "id": "incoterms", "var": "incoterms", "name": "incoterms", "type": "string", "default": "" },
+            { "id": "expectedShipDate", "var": "expectedShipDate", "name": "expectedShipDate", "type": "date", "default": "" },
+            { "id": "portOfLoading", "var": "portOfLoading", "name": "portOfLoading", "type": "string", "default": "" },
+            { "id": "portOfEntry", "var": "portOfEntry", "name": "portOfEntry", "type": "string", "default": "" },
+            { "id": "blNumber", "var": "blNumber", "name": "blNumber", "type": "string", "default": "" },
+            { "id": "cooDeclaration", "var": "cooDeclaration", "name": "cooDeclaration", "type": "string", "default": "" },
+            { "id": "cooVerified", "var": "cooVerified", "name": "cooVerified", "type": "boolean", "default": "false" },
+            { "id": "transshipmentFlag", "var": "transshipmentFlag", "name": "transshipmentFlag", "type": "boolean", "default": "false" },
+            { "id": "transshipmentRisk", "var": "transshipmentRisk", "name": "transshipmentRisk", "type": "string", "default": "LOW" },
+            { "id": "poDataComplete", "var": "poDataComplete", "name": "poDataComplete", "type": "boolean", "default": "false" },
+            { "id": "cooVerificationRequired", "var": "cooVerificationRequired", "name": "cooVerificationRequired", "type": "boolean", "default": "false" },
+            { "id": "documentList", "var": "documentList", "name": "documentList", "type": "jsonSchema", "default": "" },
+            { "id": "isfStatus", "var": "isfStatus", "name": "isfStatus", "type": "string", "default": "PENDING" },
+            { "id": "isfTxnNumber", "var": "isfTxnNumber", "name": "isfTxnNumber", "type": "string", "default": "" },
+            { "id": "isfDeadlineUtc", "var": "isfDeadlineUtc", "name": "isfDeadlineUtc", "type": "string", "default": "" },
+            { "id": "isfDataComplete", "var": "isfDataComplete", "name": "isfDataComplete", "type": "boolean", "default": "false" },
+            { "id": "isfAmendmentRequired", "var": "isfAmendmentRequired", "name": "isfAmendmentRequired", "type": "boolean", "default": "false" },
+            { "id": "htsCode", "var": "htsCode", "name": "htsCode", "type": "string", "default": "" },
+            { "id": "htsCandidates", "var": "htsCandidates", "name": "htsCandidates", "type": "jsonSchema", "default": "" },
+            { "id": "htsConfidence", "var": "htsConfidence", "name": "htsConfidence", "type": "float", "default": "0" },
+            { "id": "dutyRatePct", "var": "dutyRatePct", "name": "dutyRatePct", "type": "float", "default": "0" },
+            { "id": "dutyAmountUsd", "var": "dutyAmountUsd", "name": "dutyAmountUsd", "type": "float", "default": "0" },
+            { "id": "mpfAmount", "var": "mpfAmount", "name": "mpfAmount", "type": "float", "default": "0" },
+            { "id": "hmfAmount", "var": "hmfAmount", "name": "hmfAmount", "type": "float", "default": "0" },
+            { "id": "pgaFlag", "var": "pgaFlag", "name": "pgaFlag", "type": "boolean", "default": "false" },
+            { "id": "pgaAgencies", "var": "pgaAgencies", "name": "pgaAgencies", "type": "jsonSchema", "default": "" },
+            { "id": "pgaStatus", "var": "pgaStatus", "name": "pgaStatus", "type": "string", "default": "NOT_REQUIRED" },
+            { "id": "partyNames", "var": "partyNames", "name": "partyNames", "type": "jsonSchema", "default": "" },
+            { "id": "ofacScreeningResults", "var": "ofacScreeningResults", "name": "ofacScreeningResults", "type": "jsonSchema", "default": "" },
+            { "id": "ofacMatchScore", "var": "ofacMatchScore", "name": "ofacMatchScore", "type": "float", "default": "0" },
+            { "id": "ofacClearStatus", "var": "ofacClearStatus", "name": "ofacClearStatus", "type": "string", "default": "PENDING" },
+            { "id": "entryNumber", "var": "entryNumber", "name": "entryNumber", "type": "string", "default": "" },
+            { "id": "cbpStatus", "var": "cbpStatus", "name": "cbpStatus", "type": "string", "default": "PENDING" },
+            { "id": "examType", "var": "examType", "name": "examType", "type": "string", "default": "" },
+            { "id": "cf28Questions", "var": "cf28Questions", "name": "cf28Questions", "type": "jsonSchema", "default": "" },
+            { "id": "cf29ActionType", "var": "cf29ActionType", "name": "cf29ActionType", "type": "string", "default": "" },
+            { "id": "estimatedDutyUsd", "var": "estimatedDutyUsd", "name": "estimatedDutyUsd", "type": "float", "default": "0" },
+            { "id": "actualDutyUsd", "var": "actualDutyUsd", "name": "actualDutyUsd", "type": "float", "default": "0" },
+            { "id": "dutyVarianceUsd", "var": "dutyVarianceUsd", "name": "dutyVarianceUsd", "type": "float", "default": "0" },
+            { "id": "dutyVariancePct", "var": "dutyVariancePct", "name": "dutyVariancePct", "type": "float", "default": "0" },
+            { "id": "documentationComplete", "var": "documentationComplete", "name": "documentationComplete", "type": "boolean", "default": "false" },
+            { "id": "archivalStatus", "var": "archivalStatus", "name": "archivalStatus", "type": "string", "default": "PENDING" },
+            { "id": "landedCostPosted", "var": "landedCostPosted", "name": "landedCostPosted", "type": "boolean", "default": "false" },
+            { "id": "dutySavingsOpportunity", "var": "dutySavingsOpportunity", "name": "dutySavingsOpportunity", "type": "string", "default": "NONE" },
+            { "id": "estimatedSavingsUsd", "var": "estimatedSavingsUsd", "name": "estimatedSavingsUsd", "type": "float", "default": "0" },
+            { "id": "caseState", "var": "caseState", "name": "caseState", "type": "string", "default": "ACTIVE" }
+        ]
+    },
+    "nodes": [
+        {
+            "id": "trig-Email0001",
+            "type": "case-management:Trigger",
+            "data": {
+                "label": "Trade Order Email Received",
+                "description": "Fires when a trade order email is received in the monitored Outlook 365 inbox",
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "uipath": { "serviceType": "Intsvc.EventTrigger" }
+            }
+        },
+        {
+            "id": "trig-SFDC00001",
+            "type": "case-management:Trigger",
+            "data": {
+                "label": "Salesforce Trade Order Created",
+                "description": "Fires when a new Trade Order record is created in Salesforce CRM",
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "uipath": { "serviceType": "Intsvc.EventTrigger" }
+            }
+        },
+        {
+            "id": "Stage_Ordr01",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "Trade Order Intake",
+                "description": "Initiates on email or Salesforce trigger. Fetches and validates PO fields, saves documents to UiPath Storage, runs COO transshipment risk classification.",
+                "isRequired": true,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{ "id": "tS1L0PoDat", "elementId": "Stage_Ordr01-tS1L0PoDat", "displayName": "PO Data Fetch", "isRequired": true, "shouldRunOnlyOnce": true, "type": "api-workflow", "data": {} }],
+                    [{ "id": "tS1L1EmDoc", "elementId": "Stage_Ordr01-tS1L1EmDoc", "displayName": "Email Document Collector", "isRequired": false, "shouldRunOnlyOnce": true, "type": "agent", "data": {} }],
+                    [{ "id": "tS1L2CooAg", "elementId": "Stage_Ordr01-tS1L2CooAg", "displayName": "COO Classification Agent", "isRequired": true, "shouldRunOnlyOnce": true, "type": "agent", "data": {} }],
+                    [{ "id": "tS1L3HT001", "elementId": "Stage_Ordr01-tS1L3HT001", "displayName": "HT-01 Missing PO Fields", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS1L4HT002", "elementId": "Stage_Ordr01-tS1L4HT002", "displayName": "HT-02 COO Verification", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }]
+                ]
+            }
+        },
+        {
+            "id": "Stage_ISFf01",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "ISF 10+2 Filing",
+                "description": "Prepares, submits, and monitors the ISF 10+2 filing to CBP ACE. Handles missing elements, Do Not Load, and material amendments.",
+                "isRequired": true,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{ "id": "tS2L0IsfCl", "elementId": "Stage_ISFf01-tS2L0IsfCl", "displayName": "ISF Data Collector Agent", "isRequired": true, "shouldRunOnlyOnce": true, "type": "agent", "data": {} }],
+                    [{ "id": "tS2L1AceIs", "elementId": "Stage_ISFf01-tS2L1AceIs", "displayName": "ACE ISF Filing Workflow", "isRequired": true, "shouldRunOnlyOnce": true, "type": "api-workflow", "data": {} }],
+                    [{ "id": "tS2L2AcePl", "elementId": "Stage_ISFf01-tS2L2AcePl", "displayName": "ACE ISF Status Poller", "isRequired": true, "shouldRunOnlyOnce": false, "type": "rpa", "data": {} }],
+                    [{ "id": "tS2L3HT003", "elementId": "Stage_ISFf01-tS2L3HT003", "displayName": "HT-03 Missing ISF Elements", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS2L4HT004", "elementId": "Stage_ISFf01-tS2L4HT004", "displayName": "HT-04 ISF Do Not Load", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS2L5HT005", "elementId": "Stage_ISFf01-tS2L5HT005", "displayName": "HT-05 ISF Material Amendment", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }]
+                ]
+            }
+        },
+        {
+            "id": "Stage_HTSc01",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "HTS Classification & Duty",
+                "description": "IDP extraction, AI HTS classification (LangGraph), duty rate lookup, and PGA flag evaluation. Human review for confidence below 90%.",
+                "isRequired": true,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{ "id": "tS3L0IdpPp", "elementId": "Stage_HTSc01-tS3L0IdpPp", "displayName": "IDP Document Pipeline", "isRequired": true, "shouldRunOnlyOnce": true, "type": "rpa", "data": {} }],
+                    [{ "id": "tS3L1HtsCl", "elementId": "Stage_HTSc01-tS3L1HtsCl", "displayName": "HTS Classification Agent", "isRequired": true, "shouldRunOnlyOnce": true, "type": "agent", "data": {} }],
+                    [{ "id": "tS3L2DutyR", "elementId": "Stage_HTSc01-tS3L2DutyR", "displayName": "Duty Rate Lookup Workflow", "isRequired": true, "shouldRunOnlyOnce": true, "type": "api-workflow", "data": {} }],
+                    [{ "id": "tS3L3PgaFl", "elementId": "Stage_HTSc01-tS3L3PgaFl", "displayName": "PGA Flag Workflow", "isRequired": true, "shouldRunOnlyOnce": true, "type": "api-workflow", "data": {} }],
+                    [{ "id": "tS3L4HT006", "elementId": "Stage_HTSc01-tS3L4HT006", "displayName": "HT-06 HTS Review 70-90%", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS3L5HT007", "elementId": "Stage_HTSc01-tS3L5HT007", "displayName": "HT-07 Manual HTS Classification", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS3L6HT008", "elementId": "Stage_HTSc01-tS3L6HT008", "displayName": "HT-08 PGA Documentation Required", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }]
+                ]
+            }
+        },
+        {
+            "id": "Stage_PGAs01",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "PGA Screening",
+                "description": "Conditional stage — runs only when pgaFlag=true. CrewAI PGA Coordinator manages agency submissions; RPA polls for approval/hold/refusal.",
+                "isRequired": false,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{ "id": "tS4L0PgaCo", "elementId": "Stage_PGAs01-tS4L0PgaCo", "displayName": "PGA Agency Coordinator", "isRequired": true, "shouldRunOnlyOnce": true, "type": "api-workflow", "data": {} }],
+                    [{ "id": "tS4L1PgaPl", "elementId": "Stage_PGAs01-tS4L1PgaPl", "displayName": "PGA Status Polling Bot", "isRequired": true, "shouldRunOnlyOnce": false, "type": "rpa", "data": {} }],
+                    [{ "id": "tS4L2HT009", "elementId": "Stage_PGAs01-tS4L2HT009", "displayName": "HT-09 PGA Hold", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS4L3HT010", "elementId": "Stage_PGAs01-tS4L3HT010", "displayName": "HT-10 PGA Refusal", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }]
+                ]
+            }
+        },
+        {
+            "id": "Stage_OFAC01",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "OFAC & Denied-Party Screening",
+                "description": "Party extraction agent, LangGraph transshipment risk refinement, and OFAC SDN API screening of all parties. Human review for fuzzy matches and confirmed hits.",
+                "isRequired": true,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{ "id": "tS5L0PtyEx", "elementId": "Stage_OFAC01-tS5L0PtyEx", "displayName": "Party Extraction Agent", "isRequired": true, "shouldRunOnlyOnce": true, "type": "agent", "data": {} }],
+                    [{ "id": "tS5L1TrsRk", "elementId": "Stage_OFAC01-tS5L1TrsRk", "displayName": "Transshipment Risk Agent", "isRequired": true, "shouldRunOnlyOnce": true, "type": "agent", "data": {} }],
+                    [{ "id": "tS5L2OfacS", "elementId": "Stage_OFAC01-tS5L2OfacS", "displayName": "OFAC SDN API Workflow", "isRequired": true, "shouldRunOnlyOnce": true, "type": "api-workflow", "data": {} }],
+                    [{ "id": "tS5L3HT011", "elementId": "Stage_OFAC01-tS5L3HT011", "displayName": "HT-11 OFAC Fuzzy Match", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS5L4HT012", "elementId": "Stage_OFAC01-tS5L4HT012", "displayName": "HT-12 Confirmed OFAC Hit", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }]
+                ]
+            }
+        },
+        {
+            "id": "Stage_CBPe01",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "Customs Entry Filing & CBP Clearance",
+                "description": "CBP Form 3461 filing via RPA, ACE status polling, duty calculation, and exam/CF-28/CF-29 human task handling.",
+                "isRequired": true,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{ "id": "tS6L0Cbp34", "elementId": "Stage_CBPe01-tS6L0Cbp34", "displayName": "CBP 3461 Form Bot", "isRequired": true, "shouldRunOnlyOnce": true, "type": "rpa", "data": {} }],
+                    [{ "id": "tS6L1CbpSt", "elementId": "Stage_CBPe01-tS6L1CbpSt", "displayName": "CBP Status Polling Workflow", "isRequired": true, "shouldRunOnlyOnce": false, "type": "api-workflow", "data": {} }],
+                    [{ "id": "tS6L2DtyCs", "elementId": "Stage_CBPe01-tS6L2DtyCs", "displayName": "Duty Calculation Workflow", "isRequired": true, "shouldRunOnlyOnce": true, "type": "api-workflow", "data": {} }],
+                    [{ "id": "tS6L3HT013", "elementId": "Stage_CBPe01-tS6L3HT013", "displayName": "HT-13 CBP Exam Selected", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS6L4HT014", "elementId": "Stage_CBPe01-tS6L4HT014", "displayName": "HT-14 CF-28 Unanswered Questions", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS6L5HT015", "elementId": "Stage_CBPe01-tS6L5HT015", "displayName": "HT-15 CF-29 CBP Action", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }]
+                ]
+            }
+        },
+        {
+            "id": "Stage_PostE1",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "Document Management & Post-Entry",
+                "description": "DMS archival of all documents, ERP landed cost posting, duty savings analysis, and final human reviews for discrepancies, variances, and savings opportunities.",
+                "isRequired": true,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{ "id": "tS7L0DmsAr", "elementId": "Stage_PostE1-tS7L0DmsAr", "displayName": "DMS Archive Workflow", "isRequired": true, "shouldRunOnlyOnce": true, "type": "rpa", "data": {} }],
+                    [{ "id": "tS7L1ErpLc", "elementId": "Stage_PostE1-tS7L1ErpLc", "displayName": "ERP Landed Cost Workflow", "isRequired": true, "shouldRunOnlyOnce": true, "type": "rpa", "data": {} }],
+                    [{ "id": "tS7L2DtySv", "elementId": "Stage_PostE1-tS7L2DtySv", "displayName": "Duty Savings Analysis Agent", "isRequired": true, "shouldRunOnlyOnce": true, "type": "agent", "data": {} }],
+                    [{ "id": "tS7L3HT016", "elementId": "Stage_PostE1-tS7L3HT016", "displayName": "HT-16 Document Discrepancy", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS7L4HT017", "elementId": "Stage_PostE1-tS7L4HT017", "displayName": "HT-17 Duty Variance Review", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS7L5HT018", "elementId": "Stage_PostE1-tS7L5HT018", "displayName": "HT-18 Duty Savings Opportunity", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }]
+                ]
+            }
+        }
+    ],
+    "edges": [],
+    "layout": {}
+}

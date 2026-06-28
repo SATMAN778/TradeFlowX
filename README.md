@@ -19,19 +19,50 @@ Built on UiPath Maestro, the platform acts as a **digital Import Operations Mana
 
 ---
 
-## The Problem
+## TradeX Portal Dashboard
 
-Importing goods from the UAE into the USA spans multiple stakeholders, compliance frameworks, document sets, and regulatory deadlines — all running concurrently.
+The **TradeX Portal** is a Vite + React + TypeScript web application that serves as the central control room for import operations managers. It provides a visual dashboard of active cases, direct database records via the Data Fabric Registry, and a dedicated Task Inbox for human-in-the-loop approvals.
 
-| Challenge | Impact |
+| Main Dashboard Overview | Data Fabric Case Details |
+| :---: | :---: |
+| ![TradeX Portal Main Dashboard](docs/images/dashboard_main.png) | ![Case Details Panel](docs/images/case_details_view.png) |
+
+| Task Workstation & Approval Inbox |
+| :---: |
+| ![Action Tasks Workstation](docs/images/task_review_view.png) |
+
+---
+
+## The Problem & Manual Process Today
+
+Importing goods from the UAE (Dubai/JAFZA) into the USA is a highly regulated, high-stakes supply chain operation. The transaction spans multiple cross-border stakeholders, compliance frameworks, documents, and regulatory deadlines. 
+
+### Key Corridor Metrics (PPT-Ready)
+*   🌐 **US–UAE trade hit $47.9B in 2024, growing 10.4% YoY** — yet the compliance infrastructure managing this corridor still runs on manual broker workflows and email chains that cannot scale. *(USTR, 2024)*
+*   📋 **HTS misclassification drives 42% of all CBP penalties** — with Section 301 and IEEPA tariffs stacking to 40%+, one wrong digit can shift your effective duty rate by 20–50 percentage points overnight. *(Greenwich Mercantile, 2026)*
+*   🚢 **60% of all GCC re-exports flow through UAE Free Zones** — making every JAFZA shipment a CBP scrutiny target for undeclared China/India origin, Section 301 exposure, and OFAC transshipment risk. *(UAE Customs Guide, 2026)*
+*   ⚠️ **Late ISF filing costs $5,000–$10,000 per shipment** — and a manual broker handling 40–60 entries a month cannot guarantee the 24-hour Jebel Ali deadline on every ocean vessel departure. *(CBP / Great Lakes Customs Law)*
+
+### What is Being Done Manually Today?
+
+Currently, import compliance operations rely heavily on fragmented manual workflows:
+*   📧 **Brokers collect shipment documents via email and manually re-key data into ACE** — commercial invoices, B/L, COO, and packing lists arrive as PDF attachments with no structured extraction; a single entry takes 2–4 hours of manual preparation with brokers reviewing just 5–10% of HTS codes before submission. *(Flexport Customs Brokerage — flexport.com, 2025)*
+*   ⏰ **ISF 10+2 is filed manually by a customs broker racing a 24-hour clock** — brokers chase suppliers for missing data elements over email, hand-key all 10+2 fields into ACE, and rely on personal reminders rather than automated SLA enforcement to avoid the $5,000–$10,000 per-shipment penalty. *(Great Lakes Customs Law — greatlakescustomslaw.com, 2026)*
+*   🔍 **HTS classification is done by a human expert per shipment, from scratch** — brokers manually search the 17,000-code HTSUS schedule, cross-reference CBP CROSS rulings, and check Section 301 lists individually; no institutional memory carries over from prior shipments of the same product. *(US International Trade Commission — hts.usitc.gov)*
+*   🚨 **OFAC screening is performed at supplier onboarding only — then never again** — most importers run a one-time manual name search on OFAC's public web tool; the SDN list updates multiple times per week, meaning a supplier cleared at setup may be sanctioned today with no re-check triggered. *(OFAC Treasury Sanctions List Search — ofac.treasury.gov · Sanctions Lawyers, 2026)*
+*   🏛️ **PGA requirements are researched manually per shipment across 5+ separate agency portals** — FDA, USDA, CPSC, EPA and FCC each maintain independent submission systems; importers discover PGA holds only after the container arrives at port, with demurrage running at $200–$400/day while documentation is gathered. *(USA Customs Clearance PGA Guide — usacustomsclearance.com · FreightAmigo, 2026)*
+*   📂 **Post-entry reconciliation and duty payments are manually posted to ERP by the finance team** — CBP 7501 entry summaries, broker fee invoices, and duty calculations are reconciled via spreadsheet with no automated cross-check against declared values; 5-year record retention is managed through shared drives and email folders. *(Clearit USA Import Lifecycle — clearitusa.com, 2025)*
+
+
+| Manual Challenge | Impact of Manual Failure |
 |---|---|
-| ISF 10+2 must file **24 hrs before vessel loads** at Jebel Ali | Missed deadlines trigger CBP penalties ($5,000–$10,000/violation) |
-| HTS classification errors | Wrong duty rates, CBP exams, post-entry liquidation amendments |
-| JAFZA transshipment risk | Goods may originate in China; Section 301 tariffs misapplied or missed |
-| OFAC / BIS / SAM.gov screening | Manual checks miss fuzzy-name hits; record retention gaps |
-| Fragmented document handling | Discrepancies between CI, B/L, and packing list discovered at port |
+| ISF 10+2 must file **24 hrs before vessel loads** at Jebel Ali | Missed deadlines trigger CBP penalties ($5,000–$10,000/violation) and cargo lading holds. |
+| HTS classification errors | Wrong duty rates applied, leading to CBP exams, delays, and post-entry liquidation penalties. |
+| JAFZA transshipment risk | Chinese-origin goods transiting UAE escape Section 301 tariffs, triggering major trade fraud violations. |
+| OFAC / BIS / SAM.gov screening | Manual list checking misses fuzzy name matches, causing severe sanctions compliance violations. |
+| Fragmented document handling | Discrepancies between invoice and packing list are only discovered at the port of entry, halting clearance. |
 
-Traditional RPA handles individual tasks. **TradeFlow Maestro AI orchestrates the entire operation.**
+Traditional task automation cannot solve this. **TradeFlow Maestro AI orchestrates the entire import clearance operation.**
 
 ---
 
@@ -591,6 +622,55 @@ The result is a next-generation **Agentic Supply Chain Operations** demonstratio
 - [ ] Multi-country import support (EU, India, UK corridors)
 - [ ] AI shipment risk forecasting (ADD/CVD initiation risk, Section 301 expansion watch)
 - [ ] Protest filing automation (CF-29 protest deadline tracking + auto-draft)
+
+---
+
+## Compliance References & Key Terms
+
+### Key Reference URLs
+
+| Resource | URL |
+|---|---|
+| CBP Import Process | [cbp.gov/trade/basic-import-export](https://www.cbp.gov/trade/basic-import-export) |
+| ACE Portal | [cbp.gov/trade/automated](https://www.cbp.gov/trade/automated) |
+| ISF 10+2 Filing | [cbp.gov/cargo-security/importer-security-filing-102](https://www.cbp.gov/border-security/ports-entry/cargo-security/importer-security-filing-102) |
+| HTS Schedule | [hts.usitc.gov](https://hts.usitc.gov) |
+| CBP CROSS Rulings | [rulings.cbp.gov](https://rulings.cbp.gov) |
+| Section 301 Tariffs | [ustr.gov/enforcement/section-301-investigations](https://www.ustr.gov/issue-areas/enforcement/section-301-investigations) |
+| ADD/CVD Orders | [enforceandprotect.trade.gov](https://enforceandprotect.trade.gov) |
+| OFAC SDN Search | [sanctionssearch.ofac.treas.gov](https://sanctionssearch.ofac.treas.gov) |
+| BIS Entity List | [bis.doc.gov/parties-of-concern](https://www.bis.doc.gov/index.php/policy-guidance/lists-of-parties-of-concern) |
+| SAM.gov Excluded Parties | [sam.gov](https://www.sam.gov) |
+| FDA Prior Notice | [fda.gov/food/importing-food/prior-notice](https://www.fda.gov/food/importing-food/prior-notice) |
+| USDA APHIS | [aphis.usda.gov/import-export](https://www.aphis.usda.gov/import-export) |
+| JAFZA Free Zone | [jafza.ae](https://www.jafza.ae) |
+| Dubai Customs | [dubaicustoms.gov.ae](https://www.dubaicustoms.gov.ae) |
+| UAE Certificate of Origin | [dubaichamber.com/certificate-of-origin](https://www.dubaichamber.com/services/certificate-of-origin) |
+
+### Key Import Terms
+
+| Term | What It Means |
+|---|---|
+| **ISF 10+2** | 10 importer + 2 carrier data elements filed 24 hrs before vessel loads at Jebel Ali |
+| **HTS Code** | 10-digit product classification code that determines your US duty rate |
+| **MFN Rate** | Standard duty duty rate applied to WTO members (including UAE) |
+| **Section 301** | Extra US tariff (7.5%–100%) on Chinese-origin goods — applies even via UAE transit |
+| **ADD / CVD** | Anti-Dumping / Countervailing Duties on subsidized or below-market-price imports |
+| **CBP 3461** | Entry form filed to release cargo from port before full duty assessment |
+| **CBP 7501** | Entry Summary — final duty declaration filed within 10 working days of entry |
+| **MPF** | Merchandise Processing Fee — 0.3464% of value (min $31.67 / max $614.35) |
+| **HMF** | Harbor Maintenance Fee — 0.125% of value on all ocean cargo |
+| **IOR** | Importer of Record — entity legally responsible for CBP compliance and duty payment |
+| **ACE** | CBP's single digital window for all US import, export and PGA filings |
+| **PGA** | Partner Government Agency — FDA, USDA, EPA, CPSC, FCC regulate specific goods |
+| **OFAC SDN** | Specially Designated Nationals list — transacting with any listed party is prohibited |
+| **JAFZA** | Jebel Ali Free Zone — UAE's largest FTZ; CBP scrutinizes all outbound shipments |
+| **COO** | Certificate of Origin — determines tariff treatment and Section 301 applicability |
+| **Transshipment** | Routing goods via UAE to hide true origin — triggers CBP enhanced scrutiny |
+| **C-TPAT** | CBP trusted trader program — fewer exams, faster clearance for certified importers |
+| **CF-28** | CBP Request for Information — issued when CBP needs clarification post-entry |
+| **CF-29** | CBP Notice of Action — formal duty change or penalty notice requiring response |
+| **Substantial Transformation** | Legal test for UAE origin — goods must be genuinely manufactured, not repackaged |
 
 ---
 
