@@ -75,7 +75,7 @@ export const CaseTimeline = ({ auditEntries, maestroEvents = [] }: CaseTimelineP
             </p>
           )}
           {displayed.map((event, i) => (
-            <div key={event.id} style={{ display: 'flex', gap: '12px', paddingBottom: i < displayed.length - 1 ? '12px' : '0' }}>
+            <div key={`${event.id}-${i}`} style={{ display: 'flex', gap: '12px', paddingBottom: i < displayed.length - 1 ? '12px' : '0' }}>
               {/* Timeline spine */}
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, width: '16px' }}>
                 <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: SOURCE_COLORS[event.source], marginTop: '3px', flexShrink: 0 }} />

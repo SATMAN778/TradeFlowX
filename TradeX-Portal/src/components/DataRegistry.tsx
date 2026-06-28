@@ -332,7 +332,7 @@ export default function DataRegistry({ onInspectCase }: DataRegistryProps) {
             <tbody>
               {filteredRecords.map((rec, i) => (
                 <tr
-                  key={rec.id || rec.CaseRef || i}
+                  key={`${rec.id || rec.CaseRef || 'rec'}-${i}`}
                   style={{
                     borderBottom: '1px solid var(--glass-border)',
                     cursor: 'pointer',

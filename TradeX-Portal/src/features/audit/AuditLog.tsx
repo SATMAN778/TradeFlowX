@@ -138,7 +138,7 @@ export const AuditLog = () => {
               {paginated.map((e, i) => {
                 const color = ACTION_COLORS[e.ActionType] || 'var(--text-secondary)';
                 return (
-                  <tr key={e.id || i} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+                  <tr key={`${e.id || 'audit'}-${i}`} style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
                     <td style={{ padding: '10px 14px', fontSize: '0.78rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
                       {new Date(e.RecordedAt).toLocaleString()}
                     </td>
