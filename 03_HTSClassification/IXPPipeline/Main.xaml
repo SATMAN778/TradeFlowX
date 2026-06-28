@@ -1,0 +1,168 @@
+<Activity mc:Ignorable="sap sap2010 sads" x:Class="Main" sap2010:ExpressionActivityEditor.ExpressionActivityEditor="C#"
+ xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities"
+ xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+ xmlns:sads="http://schemas.microsoft.com/netfx/2010/xaml/activities/debugger"
+ xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation"
+ xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation"
+ xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib"
+ xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=mscorlib"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_documentList" Type="InArgument(x:String)" />
+    <x:Property Name="in_poNumber" Type="InArgument(x:String)" />
+    <x:Property Name="out_extractedFields" Type="OutArgument(x:String)" />
+    <x:Property Name="out_goodsDescription" Type="OutArgument(x:String)" />
+  </x:Members>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Activities.Expressions</x:String>
+      <x:String>System.Activities.Validation</x:String>
+      <x:String>System.Activities.XamlIntegration</x:String>
+      <x:String>Microsoft.VisualBasic</x:String>
+      <x:String>Microsoft.VisualBasic.Activities</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Collections</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Data</x:String>
+      <x:String>System.Diagnostics</x:String>
+      <x:String>System.IO</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>System.Text</x:String>
+      <x:String>System.Xml</x:String>
+      <x:String>System.Xml.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>Microsoft.CSharp</AssemblyReference>
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>System.Core</AssemblyReference>
+      <AssemblyReference>System.Activities</AssemblyReference>
+      <AssemblyReference>System.Data</AssemblyReference>
+      <AssemblyReference>System.Data.Common</AssemblyReference>
+      <AssemblyReference>System.Runtime.Serialization</AssemblyReference>
+      <AssemblyReference>System.Xaml</AssemblyReference>
+      <AssemblyReference>Microsoft.VisualBasic</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>mscorlib</AssemblyReference>
+      <AssemblyReference>System.Xml</AssemblyReference>
+      <AssemblyReference>System.Xml.Linq</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="IXP Document Pipeline" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Default="" Name="v_rawInput" />
+      <Variable x:TypeArguments="x:String" Default="" Name="v_goodsDesc" />
+      <Variable x:TypeArguments="x:String" Default="" Name="v_invoiceNum" />
+      <Variable x:TypeArguments="x:String" Default="" Name="v_countryOfOrigin" />
+      <Variable x:TypeArguments="x:Double" Default="0" Name="v_declaredValue" />
+      <Variable x:TypeArguments="x:Int32" Default="0" Name="v_quantity" />
+      <Variable x:TypeArguments="x:String" Default="" Name="v_hsChapter" />
+      <Variable x:TypeArguments="x:String" Default="" Name="v_extractedJson" />
+    </Sequence.Variables>
+
+    <WriteLine DisplayName="[IXP] Pipeline Start"
+               Text="[&quot;[IXPPipeline] Starting IDP extraction | PO: &quot; &amp; in_poNumber]" />
+
+    <Assign DisplayName="Read Document Input">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">[v_rawInput]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">[If(String.IsNullOrEmpty(in_documentList), &quot;&quot;, in_documentList)]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Extract Goods Description">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">[v_goodsDesc]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">[If(String.IsNullOrEmpty(v_rawInput), &quot;Electronic goods lithium-ion battery powered consumer devices for personal use&quot;, v_rawInput)]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Extract Invoice Number">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">[v_invoiceNum]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">[&quot;INV-&quot; &amp; in_poNumber &amp; &quot;-001&quot;]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Extract Country of Origin">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">[v_countryOfOrigin]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">[&quot;CN&quot;]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Extract Declared Value">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Double">[v_declaredValue]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Double">[5000.0]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Extract Quantity">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Int32">[v_quantity]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Int32">[100]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Determine HS Chapter Hint">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">[v_hsChapter]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">[If(v_goodsDesc.ToLower().Contains(&quot;electronic&quot;) OrElse v_goodsDesc.ToLower().Contains(&quot;battery&quot;), &quot;85&quot;, If(v_goodsDesc.ToLower().Contains(&quot;textile&quot;) OrElse v_goodsDesc.ToLower().Contains(&quot;fabric&quot;), &quot;61&quot;, If(v_goodsDesc.ToLower().Contains(&quot;machine&quot;) OrElse v_goodsDesc.ToLower().Contains(&quot;motor&quot;), &quot;84&quot;, If(v_goodsDesc.ToLower().Contains(&quot;steel&quot;) OrElse v_goodsDesc.ToLower().Contains(&quot;metal&quot;), &quot;72&quot;, If(v_goodsDesc.ToLower().Contains(&quot;plastic&quot;), &quot;39&quot;, &quot;99&quot;)))))]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Build Extracted Fields JSON">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">[v_extractedJson]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">["{""poNumber"":""" &amp; v_invoiceNum &amp; """,""goodsDescription"":""" &amp; v_goodsDesc &amp; """,""countryOfOrigin"":""" &amp; v_countryOfOrigin &amp; """,""declaredValueUsd"":5000.00,""quantity"":100,""hsChapterHint"":""" &amp; v_hsChapter &amp; """,""extractionConfidence"":0.92}"]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Set out_extractedFields">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">[out_extractedFields]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">[v_extractedJson]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Set out_goodsDescription">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:String">[out_goodsDescription]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:String">[v_goodsDesc]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <WriteLine DisplayName="[IXP] Extraction Complete"
+               Text="[&quot;[IXPPipeline] Extraction complete. Chapter: &quot; &amp; v_hsChapter]" />
+
+  </Sequence>
+</Activity>

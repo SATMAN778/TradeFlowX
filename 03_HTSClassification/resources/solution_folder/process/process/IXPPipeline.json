@@ -1,0 +1,45 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "IXPPipeline",
+    "kind": "process",
+    "type": "process",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "654d89a3-6bef-42c1-bc8a-f055ac836bca",
+    "isOverridable": true,
+    "dependencies": [
+      {
+        "kind": "package",
+        "name": "IXPPipeline"
+      }
+    ],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Process",
+      "name": "IXPPipeline",
+      "package": {
+        "key": "6444b762-21e7-434c-aecc-aa17cc3ac3f1"
+      },
+      "packageName": "HTSClassificationDutySolution.process.IXPPipeline",
+      "jobPriority": "Medium",
+      "jobRecording": "Disabled",
+      "targetFrameworkValue": "Portable",
+      "duration": 40,
+      "frequency": 500,
+      "quality": 100,
+      "remoteControlAccess": "None",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "18394a23-bf7b-4165-a2d5-ab459d81314f",
+    "files": []
+  }
+}

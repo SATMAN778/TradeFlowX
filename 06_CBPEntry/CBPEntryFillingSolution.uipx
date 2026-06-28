@@ -1,0 +1,22 @@
+{
+  "DocVersion": "1.0.0",
+  "StudioMinVersion": "2025.10.0",
+  "SolutionId": "f7837a88-6c86-4b88-b72f-0f1eeae96a9d",
+  "Projects": [
+    {
+      "Type": "Api",
+      "ProjectRelativePath": "CBPStatusPoller/project.json",
+      "Id": "072250cf-4124-48ef-b5fd-ef61a5e5164c"
+    },
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "CBP3461FormBot/project.uiproj",
+      "Id": "9c490342-0565-4417-850f-1ebe219542a0"
+    },
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "CBPDutyCalculation/project.uiproj",
+      "Id": "1581d1f4-bcf3-4167-9a26-c665af5efb2d"
+    }
+  ]
+}

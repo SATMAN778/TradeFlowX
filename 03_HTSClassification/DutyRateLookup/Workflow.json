@@ -1,0 +1,134 @@
+{
+  "id": "duty-rate-lookup-workflow",
+  "version": "1.0.0",
+  "specVersion": "0.8",
+  "name": "DutyRateLookup",
+  "description": "Calculates US import duty rates for a given HTS code. Applies MFN base rate, Section 301 China tariffs, ADD/CVD margins, MPF and HMF federal fees.",
+  "start": "LookupHtsRates",
+  "states": [
+    {
+      "name": "LookupHtsRates",
+      "type": "operation",
+      "actions": [
+        {
+          "name": "ResolveMfnRate",
+          "functionRef": {
+            "refName": "resolveRate",
+            "arguments": {
+              "htsCode": "${ .htsCode }",
+              "totalValueUsd": "${ .totalValueUsd }",
+              "supplierCountry": "${ .supplierCountry // \"CN\" }"
+            }
+          },
+          "actionDataFilter": {
+            "results": "${ . }",
+            "toStateData": "${ .rateResult }"
+          }
+        }
+      ],
+      "stateDataFilter": {
+        "output": "${ . }"
+      },
+      "transition": "ComputeDutyAmounts"
+    },
+    {
+      "name": "ComputeDutyAmounts",
+      "type": "operation",
+      "actions": [
+        {
+          "name": "CalculateFees",
+          "functionRef": {
+            "refName": "calculateFees",
+            "arguments": {
+              "totalValueUsd": "${ .totalValueUsd }",
+              "dutyRatePct": "${ .rateResult.dutyRatePct }"
+            }
+          },
+          "actionDataFilter": {
+            "results": "${ . }",
+            "toStateData": "${ .feeResult }"
+          }
+        }
+      ],
+      "stateDataFilter": {
+        "output": "${ . }"
+      },
+      "transition": "BuildOutput"
+    },
+    {
+      "name": "BuildOutput",
+      "type": "operation",
+      "actions": [
+        {
+          "name": "AssembleBreakdown",
+          "functionRef": {
+            "refName": "assembleBreakdown",
+            "arguments": {
+              "htsCode": "${ .htsCode }",
+              "supplierCountry": "${ .supplierCountry // \"CN\" }",
+              "totalValueUsd": "${ .totalValueUsd }",
+              "rateResult": "${ .rateResult }",
+              "feeResult": "${ .feeResult }"
+            }
+          },
+          "actionDataFilter": {
+            "results": "${ . }",
+            "toStateData": "${ .breakdown }"
+          }
+        }
+      ],
+      "stateDataFilter": {
+        "output": "${ {dutyRatePct: .rateResult.dutyRatePct, dutyAmountUsd: .feeResult.dutyAmountUsd, mpfAmount: .feeResult.mpfAmount, hmfAmount: .feeResult.hmfAmount, dutyBreakdownJson: .breakdown.json} }"
+      },
+      "end": true
+    }
+  ],
+  "functions": [
+    {
+      "name": "resolveRate",
+      "type": "expression",
+      "operation": ".htsCode as $code | .supplierCountry as $country |
+        ($code | startswith(\"85\")) and ($country == \"CN\") |
+        if . then
+          {dutyRatePct: 27.5, mfnRate: 2.5, section301Rate: 25.0, addCvdRate: 0.0, tariffBasis: \"MFN + Section 301 List 3 (CN)\"}
+        elif ($code | startswith(\"85\")) then
+          {dutyRatePct: 2.5, mfnRate: 2.5, section301Rate: 0.0, addCvdRate: 0.0, tariffBasis: \"MFN only\"}
+        elif ($code | startswith(\"61\")) and ($country == \"CN\") then
+          {dutyRatePct: 32.2, mfnRate: 16.5, section301Rate: 15.0, addCvdRate: 0.7, tariffBasis: \"MFN + Section 301 List 4A (CN) + ADD\"}
+        elif ($code | startswith(\"61\")) then
+          {dutyRatePct: 16.5, mfnRate: 16.5, section301Rate: 0.0, addCvdRate: 0.0, tariffBasis: \"MFN only\"}
+        elif ($code | startswith(\"84\")) and ($country == \"CN\") then
+          {dutyRatePct: 27.5, mfnRate: 2.5, section301Rate: 25.0, addCvdRate: 0.0, tariffBasis: \"MFN + Section 301 List 1 (CN)\"}
+        elif ($code | startswith(\"84\")) then
+          {dutyRatePct: 2.5, mfnRate: 2.5, section301Rate: 0.0, addCvdRate: 0.0, tariffBasis: \"MFN only\"}
+        elif ($code | startswith(\"72\")) and ($country == \"CN\") then
+          {dutyRatePct: 25.0, mfnRate: 0.0, section301Rate: 25.0, addCvdRate: 0.0, tariffBasis: \"Free MFN + Section 301 (CN)\"}
+        elif ($code | startswith(\"72\")) then
+          {dutyRatePct: 0.0, mfnRate: 0.0, section301Rate: 0.0, addCvdRate: 0.0, tariffBasis: \"Free (MFN)\"}
+        elif ($code | startswith(\"39\")) and ($country == \"CN\") then
+          {dutyRatePct: 28.5, mfnRate: 3.5, section301Rate: 25.0, addCvdRate: 0.0, tariffBasis: \"MFN + Section 301 List 3 (CN)\"}
+        elif ($code | startswith(\"39\")) then
+          {dutyRatePct: 3.5, mfnRate: 3.5, section301Rate: 0.0, addCvdRate: 0.0, tariffBasis: \"MFN only\"}
+        else
+          {dutyRatePct: 5.0, mfnRate: 5.0, section301Rate: 0.0, addCvdRate: 0.0, tariffBasis: \"MFN — general rate applied\"}
+        end"
+    },
+    {
+      "name": "calculateFees",
+      "type": "expression",
+      "operation": ".totalValueUsd as $val | .dutyRatePct as $rate |
+        ($val * $rate / 100) as $dutyAmt |
+        ([($val * 0.003464), 27.23] | max) as $mpf |
+        (if $mpf > 528.33 then 528.33 else $mpf end) as $mpfCapped |
+        ($val * 0.00125) as $hmf |
+        {dutyAmountUsd: ($dutyAmt | . * 100 | round / 100),
+         mpfAmount: ($mpfCapped | . * 100 | round / 100),
+         hmfAmount: ($hmf | . * 100 | round / 100)}"
+    },
+    {
+      "name": "assembleBreakdown",
+      "type": "expression",
+      "operation": "{json: ({htsCode: .htsCode, supplierCountry: .supplierCountry, totalValueUsd: .totalValueUsd, dutyRatePct: .rateResult.dutyRatePct, mfnRate: .rateResult.mfnRate, section301Rate: .rateResult.section301Rate, addCvdRate: .rateResult.addCvdRate, tariffBasis: .rateResult.tariffBasis, dutyAmountUsd: .feeResult.dutyAmountUsd, mpfAmount: .feeResult.mpfAmount, hmfAmount: .feeResult.hmfAmount, totalLandedDutyUsd: ((.feeResult.dutyAmountUsd + .feeResult.mpfAmount + .feeResult.hmfAmount) | . * 100 | round / 100), calculatedAt: \"HACKATHON-DEMO\", dataSource: \"USITC HTS 2024 — Hackathon Simulation\"} | tojson)}"
+    }
+  ]
+}

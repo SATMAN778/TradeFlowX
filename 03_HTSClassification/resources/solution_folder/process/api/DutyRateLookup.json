@@ -1,0 +1,38 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "DutyRateLookup",
+    "kind": "process",
+    "type": "api",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "f569f8a7-6b7d-4253-92e1-5d4b442ad594",
+    "isOverridable": true,
+    "dependencies": [
+      {
+        "kind": "package",
+        "name": "DutyRateLookup"
+      }
+    ],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Api",
+      "name": "DutyRateLookup",
+      "package": {
+        "key": "cfc9b820-cc45-41d9-904b-c4aba06a725c"
+      },
+      "targetFrameworkValue": "Portable",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "f395aff9-2287-4007-9cd1-1b494a640e2b",
+    "files": []
+  }
+}

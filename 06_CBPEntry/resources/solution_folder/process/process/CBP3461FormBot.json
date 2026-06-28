@@ -1,0 +1,45 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "CBP3461FormBot",
+    "kind": "process",
+    "type": "process",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "9c490342-0565-4417-850f-1ebe219542a0",
+    "isOverridable": true,
+    "dependencies": [
+      {
+        "kind": "package",
+        "name": "CBP3461FormBot"
+      }
+    ],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Process",
+      "name": "CBP3461FormBot",
+      "package": {
+        "key": "82343b2e-ee51-4117-b066-1e4a419c91ed"
+      },
+      "packageName": "CBPEntryFillingSolution.process.CBP3461FormBot",
+      "jobPriority": "Medium",
+      "jobRecording": "Disabled",
+      "targetFrameworkValue": "Portable",
+      "duration": 40,
+      "frequency": 500,
+      "quality": 100,
+      "remoteControlAccess": "None",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "c646b8d8-7e21-4670-92ab-60f2b874ba6a",
+    "files": []
+  }
+}

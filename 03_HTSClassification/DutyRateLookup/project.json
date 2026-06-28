@@ -1,0 +1,30 @@
+{
+  "name": "DutyRateLookup",
+  "description": "API Workflow that calculates applicable US import duty rates for a given HTS code — MFN base rate, Section 301 China tariffs (List 1–4), ADD/CVD margins, and federal fees (MPF, HMF). Hackathon mode: uses a lookup table seeded from USITC HTS 2024 data.",
+  "projectVersion": "1.0.0",
+  "entryPoint": "Workflow.json",
+  "entryPoints": [
+    {
+      "filePath": "Workflow.json",
+      "uniqueId": "d4e5f6a7-b8c9-0123-defa-234567890123",
+      "input": [
+        { "name": "htsCode", "type": "string", "required": true, "hasDefault": false },
+        { "name": "totalValueUsd", "type": "number", "required": true, "hasDefault": false },
+        { "name": "supplierCountry", "type": "string", "required": false, "hasDefault": true }
+      ],
+      "output": [
+        { "name": "dutyRatePct", "type": "number" },
+        { "name": "dutyAmountUsd", "type": "number" },
+        { "name": "mpfAmount", "type": "number" },
+        { "name": "hmfAmount", "type": "number" },
+        { "name": "dutyBreakdownJson", "type": "string" }
+      ]
+    }
+  ],
+  "designOptions": {
+    "outputType": "Api"
+  },
+  "dependencies": {
+    "@uipath/api-workflow-executor": "1.0.*"
+  }
+}

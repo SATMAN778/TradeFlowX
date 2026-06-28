@@ -1,0 +1,104 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="Main" VisualBasic.Settings="{x:Null}" sap2010:WorkflowViewState.IdRef="ActivityBuilder_1" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=System.Private.CoreLib" xmlns:sco="clr-namespace:System.Collections.ObjectModel;assembly=System.Private.CoreLib" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_poNumber" Type="InArgument(x:String)" />
+    <x:Property Name="in_totalValueUsd" Type="InArgument(x:Double)" />
+    <x:Property Name="in_actualDutyUsd" Type="InArgument(x:Double)" />
+    <x:Property Name="in_mpfAmount" Type="InArgument(x:Double)" />
+    <x:Property Name="in_hmfAmount" Type="InArgument(x:Double)" />
+    <x:Property Name="out_landedCostPosted" Type="OutArgument(x:Boolean)" />
+  </x:Members>
+  <TextExpression.NamespacesForImplementation>
+    <sco:Collection x:TypeArguments="x:String">
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Activities.Expressions</x:String>
+      <x:String>System.Activities.Validation</x:String>
+      <x:String>System.Activities.XamlIntegration</x:String>
+      <x:String>Microsoft.VisualBasic</x:String>
+      <x:String>Microsoft.VisualBasic.Activities</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Collections</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Data</x:String>
+      <x:String>System.Diagnostics</x:String>
+      <x:String>System.IO</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>System.Xml</x:String>
+      <x:String>System.Xml.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+    </sco:Collection>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <sco:Collection x:TypeArguments="AssemblyReference">
+      <AssemblyReference>Microsoft.VisualBasic</AssemblyReference>
+      <AssemblyReference>mscorlib</AssemblyReference>
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Activities</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.TypeConverter</AssemblyReference>
+      <AssemblyReference>System.Core</AssemblyReference>
+      <AssemblyReference>System.Data</AssemblyReference>
+      <AssemblyReference>System.Data.Common</AssemblyReference>
+      <AssemblyReference>System.Linq</AssemblyReference>
+      <AssemblyReference>System.ObjectModel</AssemblyReference>
+      <AssemblyReference>System.Private.CoreLib</AssemblyReference>
+      <AssemblyReference>System.Xaml</AssemblyReference>
+      <AssemblyReference>System.Xml</AssemblyReference>
+      <AssemblyReference>System.Xml.Linq</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+    </sco:Collection>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence DisplayName="Main Sequence" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:Double" Name="totalLandedCost" />
+      <Variable x:TypeArguments="x:Boolean" Name="postSuccess" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+
+    <WriteLine DisplayName="Log - ERP Landed Cost Start"
+               Text="[&quot;[ERP-LandedCost] Stage 7 starting | PO: &quot; &amp; in_poNumber]" />
+
+    <Assign DisplayName="Calculate total landed cost">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Double">[totalLandedCost]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Double">[in_totalValueUsd + in_actualDutyUsd + in_mpfAmount + in_hmfAmount]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <WriteLine DisplayName="Log - Landed Cost Breakdown"
+               Text="[&quot;[ERP-LandedCost] Goods: $&quot; &amp; in_totalValueUsd.ToString(&quot;F2&quot;) &amp; &quot; | Duty: $&quot; &amp; in_actualDutyUsd.ToString(&quot;F2&quot;) &amp; &quot; | MPF: $&quot; &amp; in_mpfAmount.ToString(&quot;F2&quot;) &amp; &quot; | HMF: $&quot; &amp; in_hmfAmount.ToString(&quot;F2&quot;) &amp; &quot; | Total Landed: $&quot; &amp; totalLandedCost.ToString(&quot;F2&quot;)]" />
+
+    <!-- Simulate ERP GL posting against the PO -->
+    <WriteLine DisplayName="Log - Posting to ERP"
+               Text="[&quot;[ERP-LandedCost] Posting GL entry to ERP | PO: &quot; &amp; in_poNumber &amp; &quot; | Total Landed Cost: $&quot; &amp; totalLandedCost.ToString(&quot;F2&quot;)]" />
+
+    <Assign DisplayName="Set postSuccess">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Boolean">[postSuccess]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Boolean">[True]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <Assign DisplayName="Set out_landedCostPosted">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Boolean">[out_landedCostPosted]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Boolean">[postSuccess]</InArgument>
+      </Assign.Value>
+    </Assign>
+
+    <WriteLine DisplayName="Log - ERP Post Complete"
+               Text="[&quot;[ERP-LandedCost] GL post complete | PO: &quot; &amp; in_poNumber &amp; &quot; | Posted: &quot; &amp; postSuccess.ToString()]" />
+
+  </Sequence>
+</Activity>

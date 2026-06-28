@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "CBPStatusPoller",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "072250cf-4124-48ef-b5fd-ef61a5e5164c",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "CBPStatusPoller"
+    },
+    "locks": [],
+    "key": "8b4834cd-4d66-48ec-b359-cb01db61b118",
+    "files": []
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "CBPDutyCalculation",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "1581d1f4-bcf3-4167-9a26-c665af5efb2d",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "CBPDutyCalculation"
+    },
+    "locks": [],
+    "key": "91ef2dc8-4151-4c17-8215-7135dc644f7e",
+    "files": []
+  }
+}

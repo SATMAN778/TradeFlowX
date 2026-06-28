@@ -1,0 +1,6 @@
+{
+  "Name": "TradeX-DMS-Archive",
+  "ProjectType": "Process",
+  "Description": "DMS Archive workflow for TradeFlow Maestro AI platform - Stage 7 Post-Entry document archival",
+  "MainFile": "Main.xaml"
+}

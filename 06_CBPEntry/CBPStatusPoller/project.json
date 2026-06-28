@@ -1,0 +1,30 @@
+{
+  "name": "CBPStatusPoller",
+  "description": "API Workflow that polls CBP ACE for customs entry status — RELEASED, EXAM, CF-28, or CF-29. Hackathon-mode simulation with configurable mockStatus override.",
+  "projectVersion": "1.0.1",
+  "entryPoint": "Workflow.json",
+  "entryPoints": [
+    {
+      "filePath": "Workflow.json",
+      "uniqueId": "c3d4e5f6-a7b8-9012-cdef-123456789012",
+      "input": [
+        { "name": "entryNumber", "type": "string", "required": false, "hasDefault": false },
+        { "name": "mockStatus", "type": "string", "required": false, "hasDefault": true },
+        { "name": "maxAttempts", "type": "number", "required": false, "hasDefault": true }
+      ],
+      "output": [
+        { "name": "cbpStatus", "type": "string" },
+        { "name": "examType", "type": "string" },
+        { "name": "cf28Questions", "type": "string" },
+        { "name": "cf29ActionType", "type": "string" },
+        { "name": "pollAttempts", "type": "number" }
+      ]
+    }
+  ],
+  "designOptions": {
+    "outputType": "Api"
+  },
+  "dependencies": {
+    "@uipath/api-workflow-executor": "1.0.*"
+  }
+}

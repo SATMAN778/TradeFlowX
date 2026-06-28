@@ -1,0 +1,534 @@
+{
+    "id": "case-TradeXCase0",
+    "version": "23.0.0",
+    "name": "TradeXCase",
+    "description": "Manages the full cross-border import lifecycle — PO intake, ISF 10+2 filing, HTS classification, PGA screening, OFAC denied-party screening, CBP customs entry, and post-entry duty reconciliation.",
+    "metadata": {
+        "caseIdentifier": "=vars.poNumber",
+        "caseIdentifierType": "external",
+        "caseAppEnabled": true,
+        "publishVersion": 2,
+        "caseUnifiedSchemaEnabled": true,
+        "caseDirectlyPassTaskOutputs": true,
+        "intsvcActivityConfig": "v2",
+        "caseExitRules": [{
+            "id": "Condition_CsExit1",
+            "displayName": "Complete Rule 1",
+            "marksCaseComplete": true,
+            "rules": [[{ "id": "Rule_CsExit1", "rule": "required-stages-completed" }]]
+        }]
+    },
+    "bindings": [],
+    "variables": {
+        "inputs": [],
+        "outputs": [],
+        "inputOutputs": [
+            { "id": "triggerSource", "var": "triggerSource", "name": "triggerSource", "type": "string", "default": "MANUAL" },
+            { "id": "emailSubject", "var": "emailSubject", "name": "emailSubject", "type": "string", "default": "" },
+            { "id": "senderEmail", "var": "senderEmail", "name": "senderEmail", "type": "string", "default": "" },
+            { "id": "sfRecordId", "var": "sfRecordId", "name": "sfRecordId", "type": "string", "default": "" },
+            { "id": "poNumber", "var": "poNumber", "name": "poNumber", "type": "string", "default": "" },
+            { "id": "supplierName", "var": "supplierName", "name": "supplierName", "type": "string", "default": "" },
+            { "id": "supplierAddress", "var": "supplierAddress", "name": "supplierAddress", "type": "string", "default": "" },
+            { "id": "supplierCountry", "var": "supplierCountry", "name": "supplierCountry", "type": "string", "default": "" },
+            { "id": "goodsDescription", "var": "goodsDescription", "name": "goodsDescription", "type": "string", "default": "" },
+            { "id": "quantity", "var": "quantity", "name": "quantity", "type": "integer", "default": "0" },
+            { "id": "unitPriceUsd", "var": "unitPriceUsd", "name": "unitPriceUsd", "type": "float", "default": "0" },
+            { "id": "totalValueUsd", "var": "totalValueUsd", "name": "totalValueUsd", "type": "float", "default": "0" },
+            { "id": "incoterms", "var": "incoterms", "name": "incoterms", "type": "string", "default": "" },
+            { "id": "expectedShipDate", "var": "expectedShipDate", "name": "expectedShipDate", "type": "date", "default": "" },
+            { "id": "portOfLoading", "var": "portOfLoading", "name": "portOfLoading", "type": "string", "default": "" },
+            { "id": "portOfEntry", "var": "portOfEntry", "name": "portOfEntry", "type": "string", "default": "" },
+            { "id": "blNumber", "var": "blNumber", "name": "blNumber", "type": "string", "default": "" },
+            { "id": "cooDeclaration", "var": "cooDeclaration", "name": "cooDeclaration", "type": "string", "default": "" },
+            { "id": "cooVerified", "var": "cooVerified", "name": "cooVerified", "type": "boolean", "default": "false" },
+            { "id": "transshipmentFlag", "var": "transshipmentFlag", "name": "transshipmentFlag", "type": "boolean", "default": "false" },
+            { "id": "transshipmentRisk", "var": "transshipmentRisk", "name": "transshipmentRisk", "type": "string", "default": "LOW" },
+            { "id": "poDataComplete", "var": "poDataComplete", "name": "poDataComplete", "type": "boolean", "default": "false" },
+            { "id": "cooVerificationRequired", "var": "cooVerificationRequired", "name": "cooVerificationRequired", "type": "boolean", "default": "false" },
+            { "id": "documentList", "var": "documentList", "name": "documentList", "type": "jsonSchema", "default": "" },
+            { "id": "isfStatus", "var": "isfStatus", "name": "isfStatus", "type": "string", "default": "PENDING" },
+            { "id": "isfTxnNumber", "var": "isfTxnNumber", "name": "isfTxnNumber", "type": "string", "default": "" },
+            { "id": "isfDeadlineUtc", "var": "isfDeadlineUtc", "name": "isfDeadlineUtc", "type": "string", "default": "" },
+            { "id": "isfDataComplete", "var": "isfDataComplete", "name": "isfDataComplete", "type": "boolean", "default": "false" },
+            { "id": "isfAmendmentRequired", "var": "isfAmendmentRequired", "name": "isfAmendmentRequired", "type": "boolean", "default": "false" },
+            { "id": "htsCode", "var": "htsCode", "name": "htsCode", "type": "string", "default": "" },
+            { "id": "htsCandidates", "var": "htsCandidates", "name": "htsCandidates", "type": "jsonSchema", "default": "" },
+            { "id": "htsConfidence", "var": "htsConfidence", "name": "htsConfidence", "type": "float", "default": "0" },
+            { "id": "dutyRatePct", "var": "dutyRatePct", "name": "dutyRatePct", "type": "float", "default": "0" },
+            { "id": "dutyAmountUsd", "var": "dutyAmountUsd", "name": "dutyAmountUsd", "type": "float", "default": "0" },
+            { "id": "mpfAmount", "var": "mpfAmount", "name": "mpfAmount", "type": "float", "default": "0" },
+            { "id": "hmfAmount", "var": "hmfAmount", "name": "hmfAmount", "type": "float", "default": "0" },
+            { "id": "pgaFlag", "var": "pgaFlag", "name": "pgaFlag", "type": "boolean", "default": "false" },
+            { "id": "pgaAgencies", "var": "pgaAgencies", "name": "pgaAgencies", "type": "jsonSchema", "default": "" },
+            { "id": "pgaStatus", "var": "pgaStatus", "name": "pgaStatus", "type": "string", "default": "NOT_REQUIRED" },
+            { "id": "partyNames", "var": "partyNames", "name": "partyNames", "type": "jsonSchema", "default": "" },
+            { "id": "ofacScreeningResults", "var": "ofacScreeningResults", "name": "ofacScreeningResults", "type": "jsonSchema", "default": "" },
+            { "id": "ofacMatchScore", "var": "ofacMatchScore", "name": "ofacMatchScore", "type": "float", "default": "0" },
+            { "id": "ofacClearStatus", "var": "ofacClearStatus", "name": "ofacClearStatus", "type": "string", "default": "PENDING" },
+            { "id": "entryNumber", "var": "entryNumber", "name": "entryNumber", "type": "string", "default": "" },
+            { "id": "cbpStatus", "var": "cbpStatus", "name": "cbpStatus", "type": "string", "default": "PENDING" },
+            { "id": "examType", "var": "examType", "name": "examType", "type": "string", "default": "" },
+            { "id": "cf28Questions", "var": "cf28Questions", "name": "cf28Questions", "type": "jsonSchema", "default": "" },
+            { "id": "cf29ActionType", "var": "cf29ActionType", "name": "cf29ActionType", "type": "string", "default": "" },
+            { "id": "estimatedDutyUsd", "var": "estimatedDutyUsd", "name": "estimatedDutyUsd", "type": "float", "default": "0" },
+            { "id": "actualDutyUsd", "var": "actualDutyUsd", "name": "actualDutyUsd", "type": "float", "default": "0" },
+            { "id": "dutyVarianceUsd", "var": "dutyVarianceUsd", "name": "dutyVarianceUsd", "type": "float", "default": "0" },
+            { "id": "dutyVariancePct", "var": "dutyVariancePct", "name": "dutyVariancePct", "type": "float", "default": "0" },
+            { "id": "documentationComplete", "var": "documentationComplete", "name": "documentationComplete", "type": "boolean", "default": "false" },
+            { "id": "archivalStatus", "var": "archivalStatus", "name": "archivalStatus", "type": "string", "default": "PENDING" },
+            { "id": "landedCostPosted", "var": "landedCostPosted", "name": "landedCostPosted", "type": "boolean", "default": "false" },
+            { "id": "dutySavingsOpportunity", "var": "dutySavingsOpportunity", "name": "dutySavingsOpportunity", "type": "string", "default": "NONE" },
+            { "id": "estimatedSavingsUsd", "var": "estimatedSavingsUsd", "name": "estimatedSavingsUsd", "type": "float", "default": "0" },
+            { "id": "caseState", "var": "caseState", "name": "caseState", "type": "string", "default": "ACTIVE" }
+        ]
+    },
+    "nodes": [
+        {
+            "id": "trig-Manual001",
+            "type": "case-management:Trigger",
+            "data": {
+                "label": "Manual Start",
+                "description": "Manual trigger for creating a TradeX case instance",
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "uipath": { "serviceType": "None" }
+            }
+        },
+        {
+            "id": "Stage_Ordr01",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "Trade Order Intake",
+                "description": "Initiates on email or Salesforce trigger. Fetches and validates PO fields, saves documents to UiPath Storage, runs COO transshipment risk classification.",
+                "isRequired": true,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{ "id": "tS1L0PoDat", "elementId": "Stage_Ordr01-tS1L0PoDat", "displayName": "PO Data Fetch", "isRequired": true, "shouldRunOnlyOnce": true, "type": "api-workflow", "data": {} }],
+                    [{ "id": "tS1L1EmDoc", "elementId": "Stage_Ordr01-tS1L1EmDoc", "displayName": "Email Document Collector", "isRequired": false, "shouldRunOnlyOnce": true, "type": "agent", "data": {} }],
+                    [{ "id": "tS1L2CooAg", "elementId": "Stage_Ordr01-tS1L2CooAg", "displayName": "COO Classification Agent", "isRequired": true, "shouldRunOnlyOnce": true, "type": "agent", "data": {} }],
+                    [{ "id": "tS1L3HT001", "elementId": "Stage_Ordr01-tS1L3HT001", "displayName": "HT-01 Missing PO Fields", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS1L4HT002", "elementId": "Stage_Ordr01-tS1L4HT002", "displayName": "HT-02 COO Verification", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }]
+                ],
+                "entryConditions": [{ "id": "cOrdr01Entr1", "displayName": "Entry Rule 1", "rules": [[{ "id": "rOrdr01Rule1", "rule": "case-entered" }]] }]
+            }
+        },
+        {
+            "id": "Stage_ISFf01",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "ISF 10+2 Filing",
+                "description": "Prepares, submits, and monitors the ISF 10+2 filing to CBP ACE. Handles missing elements, Do Not Load, and material amendments.",
+                "isRequired": true,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{ "id": "tS2L0IsfCl", "elementId": "Stage_ISFf01-tS2L0IsfCl", "displayName": "ISF Data Collector Agent", "isRequired": true, "shouldRunOnlyOnce": true, "type": "agent", "data": {} }],
+                    [{ "id": "tS2L1AceIs", "elementId": "Stage_ISFf01-tS2L1AceIs", "displayName": "ACE ISF Filing Workflow", "isRequired": true, "shouldRunOnlyOnce": true, "type": "api-workflow", "data": {} }],
+                    [{ "id": "tS2L2AcePl", "elementId": "Stage_ISFf01-tS2L2AcePl", "displayName": "ACE ISF Status Poller", "isRequired": true, "shouldRunOnlyOnce": false, "type": "rpa", "data": {} }],
+                    [{ "id": "tS2L3HT003", "elementId": "Stage_ISFf01-tS2L3HT003", "displayName": "HT-03 Missing ISF Elements", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS2L4HT004", "elementId": "Stage_ISFf01-tS2L4HT004", "displayName": "HT-04 ISF Do Not Load", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS2L5HT005", "elementId": "Stage_ISFf01-tS2L5HT005", "displayName": "HT-05 ISF Material Amendment", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }]
+                ]
+            }
+        },
+        {
+            "id": "Stage_HTSc01",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "HTS Classification & Duty",
+                "description": "IDP extraction, AI HTS classification (LangGraph), duty rate lookup, and PGA flag evaluation. Human review for confidence below 90%.",
+                "isRequired": true,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{
+                        "id": "tS3L0IdpPp",
+                        "elementId": "Stage_HTSc01-tS3L0IdpPp",
+                        "displayName": "IDP Document Pipeline",
+                        "isRequired": true,
+                        "shouldRunOnlyOnce": true,
+                        "type": "rpa",
+                        "data": {
+                            "inputs": [
+                                { "name": "in_documentList", "type": "text", "id": "in_documentList", "var": "in_documentList", "value": "=vars.documentList", "elementId": "Stage_HTSc01-tS3L0IdpPp" },
+                                { "name": "in_poNumber", "type": "text", "id": "in_poNumber", "var": "in_poNumber", "value": "=vars.poNumber", "elementId": "Stage_HTSc01-tS3L0IdpPp" }
+                            ],
+                            "outputs": [
+                                { "name": "out_extractedFields", "type": "text", "id": "out_extractedFields", "var": "out_extractedFields", "value": "", "source": "", "target": "=vars.documentList", "elementId": "Stage_HTSc01-tS3L0IdpPp" },
+                                { "name": "out_goodsDescription", "type": "text", "id": "out_goodsDescription", "var": "out_goodsDescription", "value": "", "source": "", "target": "=vars.goodsDescription", "elementId": "Stage_HTSc01-tS3L0IdpPp" }
+                            ]
+                        },
+                        "entryConditions": [{
+                            "id": "cIdpEntr1",
+                            "displayName": "Entry Rule 1",
+                            "rules": [[{ "id": "rIdpRule1", "rule": "current-stage-entered" }]]
+                        }]
+                    }],
+                    [{
+                        "id": "tS3L1HtsCl",
+                        "elementId": "Stage_HTSc01-tS3L1HtsCl",
+                        "displayName": "HTS Classification Agent",
+                        "isRequired": true,
+                        "shouldRunOnlyOnce": true,
+                        "type": "agent",
+                        "data": {
+                            "inputs": [
+                                { "name": "shipmentDocument", "type": "text", "id": "shipmentDocument", "var": "shipmentDocument", "value": "=vars.documentList", "elementId": "Stage_HTSc01-tS3L1HtsCl" },
+                                { "name": "countryOfOrigin", "type": "text", "id": "countryOfOrigin", "var": "countryOfOrigin", "value": "=vars.supplierCountry", "elementId": "Stage_HTSc01-tS3L1HtsCl" }
+                            ],
+                            "outputs": [
+                                { "name": "final_hts_code", "type": "text", "id": "final_hts_code", "var": "final_hts_code", "value": "", "source": "", "target": "=vars.htsCode", "elementId": "Stage_HTSc01-tS3L1HtsCl" },
+                                { "name": "confidence", "type": "number", "id": "htsConfidence", "var": "htsConfidence", "value": "", "source": "", "target": "=vars.htsConfidence", "elementId": "Stage_HTSc01-tS3L1HtsCl" },
+                                { "name": "candidates", "type": "text", "id": "candidates", "var": "candidates", "value": "", "source": "", "target": "=vars.htsCandidates", "elementId": "Stage_HTSc01-tS3L1HtsCl" }
+                            ]
+                        },
+                        "entryConditions": [{
+                            "id": "cHtsEntr1",
+                            "displayName": "Entry Rule 1",
+                            "rules": [[{ "id": "rHtsRule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS3L0IdpPp"] }]]
+                        }]
+                    }],
+                    [{
+                        "id": "tS3L2DutyR",
+                        "elementId": "Stage_HTSc01-tS3L2DutyR",
+                        "displayName": "Duty Rate Lookup Workflow",
+                        "isRequired": true,
+                        "shouldRunOnlyOnce": true,
+                        "type": "api-workflow",
+                        "data": {
+                            "inputs": [
+                                { "name": "htsCode", "type": "text", "id": "htsCode", "var": "htsCode", "value": "=vars.htsCode", "elementId": "Stage_HTSc01-tS3L2DutyR" },
+                                { "name": "totalValueUsd", "type": "number", "id": "totalValueUsd", "var": "totalValueUsd", "value": "=vars.totalValueUsd", "elementId": "Stage_HTSc01-tS3L2DutyR" },
+                                { "name": "supplierCountry", "type": "text", "id": "supplierCountry", "var": "supplierCountry", "value": "=vars.supplierCountry", "elementId": "Stage_HTSc01-tS3L2DutyR" }
+                            ],
+                            "outputs": [
+                                { "name": "dutyRatePct", "type": "number", "id": "dutyRatePct", "var": "dutyRatePct", "value": "", "source": "", "target": "=vars.dutyRatePct", "elementId": "Stage_HTSc01-tS3L2DutyR" },
+                                { "name": "dutyAmountUsd", "type": "number", "id": "dutyAmountUsd", "var": "dutyAmountUsd", "value": "", "source": "", "target": "=vars.dutyAmountUsd", "elementId": "Stage_HTSc01-tS3L2DutyR" },
+                                { "name": "mpfAmount", "type": "number", "id": "mpfAmount", "var": "mpfAmount", "value": "", "source": "", "target": "=vars.mpfAmount", "elementId": "Stage_HTSc01-tS3L2DutyR" },
+                                { "name": "hmfAmount", "type": "number", "id": "hmfAmount", "var": "hmfAmount", "value": "", "source": "", "target": "=vars.hmfAmount", "elementId": "Stage_HTSc01-tS3L2DutyR" },
+                                { "name": "dutyBreakdownJson", "type": "text", "id": "dutyBreakdownJson", "var": "dutyBreakdownJson", "value": "", "source": "", "target": "=vars.dutyBreakdownJson", "elementId": "Stage_HTSc01-tS3L2DutyR" }
+                            ]
+                        },
+                        "entryConditions": [{
+                            "id": "cDutyEntr1",
+                            "displayName": "Entry Rule 1",
+                            "rules": [[
+                                { "id": "rDutyRule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS3L1HtsCl"] },
+                                { "id": "rDutyRule2", "rule": "adhoc", "conditionExpression": "=js:vars.htsConfidence >= 90" }
+                            ]]
+                        }]
+                    }],
+                    [{
+                        "id": "tS3L3PgaFl",
+                        "elementId": "Stage_HTSc01-tS3L3PgaFl",
+                        "displayName": "PGA Flag Workflow",
+                        "isRequired": true,
+                        "shouldRunOnlyOnce": true,
+                        "type": "api-workflow",
+                        "data": {
+                            "inputs": [
+                                { "name": "htsCode", "type": "text", "id": "htsCode", "var": "htsCode", "value": "=vars.htsCode", "elementId": "Stage_HTSc01-tS3L3PgaFl" },
+                                { "name": "goodsDescription", "type": "text", "id": "goodsDescription", "var": "goodsDescription", "value": "=vars.goodsDescription", "elementId": "Stage_HTSc01-tS3L3PgaFl" }
+                            ],
+                            "outputs": [
+                                { "name": "pgaFlag", "type": "boolean", "id": "pgaFlag", "var": "pgaFlag", "value": "", "source": "", "target": "=vars.pgaFlag", "elementId": "Stage_HTSc01-tS3L3PgaFl" },
+                                { "name": "pgaAgencies", "type": "text", "id": "pgaAgencies", "var": "pgaAgencies", "value": "", "source": "", "target": "=vars.pgaAgencies", "elementId": "Stage_HTSc01-tS3L3PgaFl" }
+                            ]
+                        },
+                        "entryConditions": [{
+                            "id": "cPgaEntr1",
+                            "displayName": "Entry Rule 1",
+                            "rules": [[
+                                { "id": "rPgaRule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS3L1HtsCl"] },
+                                { "id": "rPgaRule2", "rule": "adhoc", "conditionExpression": "=js:vars.htsConfidence >= 90" }
+                            ]]
+                        }]
+                    }],
+                    [{
+                        "id": "tS3L4HT006",
+                        "elementId": "Stage_HTSc01-tS3L4HT006",
+                        "displayName": "HT-06 HTS Review 70-90%",
+                        "isRequired": false,
+                        "shouldRunOnlyOnce": false,
+                        "type": "action",
+                        "data": {},
+                        "entryConditions": [{
+                            "id": "cHT06Entr1",
+                            "displayName": "Entry Rule 1",
+                            "rules": [[
+                                { "id": "rHT06Rule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS3L1HtsCl"] },
+                                { "id": "rHT06Rule2", "rule": "adhoc", "conditionExpression": "=js:vars.htsConfidence >= 70 && vars.htsConfidence < 90" }
+                            ]]
+                        }]
+                    }],
+                    [{
+                        "id": "tS3L5HT007",
+                        "elementId": "Stage_HTSc01-tS3L5HT007",
+                        "displayName": "HT-07 Manual HTS Classification",
+                        "isRequired": false,
+                        "shouldRunOnlyOnce": false,
+                        "type": "action",
+                        "data": {},
+                        "entryConditions": [{
+                            "id": "cHT07Entr1",
+                            "displayName": "Entry Rule 1",
+                            "rules": [[
+                                { "id": "rHT07Rule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS3L1HtsCl"] },
+                                { "id": "rHT07Rule2", "rule": "adhoc", "conditionExpression": "=js:vars.htsConfidence < 70" }
+                            ]]
+                        }]
+                    }],
+                    [{
+                        "id": "tS3L6HT008",
+                        "elementId": "Stage_HTSc01-tS3L6HT008",
+                        "displayName": "HT-08 PGA Documentation Required",
+                        "isRequired": false,
+                        "shouldRunOnlyOnce": false,
+                        "type": "action",
+                        "data": {},
+                        "entryConditions": [{
+                            "id": "cHT08Entr1",
+                            "displayName": "Entry Rule 1",
+                            "rules": [[
+                                { "id": "rHT08Rule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS3L3PgaFl"] },
+                                { "id": "rHT08Rule2", "rule": "adhoc", "conditionExpression": "=js:vars.pgaFlag == true" }
+                            ]]
+                        }]
+                    }]
+                ]
+            }
+        },
+        {
+            "id": "Stage_PGAs01",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "PGA Screening",
+                "description": "Conditional stage — runs only when pgaFlag=true. CrewAI PGA Coordinator manages agency submissions; RPA polls for approval/hold/refusal.",
+                "isRequired": false,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{ "id": "tS4L0PgaCo", "elementId": "Stage_PGAs01-tS4L0PgaCo", "displayName": "PGA Agency Coordinator", "isRequired": true, "shouldRunOnlyOnce": true, "type": "api-workflow", "data": {} }],
+                    [{ "id": "tS4L1PgaPl", "elementId": "Stage_PGAs01-tS4L1PgaPl", "displayName": "PGA Status Polling Bot", "isRequired": true, "shouldRunOnlyOnce": false, "type": "rpa", "data": {} }],
+                    [{ "id": "tS4L2HT009", "elementId": "Stage_PGAs01-tS4L2HT009", "displayName": "HT-09 PGA Hold", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS4L3HT010", "elementId": "Stage_PGAs01-tS4L3HT010", "displayName": "HT-10 PGA Refusal", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }]
+                ]
+            }
+        },
+        {
+            "id": "Stage_OFAC01",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "OFAC & Denied-Party Screening",
+                "description": "Party extraction agent, LangGraph transshipment risk refinement, and OFAC SDN API screening of all parties. Human review for fuzzy matches and confirmed hits.",
+                "isRequired": true,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{ "id": "tS5L0PtyEx", "elementId": "Stage_OFAC01-tS5L0PtyEx", "displayName": "Party Extraction Agent", "isRequired": true, "shouldRunOnlyOnce": true, "type": "agent", "data": {} }],
+                    [{ "id": "tS5L1TrsRk", "elementId": "Stage_OFAC01-tS5L1TrsRk", "displayName": "Transshipment Risk Agent", "isRequired": true, "shouldRunOnlyOnce": true, "type": "agent", "data": {} }],
+                    [{ "id": "tS5L2OfacS", "elementId": "Stage_OFAC01-tS5L2OfacS", "displayName": "OFAC SDN API Workflow", "isRequired": true, "shouldRunOnlyOnce": true, "type": "api-workflow", "data": {} }],
+                    [{ "id": "tS5L3HT011", "elementId": "Stage_OFAC01-tS5L3HT011", "displayName": "HT-11 OFAC Fuzzy Match", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }],
+                    [{ "id": "tS5L4HT012", "elementId": "Stage_OFAC01-tS5L4HT012", "displayName": "HT-12 Confirmed OFAC Hit", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {} }]
+                ]
+            }
+        },
+        {
+            "id": "Stage_CBPe01",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "Customs Entry Filing & CBP Clearance",
+                "description": "CBP Form 3461 filing via RPA, ACE status polling, duty calculation, and exam/CF-28/CF-29 human task handling.",
+                "isRequired": true,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{ "id": "tS6L0Cbp34", "elementId": "Stage_CBPe01-tS6L0Cbp34", "displayName": "CBP 3461 Form Bot", "isRequired": true, "shouldRunOnlyOnce": true, "type": "rpa", "data": { "inputs": [], "outputs": [ { "name": "entryNumber", "type": "text", "id": "entryNumber", "var": "entryNumber", "value": "", "source": "", "target": "=vars.entryNumber", "elementId": "Stage_CBPe01-tS6L0Cbp34" }, { "name": "formFilePath", "type": "text", "id": "formFilePath", "var": "formFilePath", "value": "", "source": "", "target": "=vars.formFilePath", "elementId": "Stage_CBPe01-tS6L0Cbp34" } ] }, "entryConditions": [{ "id": "cCbp34Entr1", "displayName": "Entry Rule 1", "rules": [[{ "id": "rCbp34Rule1", "rule": "current-stage-entered" }]] }] }],
+                    [{ "id": "tS6L1CbpSt", "elementId": "Stage_CBPe01-tS6L1CbpSt", "displayName": "CBP Status Polling Workflow", "isRequired": true, "shouldRunOnlyOnce": false, "type": "api-workflow", "data": { "inputs": [], "outputs": [ { "name": "cbpStatus", "type": "text", "id": "cbpStatus", "var": "cbpStatus", "value": "", "source": "", "target": "=vars.cbpStatus", "elementId": "Stage_CBPe01-tS6L1CbpSt" }, { "name": "examType", "type": "text", "id": "examType", "var": "examType", "value": "", "source": "", "target": "=vars.examType", "elementId": "Stage_CBPe01-tS6L1CbpSt" }, { "name": "cf28Questions", "type": "text", "id": "cf28Questions", "var": "cf28Questions", "value": "", "source": "", "target": "=vars.cf28Questions", "elementId": "Stage_CBPe01-tS6L1CbpSt" }, { "name": "cf29ActionType", "type": "text", "id": "cf29ActionType", "var": "cf29ActionType", "value": "", "source": "", "target": "=vars.cf29ActionType", "elementId": "Stage_CBPe01-tS6L1CbpSt" }, { "name": "pollAttempts", "type": "integer", "id": "pollAttempts", "var": "pollAttempts", "value": "", "source": "", "target": "=vars.pollAttempts", "elementId": "Stage_CBPe01-tS6L1CbpSt" } ] }, "entryConditions": [{ "id": "cCbpStEntr1", "displayName": "Entry Rule 1", "rules": [[{ "id": "rCbpStRule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS6L0Cbp34"] }]] }] }],
+                    [{ "id": "tS6L2DtyCs", "elementId": "Stage_CBPe01-tS6L2DtyCs", "displayName": "Duty Calculation Workflow", "isRequired": true, "shouldRunOnlyOnce": true, "type": "api-workflow", "data": { "inputs": [], "outputs": [ { "name": "actualDutyUsd", "type": "number", "id": "actualDutyUsd", "var": "actualDutyUsd", "value": "", "source": "", "target": "=vars.actualDutyUsd", "elementId": "Stage_CBPe01-tS6L2DtyCs" }, { "name": "mpfAmount", "type": "number", "id": "mpfAmount", "var": "mpfAmount", "value": "", "source": "", "target": "=vars.mpfAmount", "elementId": "Stage_CBPe01-tS6L2DtyCs" }, { "name": "hmfAmount", "type": "number", "id": "hmfAmount", "var": "hmfAmount", "value": "", "source": "", "target": "=vars.hmfAmount", "elementId": "Stage_CBPe01-tS6L2DtyCs" }, { "name": "dutyVarianceUsd", "type": "number", "id": "dutyVarianceUsd", "var": "dutyVarianceUsd", "value": "", "source": "", "target": "=vars.dutyVarianceUsd", "elementId": "Stage_CBPe01-tS6L2DtyCs" }, { "name": "dutyVariancePct", "type": "number", "id": "dutyVariancePct", "var": "dutyVariancePct", "value": "", "source": "", "target": "=vars.dutyVariancePct", "elementId": "Stage_CBPe01-tS6L2DtyCs" }, { "name": "dutyBreakdownJson", "type": "text", "id": "dutyBreakdownJson", "var": "dutyBreakdownJson", "value": "", "source": "", "target": "=vars.dutyBreakdownJson", "elementId": "Stage_CBPe01-tS6L2DtyCs" } ] }, "entryConditions": [{ "id": "cDtyCSEntr1", "displayName": "Entry Rule 1", "rules": [[{ "id": "rDtyCSRule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS6L1CbpSt"] }]] }] }],
+                    [{ "id": "tS6L3HT013", "elementId": "Stage_CBPe01-tS6L3HT013", "displayName": "HT-13 CBP Exam Selected", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {}, "entryConditions": [{ "id": "cHT13Entr1", "displayName": "Entry Rule 1", "rules": [[ { "id": "rHT13Rule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS6L1CbpSt"] }, { "id": "rHT13Rule2", "rule": "adhoc", "conditionExpression": "=js:vars.cbpStatus === 'EXAM'" } ]] }] }],
+                    [{ "id": "tS6L4HT014", "elementId": "Stage_CBPe01-tS6L4HT014", "displayName": "HT-14 CF-28 Unanswered Questions", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {}, "entryConditions": [{ "id": "cHT14Entr1", "displayName": "Entry Rule 1", "rules": [[ { "id": "rHT14Rule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS6L1CbpSt"] }, { "id": "rHT14Rule2", "rule": "adhoc", "conditionExpression": "=js:vars.cbpStatus === 'CF28_ISSUED'" } ]] }] }],
+                    [{ "id": "tS6L5HT015", "elementId": "Stage_CBPe01-tS6L5HT015", "displayName": "HT-15 CF-29 CBP Action", "isRequired": false, "shouldRunOnlyOnce": false, "type": "action", "data": {}, "entryConditions": [{ "id": "cHT15Entr1", "displayName": "Entry Rule 1", "rules": [[ { "id": "rHT15Rule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS6L1CbpSt"] }, { "id": "rHT15Rule2", "rule": "adhoc", "conditionExpression": "=js:vars.cbpStatus === 'CF29_ISSUED'" } ]] }] }]
+                ]
+            }
+        },
+        {
+            "id": "Stage_PostE1",
+            "type": "case-management:Stage",
+            "data": {
+                "label": "Document Management & Post-Entry",
+                "description": "DMS archival of all documents, ERP landed cost posting, duty savings analysis, and final human reviews for discrepancies, variances, and savings opportunities.",
+                "isRequired": true,
+                "parentElement": { "id": "root", "type": "case-management:root" },
+                "isInvalidDropTarget": false,
+                "isPendingParent": false,
+                "tasks": [
+                    [{
+                        "id": "tS7L0DmsAr",
+                        "elementId": "Stage_PostE1-tS7L0DmsAr",
+                        "displayName": "DMS Archive Workflow",
+                        "isRequired": true,
+                        "shouldRunOnlyOnce": true,
+                        "type": "rpa",
+                        "data": {
+                            "inputs": [
+                                { "name": "in_documentList", "type": "text", "id": "in_documentList", "var": "in_documentList", "value": "=vars.documentList", "elementId": "Stage_PostE1-tS7L0DmsAr" },
+                                { "name": "in_poNumber", "type": "text", "id": "in_poNumber", "var": "in_poNumber", "value": "=vars.poNumber", "elementId": "Stage_PostE1-tS7L0DmsAr" },
+                                { "name": "in_entryNumber", "type": "text", "id": "in_entryNumber", "var": "in_entryNumber", "value": "=vars.entryNumber", "elementId": "Stage_PostE1-tS7L0DmsAr" }
+                            ],
+                            "outputs": [
+                                { "name": "out_archivalStatus", "type": "text", "id": "out_archivalStatus", "var": "out_archivalStatus", "value": "", "source": "", "target": "=vars.archivalStatus", "elementId": "Stage_PostE1-tS7L0DmsAr" },
+                                { "name": "out_documentationComplete", "type": "boolean", "id": "documentationComplete", "var": "documentationComplete", "value": "", "source": "", "target": "=vars.documentationComplete", "elementId": "Stage_PostE1-tS7L0DmsAr" }
+                            ]
+                        },
+                        "entryConditions": [{
+                            "id": "cDmsEntr1",
+                            "displayName": "Entry Rule 1",
+                            "rules": [[{ "id": "rDmsRule1", "rule": "current-stage-entered" }]]
+                        }]
+                    }],
+                    [{
+                        "id": "tS7L1ErpLc",
+                        "elementId": "Stage_PostE1-tS7L1ErpLc",
+                        "displayName": "ERP Landed Cost Workflow",
+                        "isRequired": true,
+                        "shouldRunOnlyOnce": true,
+                        "type": "rpa",
+                        "data": {
+                            "inputs": [
+                                { "name": "in_poNumber", "type": "text", "id": "in_poNumber", "var": "in_poNumber", "value": "=vars.poNumber", "elementId": "Stage_PostE1-tS7L1ErpLc" },
+                                { "name": "in_totalValueUsd", "type": "number", "id": "in_totalValueUsd", "var": "in_totalValueUsd", "value": "=vars.totalValueUsd", "elementId": "Stage_PostE1-tS7L1ErpLc" },
+                                { "name": "in_actualDutyUsd", "type": "number", "id": "in_actualDutyUsd", "var": "in_actualDutyUsd", "value": "=vars.actualDutyUsd", "elementId": "Stage_PostE1-tS7L1ErpLc" },
+                                { "name": "in_mpfAmount", "type": "number", "id": "in_mpfAmount", "var": "in_mpfAmount", "value": "=vars.mpfAmount", "elementId": "Stage_PostE1-tS7L1ErpLc" },
+                                { "name": "in_hmfAmount", "type": "number", "id": "in_hmfAmount", "var": "in_hmfAmount", "value": "=vars.hmfAmount", "elementId": "Stage_PostE1-tS7L1ErpLc" }
+                            ],
+                            "outputs": [
+                                { "name": "out_landedCostPosted", "type": "boolean", "id": "out_landedCostPosted", "var": "out_landedCostPosted", "value": "", "source": "", "target": "=vars.landedCostPosted", "elementId": "Stage_PostE1-tS7L1ErpLc" }
+                            ]
+                        },
+                        "entryConditions": [{
+                            "id": "cErpEntr1",
+                            "displayName": "Entry Rule 1",
+                            "rules": [[{ "id": "rErpRule1", "rule": "current-stage-entered" }]]
+                        }]
+                    }],
+                    [{
+                        "id": "tS7L2DtySv",
+                        "elementId": "Stage_PostE1-tS7L2DtySv",
+                        "displayName": "Duty Savings Analysis Agent",
+                        "isRequired": true,
+                        "shouldRunOnlyOnce": true,
+                        "type": "agent",
+                        "data": {
+                            "inputs": [
+                                { "name": "htsCode", "type": "text", "id": "htsCode", "var": "htsCode", "value": "=vars.htsCode", "elementId": "Stage_PostE1-tS7L2DtySv" },
+                                { "name": "totalValueUsd", "type": "number", "id": "totalValueUsd", "var": "totalValueUsd", "value": "=vars.totalValueUsd", "elementId": "Stage_PostE1-tS7L2DtySv" },
+                                { "name": "actualDutyUsd", "type": "number", "id": "actualDutyUsd", "var": "actualDutyUsd", "value": "=vars.actualDutyUsd", "elementId": "Stage_PostE1-tS7L2DtySv" },
+                                { "name": "supplierCountry", "type": "text", "id": "supplierCountry", "var": "supplierCountry", "value": "=vars.supplierCountry", "elementId": "Stage_PostE1-tS7L2DtySv" },
+                                { "name": "cooDeclaration", "type": "text", "id": "cooDeclaration", "var": "cooDeclaration", "value": "=vars.cooDeclaration", "elementId": "Stage_PostE1-tS7L2DtySv" }
+                            ],
+                            "outputs": [
+                                { "name": "dutySavingsOpportunity", "type": "text", "id": "dutySavingsOpportunity", "var": "dutySavingsOpportunity", "value": "", "source": "", "target": "=vars.dutySavingsOpportunity", "elementId": "Stage_PostE1-tS7L2DtySv" },
+                                { "name": "estimatedSavingsUsd", "type": "number", "id": "estimatedSavingsUsd", "var": "estimatedSavingsUsd", "value": "", "source": "", "target": "=vars.estimatedSavingsUsd", "elementId": "Stage_PostE1-tS7L2DtySv" }
+                            ]
+                        },
+                        "entryConditions": [{
+                            "id": "cDsvEntr1",
+                            "displayName": "Entry Rule 1",
+                            "rules": [[{ "id": "rDsvRule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS7L0DmsAr"] }]]
+                        }]
+                    }],
+                    [{
+                        "id": "tS7L3HT016",
+                        "elementId": "Stage_PostE1-tS7L3HT016",
+                        "displayName": "HT-16 Document Discrepancy",
+                        "isRequired": false,
+                        "shouldRunOnlyOnce": false,
+                        "type": "action",
+                        "data": {
+                            "inputs": [
+                                { "name": "documentList", "type": "text", "id": "documentList", "var": "documentList", "value": "=vars.documentList", "elementId": "Stage_PostE1-tS7L3HT016" },
+                                { "name": "poNumber", "type": "text", "id": "poNumber", "var": "poNumber", "value": "=vars.poNumber", "elementId": "Stage_PostE1-tS7L3HT016" },
+                                { "name": "archivalStatus", "type": "text", "id": "archivalStatus", "var": "archivalStatus", "value": "=vars.archivalStatus", "elementId": "Stage_PostE1-tS7L3HT016" }
+                            ],
+                            "outputs": [
+                                { "name": "docDiscrepancyOutcome", "type": "text", "id": "docDiscrepancyOutcome", "var": "docDiscrepancyOutcome", "value": "", "source": "", "target": "=vars.documentationComplete", "elementId": "Stage_PostE1-tS7L3HT016" }
+                            ]
+                        },
+                        "entryConditions": [{
+                            "id": "cHT16Entr1",
+                            "displayName": "Entry Rule 1",
+                            "rules": [[
+                                { "id": "rHT16Rule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS7L0DmsAr"] },
+                                { "id": "rHT16Rule2", "rule": "adhoc", "conditionExpression": "=js:vars.documentationComplete == false" }
+                            ]]
+                        }]
+                    }],
+                    [{
+                        "id": "tS7L4HT017",
+                        "elementId": "Stage_PostE1-tS7L4HT017",
+                        "displayName": "HT-17 Duty Variance Review",
+                        "isRequired": false,
+                        "shouldRunOnlyOnce": false,
+                        "type": "action",
+                        "data": {
+                            "inputs": [
+                                { "name": "estimatedDutyUsd", "type": "number", "id": "estimatedDutyUsd", "var": "estimatedDutyUsd", "value": "=vars.estimatedDutyUsd", "elementId": "Stage_PostE1-tS7L4HT017" },
+                                { "name": "actualDutyUsd", "type": "number", "id": "actualDutyUsd", "var": "actualDutyUsd", "value": "=vars.actualDutyUsd", "elementId": "Stage_PostE1-tS7L4HT017" },
+                                { "name": "dutyVarianceUsd", "type": "number", "id": "dutyVarianceUsd", "var": "dutyVarianceUsd", "value": "=vars.dutyVarianceUsd", "elementId": "Stage_PostE1-tS7L4HT017" },
+                                { "name": "dutyVariancePct", "type": "number", "id": "dutyVariancePct", "var": "dutyVariancePct", "value": "=vars.dutyVariancePct", "elementId": "Stage_PostE1-tS7L4HT017" },
+                                { "name": "htsCode", "type": "text", "id": "htsCode", "var": "htsCode", "value": "=vars.htsCode", "elementId": "Stage_PostE1-tS7L4HT017" }
+                            ],
+                            "outputs": [
+                                { "name": "dutyVarianceOutcome", "type": "text", "id": "dutyVarianceOutcome", "var": "dutyVarianceOutcome", "value": "", "source": "", "target": "=vars.dutyVarianceOutcome", "elementId": "Stage_PostE1-tS7L4HT017" }
+                            ]
+                        },
+                        "entryConditions": [{
+                            "id": "cHT17Entr1",
+                            "displayName": "Entry Rule 1",
+                            "rules": [[
+                                { "id": "rHT17Rule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS7L1ErpLc"] },
+                                { "id": "rHT17Rule2", "rule": "adhoc", "conditionExpression": "=js:vars.dutyVariancePct > 5" }
+                            ]]
+                        }]
+                    }],
+                    [{
+                        "id": "tS7L5HT018",
+                        "elementId": "Stage_PostE1-tS7L5HT018",
+                        "displayName": "HT-18 Duty Savings Opportunity",
+                        "isRequired": false,
+                        "shouldRunOnlyOnce": false,
+                        "type": "action",
+                        "data": {
+                            "inputs": [
+                                { "name": "dutySavingsOpportunity", "type": "text", "id": "dutySavingsOpportunity", "var": "dutySavingsOpportunity", "value": "=vars.dutySavingsOpportunity", "elementId": "Stage_PostE1-tS7L5HT018" },
+                                { "name": "estimatedSavingsUsd", "type": "number", "id": "estimatedSavingsUsd", "var": "estimatedSavingsUsd", "value": "=vars.estimatedSavingsUsd", "elementId": "Stage_PostE1-tS7L5HT018" },
+                                { "name": "htsCode", "type": "text", "id": "htsCode", "var": "htsCode", "value": "=vars.htsCode", "elementId": "Stage_PostE1-tS7L5HT018" }
+                            ],
+                            "outputs": [
+                                { "name": "dutySavingsDecision", "type": "text", "id": "dutySavingsDecision", "var": "dutySavingsDecision", "value": "", "source": "", "target": "=vars.dutySavingsDecision", "elementId": "Stage_PostE1-tS7L5HT018" }
+                            ]
+                        },
+                        "entryConditions": [{
+                            "id": "cHT18Entr1",
+                            "displayName": "Entry Rule 1",
+                            "rules": [[
+                                { "id": "rHT18Rule1", "rule": "selected-tasks-completed", "selectedTasksIds": ["tS7L2DtySv"] },
+                                { "id": "rHT18Rule2", "rule": "adhoc", "conditionExpression": "=js:vars.dutySavingsOpportunity != 'NONE'" }
+                            ]]
+                        }]
+                    }]
+                ]
+            }
+        }
+    ],
+    "edges": [],
+    "layout": {}
+}

@@ -1,0 +1,26 @@
+{
+  "name": "PGAFlagWorkflow",
+  "description": "API Workflow that evaluates an HTS code against the Partner Government Agency (PGA) flag matrix — FDA, USDA, FWS, EPA, CPSC, ATF, NHTSA, and others. Returns pgaFlag (bool) and the list of agencies requiring review documentation.",
+  "projectVersion": "1.0.0",
+  "entryPoint": "Workflow.json",
+  "entryPoints": [
+    {
+      "filePath": "Workflow.json",
+      "uniqueId": "e5f6a7b8-c9d0-1234-efab-345678901234",
+      "input": [
+        { "name": "htsCode", "type": "string", "required": true, "hasDefault": false },
+        { "name": "goodsDescription", "type": "string", "required": false, "hasDefault": true }
+      ],
+      "output": [
+        { "name": "pgaFlag", "type": "boolean" },
+        { "name": "pgaAgencies", "type": "string" }
+      ]
+    }
+  ],
+  "designOptions": {
+    "outputType": "Api"
+  },
+  "dependencies": {
+    "@uipath/api-workflow-executor": "1.0.*"
+  }
+}

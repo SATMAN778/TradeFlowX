@@ -521,57 +521,28 @@ Where goods transit Dubai without substantial transformation, the first-sale (ma
 
 ```
 tradeflow-maestro-ai/
-├── README.md
-├── maestro-architecture.svg          # Architecture diagram (GitHub render)
-├── docs/
-│   ├── blueprint/
-│   │   └── Dubai_USA_Import_Maestro_Case_Blueprint.md
-│   ├── compliance/
-│   │   ├── isf-10plus2-checklist.md
-│   │   ├── ofac-screening-guide.md
-│   │   └── hts-classification-sop.md
-│   └── integrations/
-│       ├── ace-api-integration.md
-│       ├── ofac-api-integration.md
-│       └── erp-api-mapping.md
-├── maestro/
-│   ├── cases/
-│   │   └── DubaiUSAImport.case          # Maestro case app definition
-│   ├── workflows/
-│   │   ├── S1_OrderIntake.xaml
-│   │   ├── S2_ISFFilingOrchestrator.xaml
-│   │   ├── S3_HTSClassification.xaml
-│   │   ├── S4_PGAScreening.xaml
-│   │   ├── S5_OFACScreening.xaml
-│   │   ├── S6_CustomsEntryFiling.xaml
-│   │   └── S7_DocumentManagement.xaml
-│   └── human-tasks/
-│       ├── HT-01_MissingPOFields.form
-│       ├── HT-02_TransshipmentCOO.form
-│       ├── HT-04_ISFDoNotLoad.form
-│       ├── HT-06_HTSReview.form
-│       ├── HT-11_OFACFuzzyMatch.form
-│       ├── HT-12_OFACHitBlock.form
-│       └── ...
-├── agents/
-│   ├── intake_agent/
-│   ├── document_verification_agent/
-│   ├── trade_compliance_agent/
-│   ├── ofac_screening_agent/
-│   ├── hts_classification_agent/
-│   └── communication_agent/
-├── integrations/
-│   ├── ace_api/
-│   ├── ofac_api/
-│   ├── usitc_api/
-│   ├── bis_api/
-│   ├── samgov_api/
-│   └── erp_connector/
-└── tests/
-    ├── test_isf_validation.py
-    ├── test_hts_confidence_gate.py
-    ├── test_ofac_fuzzy_match.py
-    └── test_duty_calculation.py
+├── README.md                                  # Workspace root overview and design manual
+├── docs/                                      # System guides, architecture, and step-by-step documentations
+│   ├── README.md                              # Document index and directory guide
+│   ├── architecture.md                        # Overall technical design and sync logic
+│   ├── getting_started.md                     # Platform configuration and developer setup
+│   ├── publishing_and_deployment.md           # Solution packaging and deploy instructions
+│   └── stages/                                # Detailed stage-by-stage manuals (Stage 1 to 7)
+├── 00_CaseOrchestration/                      # UiPath Maestro case definition and orchestration logic
+│   └── TradeXCase/
+│       └── caseplan.json                      # Unified case definition, SLA timers, and HITL tasks
+├── 01_TradeOrderIntake/                       # Stage 1 workflow automation (PO data capture)
+├── 01_Agent_TransshipmentRisk_LangGraph/      # Stage 1 transshipment risk classifier agent (LangGraph/Python)
+├── 02_ISFFiling/                              # Stage 2 ISF filing and ACE status polling workflows
+├── 03_HTSClassification/                      # Stage 3 HTS classification & duty lookup workflows
+├── 03_Agent_HTSClassifier_LangGraph/          # Stage 3 product classification agent (LangGraph/Python)
+├── 04_PGAScreening/                           # Stage 4 PGA screening coordinator and polling bots
+├── 05_OFACScreening/                          # Stage 5 party extraction and OFAC API checks
+├── 06_CBPEntry/                               # Stage 6 customs entry filing (CBP 3461) and status monitoring
+├── 07_PostEntry/                              # Stage 7 DMS archival & ERP landed cost workflows
+├── 07_Agent_DutySavings_LangGraph/            # Stage 7 duty savings analysis agent (LangGraph/Python)
+├── App_CaseUI/                                # Operator human-task UI interfaces & Apps
+└── TradeX-Portal/                             # Vite + React + TypeScript central control room dashboard
 ```
 
 ---

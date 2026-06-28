@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "TradeX-DMS-Archive",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "b7a27a69-516f-4e89-8267-cef3540bf2f5",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "TradeX-DMS-Archive"
+    },
+    "locks": [],
+    "key": "51877d97-d2c2-4300-a10e-8d0897d81a3b",
+    "files": []
+  }
+}
