@@ -168,7 +168,7 @@ These fields are visible across all stages in the Maestro case header.
 | Commerce Dept ADD/CVD DB | Web scrape | S3 |
 | BIS Entity List / DPL | REST API or file sync | S5 |
 | SAM.gov EPLS | REST API | S5 |
-| ERP (SAP / Oracle / NetSuite) | REST / BAPI | S1, S6, S7 |
+| ERP API | REST / Webhook | S1, S6, S7 |
 | Document Management (SharePoint / ECM) | API | S7 |
 | Customs Broker TMS | API or RPA | S6 |
 | Email (Outlook / Gmail) | Integration connector | S1, S2, S7 |

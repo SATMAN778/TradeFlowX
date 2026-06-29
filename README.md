@@ -166,15 +166,18 @@ TradeFlowX deploys **five coded agents** handling distinct compliance domains:
 
 ---
 
-## How AI Helped Us Build Faster
+## How UiPath Coded Agents, CLI & SDK Accelerated Development
 
-**Claude** was our primary coding partner throughout the build. Using Claude Code with UiPath-specific skills, it authored the entire Maestro case plan, wired all 19 automation tasks and 18 human tasks, scaffolded the coded RPA processes in C#, and handled every deployment cycle — validate, pack, publish, deploy — from the terminal. When something wasn't triggering, Claude diagnosed the structural defect and fixed it. What would have taken days of documentation-reading and trial-and-error became hours.
+The developer experience of building **TradeFlowX** was highly accelerated by the native UiPath ecosystem:
 
-The **UiPath TypeScript SDK** powered the frontend human task forms. Claude used it to wire all 18 approval forms directly to Maestro Action Center with no backend required — a pattern that kept the entire portal as a single deployable app.
-
-**Gemini** handled trade compliance research — mapping HTS chapters to PGA agencies, compiling ISF 10+2 filing requirements, and drafting CBP query response language for the human review forms. It gave us accurate regulatory content fast, without us having to read through CFR chapters manually.
-
-The split was clean: Gemini for domain knowledge, Claude for building. Together they let a small team deliver a production-grade, seven-stage import compliance platform in hackathon time.
+*   **UiPath Coded Agents:** By combining stateful Python `StateGraph` workflows with the UiPath Coded Agents framework, we integrated advanced reasoning and RAG classifications seamlessly. The agents are self-contained, easily versioned via `agent.json`, and interact with the case plan via native asynchronous handshakes.
+*   **The UiPath CLI (`uip`):** The `uip` tool was our primary operational engine. We used it directly from the terminal to automate the entire validation and deployment loop:
+    *   Syncing local bindings: `uip solution resources refresh`
+    *   Compiling local packages: `uip solution pack`
+    *   Deploying and launching production workloads: `uip solution deploy run`
+    This eliminated manual UI setup in Orchestrator and allowed us to establish a continuous integration and deployment loop.
+*   **UiPath TypeScript SDK:** The `@uipath/uipath-typescript` core and services packages powered our frontend. Using these packages, the React Coded Web App communicated directly with Maestro Cases, Tasks, and Data Fabric entities from the browser (e.g. using `Tasks.complete()`), eliminating the need for a custom API proxy or backend hosting.
+*   **UiPath Coded Workflows & Activities:** The development of our C# coded RPA workflows allowed us to build robust API integrations (CBP ACE, USITC, and OFAC) with clean error recovery and minimal graphical drag-and-drop overhead.
 
 ---
 
