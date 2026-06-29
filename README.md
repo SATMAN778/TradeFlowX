@@ -1,4 +1,4 @@
-# 🚢 TradeFlow Maestro AI
+# 🚢 TradeFlowX
 
 ### Agentic Import Operations Platform · UAE (Dubai / JAFZA) → USA
 
@@ -11,7 +11,7 @@
 
 ## Overview
 
-**TradeFlow Maestro AI** is a fully orchestrated **Agentic Import Operations Platform** that autonomously manages the end-to-end US customs clearance lifecycle for shipments originating from **Dubai and JAFZA (UAE)**.
+**TradeFlowX** is a fully orchestrated **Agentic Import Operations Platform** that autonomously manages the end-to-end US customs clearance lifecycle for shipments originating from **Dubai and JAFZA (UAE)**.
 
 Built on UiPath Maestro, the platform acts as a **digital Import Operations Manager** — coordinating AI agents, RPA bots, live regulatory APIs, and human reviewers under a single governed workflow.
 
@@ -35,36 +35,17 @@ The **TradeX Portal** is a Vite + React + TypeScript web application that serves
 
 ## The Problem & Manual Process Today
 
-Importing goods from the UAE (Dubai/JAFZA) into the USA is a highly regulated, high-stakes supply chain operation. The transaction spans multiple cross-border stakeholders, compliance frameworks, documents, and regulatory deadlines. 
+Importing goods from the UAE (Dubai/JAFZA) to the USA requires complex customs compliance under tight deadlines. Today, this process is highly manual, error-prone, and slow:
 
-### Key Corridor Metrics (PPT-Ready)
-*   🌐 **US–UAE trade hit $47.9B in 2024, growing 10.4% YoY** — yet the compliance infrastructure managing this corridor still runs on manual broker workflows and email chains that cannot scale. *(USTR, 2024)*
-*   📋 **HTS misclassification drives 42% of all CBP penalties** — with Section 301 and IEEPA tariffs stacking to 40%+, one wrong digit can shift your effective duty rate by 20–50 percentage points overnight. *(Greenwich Mercantile, 2026)*
-*   🚢 **60% of all GCC re-exports flow through UAE Free Zones** — making every JAFZA shipment a CBP scrutiny target for undeclared China/India origin, Section 301 exposure, and OFAC transshipment risk. *(UAE Customs Guide, 2026)*
-*   ⚠️ **Late ISF filing costs $5,000–$10,000 per shipment** — and a manual broker handling 40–60 entries a month cannot guarantee the 24-hour Jebel Ali deadline on every ocean vessel departure. *(CBP / Great Lakes Customs Law)*
+- ⏳ **ISF 10+2 Filing Race**: Brokers manually gather and key in 10+2 data elements under a strict 24-hour pre-loading deadline, risking $5,000–$10,000 penalties for late filings.
+- 🔍 **Manual HTS Classification**: Humans manually classify products against the 17,000-code HTSUS schedule, risking misclassification penalties (42% of all CBP penalties) or incorrect duty applications.
+- 🚨 **Transshipment & Sanction Risks**: Free Zones like JAFZA introduce high risks of undeclared Chinese/Iranian origin (escaping Section 301 tariffs) and OFAC screening gaps, as manual SDN checks are rarely re-run continuously.
+- 🏛️ **Fragmented PGA & Post-Entry Work**: Coordinating Partner Government Agencies (FDA, USDA, FCC) and manually reconciling CBP 7501 entries to ERP is slow and causes demurrage delays.
 
-### What is Being Done Manually Today?
-
-Currently, import compliance operations rely heavily on fragmented manual workflows:
-*   📧 **Brokers collect shipment documents via email and manually re-key data into ACE** — commercial invoices, B/L, COO, and packing lists arrive as PDF attachments with no structured extraction; a single entry takes 2–4 hours of manual preparation with brokers reviewing just 5–10% of HTS codes before submission. *(Flexport Customs Brokerage — flexport.com, 2025)*
-*   ⏰ **ISF 10+2 is filed manually by a customs broker racing a 24-hour clock** — brokers chase suppliers for missing data elements over email, hand-key all 10+2 fields into ACE, and rely on personal reminders rather than automated SLA enforcement to avoid the $5,000–$10,000 per-shipment penalty. *(Great Lakes Customs Law — greatlakescustomslaw.com, 2026)*
-*   🔍 **HTS classification is done by a human expert per shipment, from scratch** — brokers manually search the 17,000-code HTSUS schedule, cross-reference CBP CROSS rulings, and check Section 301 lists individually; no institutional memory carries over from prior shipments of the same product. *(US International Trade Commission — hts.usitc.gov)*
-*   🚨 **OFAC screening is performed at supplier onboarding only — then never again** — most importers run a one-time manual name search on OFAC's public web tool; the SDN list updates multiple times per week, meaning a supplier cleared at setup may be sanctioned today with no re-check triggered. *(OFAC Treasury Sanctions List Search — ofac.treasury.gov · Sanctions Lawyers, 2026)*
-*   🏛️ **PGA requirements are researched manually per shipment across 5+ separate agency portals** — FDA, USDA, CPSC, EPA and FCC each maintain independent submission systems; importers discover PGA holds only after the container arrives at port, with demurrage running at $200–$400/day while documentation is gathered. *(USA Customs Clearance PGA Guide — usacustomsclearance.com · FreightAmigo, 2026)*
-*   📂 **Post-entry reconciliation and duty payments are manually posted to ERP by the finance team** — CBP 7501 entry summaries, broker fee invoices, and duty calculations are reconciled via spreadsheet with no automated cross-check against declared values; 5-year record retention is managed through shared drives and email folders. *(Clearit USA Import Lifecycle — clearitusa.com, 2025)*
-
-
-| Manual Challenge | Impact of Manual Failure |
-|---|---|
-| ISF 10+2 must file **24 hrs before vessel loads** at Jebel Ali | Missed deadlines trigger CBP penalties ($5,000–$10,000/violation) and cargo lading holds. |
-| HTS classification errors | Wrong duty rates applied, leading to CBP exams, delays, and post-entry liquidation penalties. |
-| JAFZA transshipment risk | Chinese-origin goods transiting UAE escape Section 301 tariffs, triggering major trade fraud violations. |
-| OFAC / BIS / SAM.gov screening | Manual list checking misses fuzzy name matches, causing severe sanctions compliance violations. |
-| Fragmented document handling | Discrepancies between invoice and packing list are only discovered at the port of entry, halting clearance. |
-
-Traditional task automation cannot solve this. **TradeFlow Maestro AI orchestrates the entire import clearance operation.**
+Traditional task automation cannot solve this. **TradeFlowX orchestrates the entire import clearance operation.**
 
 ---
+
 
 ## Architecture
 
@@ -519,30 +500,77 @@ Where goods transit Dubai without substantial transformation, the first-sale (ma
 
 ## Repository Structure
 
+All solutions live in a single monorepo. Folders are prefixed with the stage number so they sort in pipeline order. UiPath solutions contain the `.uipx` manifest at the folder root; LangGraph agents are suffixed `_LangGraph` to distinguish them from UiPath-native automation.
+
 ```
-tradeflow-maestro-ai/
-├── README.md                                  # Workspace root overview and design manual
-├── docs/                                      # System guides, architecture, and step-by-step documentations
-│   ├── README.md                              # Document index and directory guide
-│   ├── architecture.md                        # Overall technical design and sync logic
-│   ├── getting_started.md                     # Platform configuration and developer setup
-│   ├── publishing_and_deployment.md           # Solution packaging and deploy instructions
-│   └── stages/                                # Detailed stage-by-stage manuals (Stage 1 to 7)
-├── 00_CaseOrchestration/                      # UiPath Maestro case definition and orchestration logic
-│   └── TradeXCase/
-│       └── caseplan.json                      # Unified case definition, SLA timers, and HITL tasks
-├── 01_TradeOrderIntake/                       # Stage 1 workflow automation (PO data capture)
-├── 01_Agent_TransshipmentRisk_LangGraph/      # Stage 1 transshipment risk classifier agent (LangGraph/Python)
-├── 02_ISFFiling/                              # Stage 2 ISF filing and ACE status polling workflows
-├── 03_HTSClassification/                      # Stage 3 HTS classification & duty lookup workflows
-├── 03_Agent_HTSClassifier_LangGraph/          # Stage 3 product classification agent (LangGraph/Python)
-├── 04_PGAScreening/                           # Stage 4 PGA screening coordinator and polling bots
-├── 05_OFACScreening/                          # Stage 5 party extraction and OFAC API checks
-├── 06_CBPEntry/                               # Stage 6 customs entry filing (CBP 3461) and status monitoring
-├── 07_PostEntry/                              # Stage 7 DMS archival & ERP landed cost workflows
-├── 07_Agent_DutySavings_LangGraph/            # Stage 7 duty savings analysis agent (LangGraph/Python)
-├── App_CaseUI/                                # Operator human-task UI interfaces & Apps
-└── TradeX-Portal/                             # Vite + React + TypeScript central control room dashboard
+TradeFlowAICase/                                         # ← monorepo root
+│
+├── 00_CaseOrchestration/                                # Maestro Case plan — caseplan.json, SLA timers, HITL tasks
+│   ├── TradeFlowImportSolution.uipx                     # Solution manifest
+│   └── TradeXCase/                                      # Case project (caseplan.json, entry-points.json)
+│
+├── 01_TradeOrderIntake/                                 # Stage 1 — PO intake, document collection, COO verification
+│   ├── TradeXIntake.uipx                                # Solution manifest
+│   ├── TradeX_EmailIntake/                              # RPA: inbox monitor & attachment downloader
+│   ├── TradeX_EmailIntake_Agent/                        # Orchestration agent: PO field extraction
+│   ├── TradeX_COOAgent/                                 # Orchestration agent: COO verification
+│   ├── TradeX_POEnrichment/                             # RPA: ERP PO data enrichment
+│   ├── TradeX_GmailReader/                              # RPA: Gmail connector
+│   ├── TradeX_SalesforceOrderCreator/                   # RPA: Salesforce trade order creation
+│   └── TradeX_WebSearch/                                # RPA: web search utility
+│
+├── 01_Agent_TransshipmentRisk_LangGraph/                # Stage 1 — LangGraph Python agent: transshipment risk classifier
+│   ├── main.py                                          # Agent entrypoint & graph definition
+│   ├── agent.json / project.uiproj                      # UiPath agent manifest
+│   └── src/                                             # Agent source (state, nodes, tools)
+│
+├── 02_ISFFiling/                                        # Stage 2 — ISF 10+2 filing & ACE status polling
+│   ├── ISF_Filing_Solution.uipx                         # Solution manifest
+│   ├── ACE_ISF_Filer/                                   # RPA: CBP ACE ISF submission workflow
+│   ├── ACE_ISF_Monitor/                                 # RPA: ACE status poller
+│   └── ISF_DataCollection_Agent/                        # Orchestration agent: 10+2 data aggregation
+│
+├── 03_HTSClassification/                                # Stage 3 — HTS classification, duty rates, PGA flag
+│   ├── HTSClassificationDutySolution.uipx               # Solution manifest
+│   ├── IXPPipeline/                                     # RPA: IDP document extraction pipeline
+│   ├── DutyRateLookup/                                  # API Workflow: MFN + Section 301 + ADD/CVD duty lookup
+│   └── PGAFlagWorkflow/                                 # API Workflow: PGA agency flag evaluation
+│
+├── 03_Agent_HTSClassifier_LangGraph/                    # Stage 3 — LangGraph Python agent: HTS code classifier (RAG)
+│   ├── main.py                                          # Agent entrypoint & graph definition
+│   ├── agent.json / project.uiproj                      # UiPath agent manifest
+│   └── src/                                             # Agent source (state, nodes, tools, assets)
+│
+├── 04_PGAScreening/                                     # Stage 4 — PGA agency coordination (conditional)
+│   ├── PGA_Coordination_Solution.uipx                   # Solution manifest
+│   ├── PGA_CoordinationAgent/                           # Orchestration agent: FDA/USDA/FCC submission
+│   └── PGA_StatusPoller/                                # RPA: PGA status polling bot
+│
+├── 05_OFACScreening/                                    # Stage 5 — OFAC & denied-party screening
+│   ├── OFAC_Screening_Solution.uipx                     # Solution manifest
+│   ├── OFAC_SDN_Search/                                 # RPA: OFAC SDN API search workflow
+│   └── OFAC_Screening_Agent/                            # Orchestration agent: multi-list party screener
+│
+├── 06_CBPEntry/                                         # Stage 6 — CBP Form 3461 entry filing & clearance
+│   ├── CBPEntryFillingSolution.uipx                     # Solution manifest
+│   ├── CBP3461FormBot/                                  # RPA: CBP 3461 form generation & submission
+│   ├── CBPStatusPoller/                                 # API Workflow: CBP exam status polling
+│   └── CBPDutyCalculation/                              # RPA: duty calculation (MFN + MPF + HMF)
+│
+├── 07_PostEntry/                                        # Stage 7 — DMS archival & ERP landed cost posting
+│   ├── DocMgmtPostEntrySolution.uipx                    # Solution manifest
+│   ├── DMSArchiveWorkflow/                              # RPA: document archive to DMS (7-year retention)
+│   └── ERPLandedCostWorkflow/                           # RPA: landed cost GL posting to ERP
+│
+├── 07_Agent_DutySavings_LangGraph/                      # Stage 7 — LangGraph Python agent: duty savings analyser
+│   ├── main.py                                          # Agent entrypoint & graph definition
+│   ├── agent.json / project.uiproj                      # UiPath agent manifest
+│   └── src/                                             # Agent source (state, nodes, tools)
+│
+├── App_CaseUI/                                          # Maestro Case App — operator task UI & human-task forms
+├── TradeX-Portal/                                       # Vite + React + TypeScript central control room dashboard
+├── docs/                                                # Architecture guides, stage runbooks, deployment notes
+└── samples/                                             # Sample POs, invoices, and test data sets
 ```
 
 ---
@@ -575,52 +603,131 @@ The platform coordinates two categories of agents: **Coded Python (LangGraph) Ag
 
 ### Prerequisites
 
-- UiPath Orchestrator (Cloud or On-Prem) with Maestro enabled
-- UiPath Studio 2024.10+
-- API credentials for: CBP ACE, OFAC SDN, USITC, BIS, SAM.gov
-- ERP API access (SAP / Oracle / NetSuite)
-- OpenAI API key (or enterprise LLM endpoint)
+| Tool | Version | Purpose |
+|---|---|---|
+| [UiPath CLI](https://www.npmjs.com/package/@uipath/cli) | latest | Pack, publish, deploy all UiPath solutions |
+| UiPath Automation Cloud | — | Maestro, Orchestrator, Action Center, Studio Web |
+| Python | 3.10+ | LangGraph agents (`01_`, `03_`, `07_` `_LangGraph` folders) |
+| Node.js + npm | 18+ | TradeX Portal (`TradeX-Portal/`) |
 
-### Configuration
-
-1. Clone this repository
-2. Import the Maestro case definition from `maestro/cases/DubaiUSAImport.case`
-3. Configure API credentials in UiPath Orchestrator Assets:
-   - `ACE_API_KEY`
-   - `OFAC_API_KEY`
-   - `USITC_API_BASE_URL`
-   - `ERP_BASE_URL` + `ERP_API_KEY`
-   - `LLM_API_KEY`
-4. Deploy workflows from `maestro/workflows/` to your Orchestrator tenant
-5. Publish human task forms from `maestro/human-tasks/`
-6. Configure SLA timers per the [Key SLA Timers](#key-sla-timers) table
-
-### Running a Test Case
+### 1. Clone & Authenticate
 
 ```bash
-# Trigger a test intake via the Orchestrator API
-curl -X POST https://your-orchestrator/api/jobs/StartJobs \
-  -H "Authorization: Bearer $UIPATH_TOKEN" \
-  -d '{
-    "startInfo": {
-      "ReleaseKey": "<S1_OrderIntake_ReleaseKey>",
-      "Strategy": "All",
-      "InputArguments": {
-        "PONumber": "TEST-PO-001",
-        "SupplierName": "Test Supplier LLC",
-        "SupplierCountry": "UAE",
-        "ShipmentValue": 15000,
-        "PortOfLoading": "Jebel Ali"
-      }
-    }
-  }'
+git clone https://github.com/your-username/TradeFlowAICase.git
+cd TradeFlowAICase
+
+# Install the UiPath CLI globally if not already installed
+npm install -g @uipath/cli
+
+# Log in to your UiPath Automation Cloud tenant
+uip login
+```
+
+### 2. Deploy the Case Orchestration (Stage 00)
+
+The Maestro case plan (`caseplan.json`) is the backbone — deploy this first. It defines all stages, SLA timers, HITL tasks, and case variables.
+
+```bash
+# Sync resource bindings
+uip solution resources refresh --solution-folder 00_CaseOrchestration
+
+# Pack into a deployable zip
+uip solution pack 00_CaseOrchestration ./dist -v 1.0.0 --output json
+
+# Publish to your tenant feed
+uip solution publish ./dist/TradeFlowImportSolution_1.0.0.zip --output json
+
+# Deploy and activate
+uip solution deploy run \
+  --name "TradeXCase-Prod" \
+  --package-name "TradeFlowImportSolution" \
+  --package-version "1.0.0" \
+  --folder-name "TradeXCase" \
+  --parent-folder-path "Shared" \
+  --output json
+```
+
+### 3. Deploy Each Stage Solution
+
+Repeat the pack → publish → deploy pattern for each stage. Replace `<STAGE_FOLDER>`, `<SOLUTION_NAME>`, and `<STAGE_FOLDER_NAME>` accordingly:
+
+| Stage | Folder | Solution name | Deploy folder |
+|---|---|---|---|
+| S1 | `01_TradeOrderIntake` | `TradeXIntake` | `TradeXCase/Stage01` |
+| S2 | `02_ISFFiling` | `ISF_Filing_Solution` | `TradeXCase/Stage02` |
+| S3 | `03_HTSClassification` | `HTSClassificationDutySolution` | `TradeXCase/Stage03` |
+| S4 | `04_PGAScreening` | `PGA_Coordination_Solution` | `TradeXCase/Stage04` |
+| S5 | `05_OFACScreening` | `OFAC_Screening_Solution` | `TradeXCase/Stage05` |
+| S6 | `06_CBPEntry` | `CBPEntryFillingSolution` | `TradeXCase/Stage06` |
+| S7 | `07_PostEntry` | `DocMgmtPostEntrySolution` | `TradeXCase/Stage07` |
+
+```bash
+# Example — Stage 3
+uip solution resources refresh --solution-folder 03_HTSClassification
+uip solution pack 03_HTSClassification ./dist -v 1.0.0 --output json
+uip solution publish ./dist/HTSClassificationDutySolution_1.0.0.zip --output json
+uip solution deploy run \
+  --name "HTSClassification-Prod" \
+  --package-name "HTSClassificationDutySolution" \
+  --package-version "1.0.0" \
+  --folder-name "Stage03" \
+  --parent-folder-path "Shared/TradeXCase" \
+  --output json
+```
+
+### 4. Set Up LangGraph Agents
+
+Each `_LangGraph` folder is a standalone Python project registered with UiPath Agents.
+
+```bash
+# Example — HTS Classifier Agent (Stage 3)
+cd 03_Agent_HTSClassifier_LangGraph
+
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment variables
+cp .env.example .env              # then fill in API keys
+
+# Run locally to verify
+python main.py
+
+# Deploy to UiPath Agents
+uip agent deploy --output json
+```
+
+Repeat for `01_Agent_TransshipmentRisk_LangGraph` and `07_Agent_DutySavings_LangGraph`.
+
+### 5. Start the TradeX Portal
+
+```bash
+cd TradeX-Portal
+npm install
+npm run dev          # development server at http://localhost:5173
+npm run build        # production build → dist/
+```
+
+### 6. Trigger a Test Case
+
+Once all solutions are deployed, start a case manually from Orchestrator or via the Maestro API:
+
+```bash
+# Start a manual test case via the UiPath CLI
+uip or jobs start \
+  --process-name "TradeXIntake" \
+  --folder-path "Shared/TradeXCase/Stage01" \
+  --input '{"PONumber":"TEST-PO-001","SupplierName":"JAFZA Test Co","SupplierCountry":"UAE","ShipmentValue":15000,"PortOfLoading":"Jebel Ali"}'
 ```
 
 ---
 
 ## Business Impact
 
-| Metric | Traditional Process | TradeFlow Maestro AI |
+| Metric | Traditional Process | TradeFlowX |
 |---|---|---|
 | ISF filing time | Manual, 4–8 hrs average | Automated, < 30 min |
 | HTS classification accuracy | Depends on broker expertise | AI-assisted with confidence gating |
@@ -633,7 +740,7 @@ curl -X POST https://your-orchestrator/api/jobs/StartJobs \
 
 ## Hackathon Vision
 
-> *Most automation solutions focus on task automation. TradeFlow Maestro AI focuses on operational decision automation.*
+> *Most automation solutions focus on task automation. TradeFlowX focuses on operational decision automation.*
 
 Instead of automating one activity, this platform orchestrates an **entire import operation** using coordinated AI agents, business rules, human approvals, and RPA — all under a single Maestro governance model.
 

@@ -1,0 +1,191 @@
+{
+  "id": "908b7d37-8323-478f-8985-d4a1ed97291c",
+  "version": "1.1.0",
+  "name": "TradeX_EmailIntake_Agent",
+  "metadata": {
+    "storageVersion": "50.0.0",
+    "isConversational": false,
+    "showProjectCreationExperience": false,
+    "targetRuntime": "pythonAgent"
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a US import shipment intake agent for Odyssey Logistics. Your job is to read the latest unread shipment email from Gmail, intelligently extract all shipment details regardless of email format, and create a Salesforce Order record.\n\nWorkflow:\n1. Call ReadGmailTool with in_CaseId set to the value from your input (input.in_CaseId). If in_CaseId is not provided or is empty, pass an empty string — GmailReader will fall back to using the email ID as the folder name. If out_HasEmail is false, stop and return out_HasEmail=false with all other fields empty.\n2. Carefully read the email body (and subject) — the sender may use ANY format: structured tables, bullet points, free-form paragraphs, forwarded chains, or mixed formats. There is NO fixed template.\n3. Extract all 22 CBP-required shipment fields from the email content using your reasoning. Fields may appear in any order, with varying labels, abbreviations, or embedded in sentences.\n4. The 22 required fields are:\n   - ImporterOfRecord: The US importer of record name and EIN/IRS number\n   - Shipper: Exporter/supplier company name and address\n   - Consignee: Consignee name and address\n   - NotifyParty: Notify party name for Bill of Lading\n   - CountryOfOrigin: Country where goods were manufactured (NOT shipped from)\n   - HTSCode: 10-digit Harmonized Tariff Schedule code(s)\n   - GoodsDescription: Detailed description of goods including composition and intended use\n   - Quantity: Number of units with unit of measure\n   - UnitValue_USD: Price per unit in USD\n   - TotalValue_USD: Total declared invoice value in USD\n   - Currency: Currency code (e.g. USD, EUR)\n   - Incoterms: Trade terms (FOB, CIF, EXW, DDP, etc.)\n   - PortOfLoading: Port or airport where goods are loaded\n   - PortOfDischarge: US port of entry / port of discharge\n   - VesselOrFlightNumber: Vessel name and voyage number, or airline and flight number\n   - BillOfLadingOrAWBNumber: Bill of Lading number or Air Waybill number\n   - InvoiceNumber: Commercial invoice number\n   - InvoiceDate: Invoice date (standardize to YYYY-MM-DD)\n   - ManufacturerName: Name of the actual manufacturer (important for COO verification)\n   - ManufacturerAddress: Full address of the manufacturer\n   - GrossWeight_KG: Total gross weight in kilograms\n   - PackageCount: Total number of packages/cartons/pallets\n5. Build a JSON object with exactly these 22 field names as keys and the extracted values as strings. Use empty string for any field not found in the email.\n6. Call CreateSalesforceOrderTool with:\n   - in_FieldsJson: the 22-field JSON object as a string\n   - in_EmailId: the EmailId from step 1\n   - in_AttachmentNamesJson: serialize the AttachmentNames array from the email JSON as a JSON array string (e.g. \"[\\\"invoice.pdf\\\",\\\"packing_list.xlsx\\\"]\")\n7. Return all output fields based on the tool responses.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "You are a US import shipment intake agent for Odyssey Logistics. Your job is to read the latest unread shipment email from Gmail, intelligently extract all shipment details regardless of email format, and create a Salesforce Order record.\n\nWorkflow:\n1. Call ReadGmailTool with in_CaseId set to the value from your input (input.in_CaseId). If in_CaseId is not provided or is empty, pass an empty string — GmailReader will fall back to using the email ID as the folder name. If out_HasEmail is false, stop and return out_HasEmail=false with all other fields empty.\n2. Carefully read the email body (and subject) — the sender may use ANY format: structured tables, bullet points, free-form paragraphs, forwarded chains, or mixed formats. There is NO fixed template.\n3. Extract all 22 CBP-required shipment fields from the email content using your reasoning. Fields may appear in any order, with varying labels, abbreviations, or embedded in sentences.\n4. The 22 required fields are:\n   - ImporterOfRecord: The US importer of record name and EIN/IRS number\n   - Shipper: Exporter/supplier company name and address\n   - Consignee: Consignee name and address\n   - NotifyParty: Notify party name for Bill of Lading\n   - CountryOfOrigin: Country where goods were manufactured (NOT shipped from)\n   - HTSCode: 10-digit Harmonized Tariff Schedule code(s)\n   - GoodsDescription: Detailed description of goods including composition and intended use\n   - Quantity: Number of units with unit of measure\n   - UnitValue_USD: Price per unit in USD\n   - TotalValue_USD: Total declared invoice value in USD\n   - Currency: Currency code (e.g. USD, EUR)\n   - Incoterms: Trade terms (FOB, CIF, EXW, DDP, etc.)\n   - PortOfLoading: Port or airport where goods are loaded\n   - PortOfDischarge: US port of entry / port of discharge\n   - VesselOrFlightNumber: Vessel name and voyage number, or airline and flight number\n   - BillOfLadingOrAWBNumber: Bill of Lading number or Air Waybill number\n   - InvoiceNumber: Commercial invoice number\n   - InvoiceDate: Invoice date (standardize to YYYY-MM-DD)\n   - ManufacturerName: Name of the actual manufacturer (important for COO verification)\n   - ManufacturerAddress: Full address of the manufacturer\n   - GrossWeight_KG: Total gross weight in kilograms\n   - PackageCount: Total number of packages/cartons/pallets\n5. Build a JSON object with exactly these 22 field names as keys and the extracted values as strings. Use empty string for any field not found in the email.\n6. Call CreateSalesforceOrderTool with:\n   - in_FieldsJson: the 22-field JSON object as a string\n   - in_EmailId: the EmailId from step 1\n   - in_AttachmentNamesJson: serialize the AttachmentNames array from the email JSON as a JSON array string (e.g. \"[\\\"invoice.pdf\\\",\\\"packing_list.xlsx\\\"]\")\n7. Return all output fields based on the tool responses."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Process the newest unread shipment email from the Gmail INBOX. Extract all CBP-required fields and create a Salesforce Order record.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "Process the newest unread shipment email from the Gmail INBOX. Extract all CBP-required fields and create a Salesforce Order record."
+        }
+      ]
+    }
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "in_CaseId": {
+        "type": "string",
+        "description": "Maestro Case ID passed from the Maestro Case context. Used as the Storage Bucket folder name for attachments. If empty, the Gmail message ID is used as the folder name."
+      }
+    },
+    "required": []
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "out_SalesforceOrderId": {
+        "type": "string",
+        "description": "Salesforce Order record ID created from the shipment email"
+      },
+      "out_CaseId": {
+        "type": "string",
+        "description": "Case ID = Salesforce Order.OrderNumber, used as Storage Bucket key"
+      },
+      "out_PO_HasAllDetails": {
+        "type": "boolean",
+        "description": "True if all 22 CBP-required shipment fields were extracted from the email"
+      },
+      "out_MissingFields": {
+        "type": "string",
+        "description": "JSON array of missing field names when out_PO_HasAllDetails is false"
+      },
+      "out_AttachmentCount": {
+        "type": "integer",
+        "description": "Number of attachments found on the email"
+      },
+      "out_HasEmail": {
+        "type": "boolean",
+        "description": "True if an unread shipment email was found in the INBOX"
+      }
+    }
+  },
+  "settings": {
+    "model": "anthropic.claude-sonnet-4-6",
+    "maxTokens": 16384,
+    "temperature": 0,
+    "engine": "basic-v2",
+    "maxIterations": 15,
+    "mode": "standard"
+  },
+  "type": "lowCode",
+  "projectId": "908b7d37-8323-478f-8985-d4a1ed97291c",
+  "resources": [
+    {
+      "$resourceType": "tool",
+      "id": "5d3103c3-5ef7-4483-8f47-49329f376bdb",
+      "name": "CreateSalesforceOrderTool",
+      "description": "Creates a Salesforce Order from 22 CBP fields JSON. Inputs: in_FieldsJson (required), in_EmailId, in_AttachmentNamesJson, in_AttachmentBucketPathsJson. Returns out_OrderId, out_OrderNumber (CaseId), out_PO_HasAllDetails, out_MissingFields.",
+      "type": "process",
+      "isEnabled": true,
+      "location": "external",
+      "referenceKey": "42a849b0-5cf7-45b2-817f-9a1ea2f60487",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "in_FieldsJson": {
+            "type": "string"
+          },
+          "in_EmailId": {
+            "type": "string"
+          },
+          "in_AttachmentNamesJson": {
+            "type": "string"
+          },
+          "in_AttachmentBucketPathsJson": {
+            "type": "string"
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "out_OrderId": {
+            "type": "string"
+          },
+          "out_OrderNumber": {
+            "type": "string"
+          },
+          "out_PO_HasAllDetails": {
+            "type": "boolean"
+          },
+          "out_MissingFields": {
+            "type": "string"
+          }
+        },
+        "required": []
+      },
+      "settings": {},
+      "guardrail": {
+        "policies": []
+      },
+      "properties": {
+        "processName": "TradeX_SalesforceOrderCreator",
+        "folderPath": "solution_folder",
+        "exampleCalls": []
+      },
+      "argumentProperties": {}
+    },
+    {
+      "$resourceType": "tool",
+      "id": "b247a844-9204-4f0a-ac2e-aa5af3e59c71",
+      "name": "ReadGmailTool",
+      "description": "Reads the newest unread email from Gmail INBOX. Returns out_EmailJson, out_EmailId, out_HasEmail, out_AttachmentBucketPathsJson.",
+      "type": "process",
+      "isEnabled": true,
+      "location": "external",
+      "referenceKey": "2230215f-f50c-4e1a-a1df-093d41df899b",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "in_CaseId": {
+            "type": "string"
+          },
+          "in_TestMessageId": {
+            "type": "string"
+          }
+        },
+        "required": []
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "out_EmailJson": {
+            "type": "string"
+          },
+          "out_EmailId": {
+            "type": "string"
+          },
+          "out_HasEmail": {
+            "type": "boolean"
+          },
+          "out_AttachmentBucketPathsJson": {
+            "type": "string"
+          }
+        },
+        "required": []
+      },
+      "settings": {},
+      "guardrail": {
+        "policies": []
+      },
+      "properties": {
+        "processName": "TradeX_GmailReader",
+        "folderPath": "solution_folder",
+        "exampleCalls": []
+      },
+      "argumentProperties": {}
+    }
+  ],
+  "features": []
+}

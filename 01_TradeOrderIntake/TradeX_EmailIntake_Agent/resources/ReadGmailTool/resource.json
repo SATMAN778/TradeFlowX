@@ -1,0 +1,50 @@
+{
+  "$resourceType": "tool",
+  "id": "b247a844-9204-4f0a-ac2e-aa5af3e59c71",
+  "name": "ReadGmailTool",
+  "description": "Reads the newest unread email from Gmail INBOX. Returns out_EmailJson, out_EmailId, out_HasEmail, out_AttachmentBucketPathsJson.",
+  "type": "process",
+  "isEnabled": true,
+  "location": "external",
+  "referenceKey": "2230215f-f50c-4e1a-a1df-093d41df899b",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "in_CaseId": {
+        "type": "string"
+      },
+      "in_TestMessageId": {
+        "type": "string"
+      }
+    },
+    "required": []
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "out_EmailJson": {
+        "type": "string"
+      },
+      "out_EmailId": {
+        "type": "string"
+      },
+      "out_HasEmail": {
+        "type": "boolean"
+      },
+      "out_AttachmentBucketPathsJson": {
+        "type": "string"
+      }
+    },
+    "required": []
+  },
+  "settings": {},
+  "guardrail": {
+    "policies": []
+  },
+  "properties": {
+    "processName": "TradeX_GmailReader",
+    "folderPath": "solution_folder",
+    "exampleCalls": []
+  },
+  "argumentProperties": {}
+}

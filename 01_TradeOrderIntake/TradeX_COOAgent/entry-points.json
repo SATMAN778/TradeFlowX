@@ -1,0 +1,110 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "$id": "entry-points.json",
+  "entryPoints": [
+    {
+      "filePath": "/content/agent.json",
+      "uniqueId": "68df933b-45d1-4621-930c-712565a46cc9",
+      "type": "agent",
+      "input": {
+        "type": "object",
+        "properties": {
+          "declaredCOO": {
+            "type": "string",
+            "description": "Country of Origin as declared on the commercial invoice"
+          },
+          "htsCodes": {
+            "type": "string",
+            "description": "Comma-separated 10-digit HTS codes for all line items"
+          },
+          "manufacturerName": {
+            "type": "string",
+            "description": "Declared manufacturer / producer name"
+          },
+          "manufacturerAddress": {
+            "type": "string",
+            "description": "Declared manufacturer address including country"
+          },
+          "shipperName": {
+            "type": "string",
+            "description": "Exporter / shipper company name"
+          },
+          "shipperCountry": {
+            "type": "string",
+            "description": "Country where the exporter is registered"
+          },
+          "goodsDescription": {
+            "type": "string",
+            "description": "Detailed goods description from the commercial invoice"
+          },
+          "totalValue_USD": {
+            "type": "number",
+            "description": "Total declared shipment value in US dollars"
+          },
+          "invoiceNumber": {
+            "type": "string",
+            "description": "Commercial invoice number"
+          },
+          "salesforceOrderId": {
+            "type": "string",
+            "description": "Salesforce Order record ID for cross-reference"
+          }
+        },
+        "required": [
+          "declaredCOO",
+          "htsCodes",
+          "manufacturerName",
+          "manufacturerAddress",
+          "shipperName",
+          "shipperCountry",
+          "goodsDescription",
+          "totalValue_USD",
+          "invoiceNumber",
+          "salesforceOrderId"
+        ]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "COO_MisclassificationRisk": {
+            "type": "boolean",
+            "description": "True if Country of Origin appears to be misrepresented or transshipped"
+          },
+          "PO_HasAllDetails": {
+            "type": "boolean",
+            "description": "True if all 22 CBP-required shipment fields are present and non-empty"
+          },
+          "riskLevel": {
+            "type": "string",
+            "description": "Overall risk classification: HIGH, MEDIUM, LOW, or NONE"
+          },
+          "riskFactors": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "List of specific transshipment or misclassification indicators detected"
+          },
+          "declaredCOO": {
+            "type": "string",
+            "description": "Country of Origin as provided in the input"
+          },
+          "suspectedTrueCOO": {
+            "type": "string",
+            "description": "Agent-assessed true country of origin if different from declared"
+          },
+          "htsMisclassificationRisk": {
+            "type": "boolean",
+            "description": "True if HTS codes appear inconsistent with the goods description or declared origin"
+          },
+          "recommendation": {
+            "type": "string",
+            "description": "Recommended action: BLOCK, ESCALATE, or APPROVE"
+          },
+          "searchSummary": {
+            "type": "string",
+            "description": "Synthesized evidence from the three web searches performed"
+          }
+        }
+      }
+    }
+  ]
+}

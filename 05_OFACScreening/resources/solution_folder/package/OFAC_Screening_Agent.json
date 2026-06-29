@@ -1,0 +1,22 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "OFAC_Screening_Agent",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "c50eeaeb-9bf9-4e1c-bb90-ad1853a1ca01",
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "OFAC_Screening_Agent"
+    },
+    "locks": [],
+    "key": "c9803848-048f-418d-b130-6965daa81914",
+    "files": []
+  }
+}

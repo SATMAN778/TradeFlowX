@@ -1,0 +1,6 @@
+{
+  "Name": "TradeX_SalesforceOrderCreator",
+  "ProjectType": "Process",
+  "Description": "Project",
+  "MainFile": "Main.cs"
+}

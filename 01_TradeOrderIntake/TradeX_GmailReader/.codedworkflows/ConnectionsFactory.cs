@@ -1,0 +1,3 @@
+namespace TradeX_GmailReader
+{
+}

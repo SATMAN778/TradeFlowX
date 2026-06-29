@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "ACE_ISF_Monitor",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "c1642bed-343c-4b3a-8347-de28e41f7e8e",
+    "isOverridable": false,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "ACE_ISF_Monitor"
+    },
+    "locks": [],
+    "key": "f8e6b0fa-914d-46ea-bd21-2a2dabc7337e"
+  }
+}

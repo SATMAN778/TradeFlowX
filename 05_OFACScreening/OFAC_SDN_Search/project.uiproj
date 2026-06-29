@@ -1,0 +1,6 @@
+{
+  "Name": "OFAC_SDN_Search",
+  "ProjectType": "Process",
+  "Description": "Searches OFAC SDN API for denied party matches",
+  "MainFile": "Main.xaml"
+}

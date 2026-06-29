@@ -1,0 +1,37 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "Specially Designated Nationals List",
+    "kind": "index",
+    "apiVersion": "ecs.uipath.com/v2",
+    "isOverridable": true,
+    "dependencies": [
+      {
+        "name": "Specially Designated Nationals List",
+        "kind": "bucket"
+      }
+    ],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "Specially Designated Nationals List",
+      "description": "Specially Designated Nationals List",
+      "storageBucketReference": {
+        "name": "Specially Designated Nationals List",
+        "key": "5419239c-084a-422d-b733-5603acb5e622"
+      },
+      "fileNameGlob": "All",
+      "dataSourceType": "StorageBucket",
+      "includeSubfolders": true,
+      "ingestionType": "Advanced",
+      "encrypted": false
+    },
+    "locks": [],
+    "key": "3e32f7a6-286b-4c94-0221-08ded1677f40",
+    "files": []
+  }
+}

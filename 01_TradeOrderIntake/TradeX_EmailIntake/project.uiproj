@@ -1,0 +1,6 @@
+{
+  "Name": "TradeX_EmailIntake",
+  "ProjectType": "Process",
+  "Description": "Project",
+  "MainFile": "Main.xaml"
+}

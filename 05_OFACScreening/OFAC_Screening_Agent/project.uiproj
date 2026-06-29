@@ -1,0 +1,6 @@
+{
+  "ProjectType": "Agent",
+  "Name": "OFAC_Screening_Agent",
+  "Description": null,
+  "MainFile": null
+}

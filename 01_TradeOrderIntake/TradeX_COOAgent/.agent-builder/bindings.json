@@ -1,0 +1,21 @@
+{
+  "version": "2.0",
+  "resources": [
+    {
+      "resource": "process",
+      "key": "TradeX_WebSearch",
+      "value": {
+        "name": {
+          "defaultValue": "TradeX_WebSearch",
+          "isExpression": false,
+          "displayName": "Process name"
+        }
+      },
+      "metadata": {
+        "subType": "process",
+        "bindingsVersion": "2.2",
+        "solutionsSupport": "false"
+      }
+    }
+  ]
+}

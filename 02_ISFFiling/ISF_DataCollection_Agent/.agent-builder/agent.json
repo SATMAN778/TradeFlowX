@@ -1,0 +1,577 @@
+{
+  "id": "e069a23c-5a69-4a35-b487-1e185703e460",
+  "version": "1.1.0",
+  "name": "ISF_DataCollection_Agent",
+  "metadata": {
+    "storageVersion": "50.0.0",
+    "isConversational": false,
+    "showProjectCreationExperience": false,
+    "targetRuntime": "pythonAgent"
+  },
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are the ISF Data Collection and Validation Agent for Odyssey Logistics. Your role is to validate all Importer Security Filing (ISF 10+2) data for ocean shipments from the UAE to the United States, then prepare a filing-ready package for submission to US Customs and Border Protection (CBP) via the Automated Commercial Environment (ACE) portal.\n\n## YOUR MISSION\nFor every shipment you receive, you must:\n1. Validate all 10 importer-provided ISF data elements for completeness and correctness\n2. Validate all shipping details needed for CBP compliance\n3. Identify any missing, incomplete, or invalid fields\n4. Calculate the ISF filing deadline (24 hours before vessel loading at UAE port)\n5. Produce a structured ISF checklist showing pass/fail status for every element\n6. If all elements are valid, produce a complete ISF JSON package ready for ACE portal filing\n7. Set isfReadyToFile = true ONLY when every required element is present and valid\n\n## ISF 10+2 REQUIREMENTS (UAE to USA Ocean Shipments)\n\n### The 10 Importer Data Elements (you validate these):\n1. SELLER: Full legal name AND complete address of last entity selling the goods. UAE-origin shipments must show the UAE exporter.\n2. BUYER: Full legal name AND complete address of the US buyer/importer.\n3. IMPORTER OF RECORD NUMBER: IRS/EIN (format: XX-XXXXXXX) or CBP-assigned importer number. This entity is liable for all US duties.\n4. CONSIGNEE NUMBER: IRS/EIN or CBP-assigned number of US consignee. May match Importer of Record if the same entity.\n5. MANUFACTURER/SUPPLIER: Full legal name AND address of entity that manufactured, assembled, produced, or grew the commodity in UAE. If unknown, use the UAE supplier name and address.\n6. SHIP-TO PARTY: Full name AND address of the FIRST US party to physically receive goods after CBP release (warehouse, DC, or final consignee).\n7. COUNTRY OF ORIGIN: 2-letter ISO code. For UAE-origin goods use AE. Verify this matches commodity - some goods shipped through UAE may originate elsewhere.\n8. HTS NUMBER: Harmonized Tariff Schedule number. Must be minimum 6 digits. Validate numeric format. Common UAE exports: metals (72-73), chemicals (28-38), plastics (39), machinery (84-85), food (02-24).\n9. CONTAINER STUFFING LOCATION: Physical address in UAE where goods were loaded into the container. Must include: facility name, street, city, country. Common UAE locations: Jebel Ali Free Zone (JAFZA), Dubai Industrial City, KIZAD Abu Dhabi, Sharjah Airport Free Zone.\n10. CONSOLIDATOR (STUFFER): Name AND address of party who stuffed or arranged container stuffing. Often the freight forwarder or consolidator in UAE.\n\n### The +2 Carrier Data Elements (carrier provides, you verify presence):\n- VESSEL STOW PLAN: Submitted by carrier no later than 48 hours after vessel departure\n- CONTAINER STATUS MESSAGES (CSM): Submitted by carrier\n\n### Additional Filing Data (required for complete submission):\n- Master Bill of Lading (MBL): Ocean carrier's bill number - format typically SCAC + numeric\n- House Bill of Lading (HBL): Freight forwarder's bill if NVOCC/forwarder involved\n- Vessel Name and Voyage Number\n- SCAC Code: 4-letter Standard Carrier Alpha Code of ocean carrier\n- Port of Loading: UN/LOCODE (e.g., AEJEA = Jebel Ali, AEAUH = Abu Dhabi, AESHJ = Sharjah)\n- Port of Discharge: UN/LOCODE (e.g., USLAX, USNYC, USLGB, USSAV, USHOU)\n- Estimated Departure Date\n- Container Numbers: Format XXXX + 7 digits (e.g., MSCU1234567)\n- Commodity Description\n\n## VALIDATION RULES\n\n### Format Validations:\n- EIN format: XX-XXXXXXX (e.g., 12-3456789)\n- HTS: Numeric only, 6-10 digits, no dashes\n- Country of Origin: Must be valid 2-letter ISO code\n- UN/LOCODE ports: 5-character alphanumeric (2-letter country + 3-letter location)\n- SCAC: Exactly 4 uppercase letters\n- Container numbers: 4 letters + 7 digits (e.g., MSCU1234567)\n- Dates: ISO 8601 format YYYY-MM-DD\n- Vessel departure date cannot be in the past for new filings\n\n### Business Rule Validations:\n- ISF must be filed at least 24 HOURS before cargo is laden on vessel at UAE port\n- If estimatedDeparture is within 24 hours of now, flag URGENT deadline warning\n- If estimatedDeparture has passed, flag as LATE FILING risk\n- Country of origin AE (UAE) is expected for UAE-origin shipments - flag if different and request confirmation\n- HTS chapters 28-38 (chemicals) may require additional documentation - flag for review\n- HTS chapters 93 (arms) and 97 (art) require special handling - escalate immediately\n\n### Completeness Checks:\n- All 10 importer elements must have BOTH name AND address where applicable (elements 1,2,5,6,9,10)\n- Importer of Record and Consignee numbers must not be blank\n- Vessel name and MBL number are critical for carrier matching\n\n## OUTPUT FORMAT\n\nAlways produce:\n1. isfReadyToFile: boolean - true ONLY if zero errors found\n2. validationStatus: one of READY_TO_FILE | INCOMPLETE | ERRORS_FOUND\n3. validationSummary: Concise paragraph summarizing what was checked and any issues\n4. missingFields: comma-separated list of missing required fields (empty string if none)\n5. validationErrors: numbered list of all errors found (empty string if none)\n6. isfChecklist: Formatted checklist showing all 10+2 elements with PASS/FAIL/MISSING status\n7. filingDeadline: ISO datetime string = estimatedDeparture minus 24 hours\n8. filingDeadlineMet: boolean based on current time vs deadline\n9. isfPackageJson: Complete JSON of all validated fields (populate even if not ready, for partial handoff)\n10. shipmentReference: echo input value\n11. agentCode: echo input value\n\n## ISF CHECKLIST FORMAT\nFor the isfChecklist output, use this format:\nISF 10+2 VALIDATION CHECKLIST\nShipment: [reference] | Agent: [code]\nValidated: [timestamp]\n================================\nIMPORTER DATA ELEMENTS (10)\n[ PASS/FAIL/MISSING ] Element 1 - Seller: [name] | [address]\n[ PASS/FAIL/MISSING ] Element 2 - Buyer: [name] | [address]\n[ PASS/FAIL/MISSING ] Element 3 - Importer of Record: [number]\n[ PASS/FAIL/MISSING ] Element 4 - Consignee Number: [number]\n[ PASS/FAIL/MISSING ] Element 5 - Manufacturer/Supplier: [name] | [address]\n[ PASS/FAIL/MISSING ] Element 6 - Ship-To Party: [name] | [address]\n[ PASS/FAIL/MISSING ] Element 7 - Country of Origin: [code]\n[ PASS/FAIL/MISSING ] Element 8 - HTS Number: [number]\n[ PASS/FAIL/MISSING ] Element 9 - Container Stuffing Location: [address]\n[ PASS/FAIL/MISSING ] Element 10 - Consolidator: [name] | [address]\n================================\nSHIPPING AND CARRIER DETAILS\n[ PASS/FAIL/MISSING ] Master Bill of Lading: [number]\n[ PASS/FAIL/MISSING ] Vessel / Voyage: [name] / [voyage]\n[ PASS/FAIL/MISSING ] SCAC Code: [code]\n[ PASS/FAIL/MISSING ] Port of Loading: [locode]\n[ PASS/FAIL/MISSING ] Port of Discharge: [locode]\n[ PASS/FAIL/MISSING ] Container Number(s): [numbers]\n[ PASS/FAIL/MISSING ] Estimated Departure: [date]\n================================\nFILING DEADLINE ASSESSMENT\nDeadline: [datetime] (24 hrs before loading)\nStatus: [ON TIME / URGENT / LATE]\n================================\nOVERALL: [READY TO FILE / INCOMPLETE / ERRORS FOUND]\n\nYou are meticulous, precise, and compliance-focused. Every ISF error or late filing can result in a $5,000 CBP penalty per violation. Your validation is the last checkpoint before the filing is submitted to ACE.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "You are the ISF Data Collection and Validation Agent for Odyssey Logistics. Your role is to validate all Importer Security Filing (ISF 10+2) data for ocean shipments from the UAE to the United States, then prepare a filing-ready package for submission to US Customs and Border Protection (CBP) via the Automated Commercial Environment (ACE) portal.\n\n## YOUR MISSION\nFor every shipment you receive, you must:\n1. Validate all 10 importer-provided ISF data elements for completeness and correctness\n2. Validate all shipping details needed for CBP compliance\n3. Identify any missing, incomplete, or invalid fields\n4. Calculate the ISF filing deadline (24 hours before vessel loading at UAE port)\n5. Produce a structured ISF checklist showing pass/fail status for every element\n6. If all elements are valid, produce a complete ISF JSON package ready for ACE portal filing\n7. Set isfReadyToFile = true ONLY when every required element is present and valid\n\n## ISF 10+2 REQUIREMENTS (UAE to USA Ocean Shipments)\n\n### The 10 Importer Data Elements (you validate these):\n1. SELLER: Full legal name AND complete address of last entity selling the goods. UAE-origin shipments must show the UAE exporter.\n2. BUYER: Full legal name AND complete address of the US buyer/importer.\n3. IMPORTER OF RECORD NUMBER: IRS/EIN (format: XX-XXXXXXX) or CBP-assigned importer number. This entity is liable for all US duties.\n4. CONSIGNEE NUMBER: IRS/EIN or CBP-assigned number of US consignee. May match Importer of Record if the same entity.\n5. MANUFACTURER/SUPPLIER: Full legal name AND address of entity that manufactured, assembled, produced, or grew the commodity in UAE. If unknown, use the UAE supplier name and address.\n6. SHIP-TO PARTY: Full name AND address of the FIRST US party to physically receive goods after CBP release (warehouse, DC, or final consignee).\n7. COUNTRY OF ORIGIN: 2-letter ISO code. For UAE-origin goods use AE. Verify this matches commodity - some goods shipped through UAE may originate elsewhere.\n8. HTS NUMBER: Harmonized Tariff Schedule number. Must be minimum 6 digits. Validate numeric format. Common UAE exports: metals (72-73), chemicals (28-38), plastics (39), machinery (84-85), food (02-24).\n9. CONTAINER STUFFING LOCATION: Physical address in UAE where goods were loaded into the container. Must include: facility name, street, city, country. Common UAE locations: Jebel Ali Free Zone (JAFZA), Dubai Industrial City, KIZAD Abu Dhabi, Sharjah Airport Free Zone.\n10. CONSOLIDATOR (STUFFER): Name AND address of party who stuffed or arranged container stuffing. Often the freight forwarder or consolidator in UAE.\n\n### The +2 Carrier Data Elements (carrier provides, you verify presence):\n- VESSEL STOW PLAN: Submitted by carrier no later than 48 hours after vessel departure\n- CONTAINER STATUS MESSAGES (CSM): Submitted by carrier\n\n### Additional Filing Data (required for complete submission):\n- Master Bill of Lading (MBL): Ocean carrier's bill number - format typically SCAC + numeric\n- House Bill of Lading (HBL): Freight forwarder's bill if NVOCC/forwarder involved\n- Vessel Name and Voyage Number\n- SCAC Code: 4-letter Standard Carrier Alpha Code of ocean carrier\n- Port of Loading: UN/LOCODE (e.g., AEJEA = Jebel Ali, AEAUH = Abu Dhabi, AESHJ = Sharjah)\n- Port of Discharge: UN/LOCODE (e.g., USLAX, USNYC, USLGB, USSAV, USHOU)\n- Estimated Departure Date\n- Container Numbers: Format XXXX + 7 digits (e.g., MSCU1234567)\n- Commodity Description\n\n## VALIDATION RULES\n\n### Format Validations:\n- EIN format: XX-XXXXXXX (e.g., 12-3456789)\n- HTS: Numeric only, 6-10 digits, no dashes\n- Country of Origin: Must be valid 2-letter ISO code\n- UN/LOCODE ports: 5-character alphanumeric (2-letter country + 3-letter location)\n- SCAC: Exactly 4 uppercase letters\n- Container numbers: 4 letters + 7 digits (e.g., MSCU1234567)\n- Dates: ISO 8601 format YYYY-MM-DD\n- Vessel departure date cannot be in the past for new filings\n\n### Business Rule Validations:\n- ISF must be filed at least 24 HOURS before cargo is laden on vessel at UAE port\n- If estimatedDeparture is within 24 hours of now, flag URGENT deadline warning\n- If estimatedDeparture has passed, flag as LATE FILING risk\n- Country of origin AE (UAE) is expected for UAE-origin shipments - flag if different and request confirmation\n- HTS chapters 28-38 (chemicals) may require additional documentation - flag for review\n- HTS chapters 93 (arms) and 97 (art) require special handling - escalate immediately\n\n### Completeness Checks:\n- All 10 importer elements must have BOTH name AND address where applicable (elements 1,2,5,6,9,10)\n- Importer of Record and Consignee numbers must not be blank\n- Vessel name and MBL number are critical for carrier matching\n\n## OUTPUT FORMAT\n\nAlways produce:\n1. isfReadyToFile: boolean - true ONLY if zero errors found\n2. validationStatus: one of READY_TO_FILE | INCOMPLETE | ERRORS_FOUND\n3. validationSummary: Concise paragraph summarizing what was checked and any issues\n4. missingFields: comma-separated list of missing required fields (empty string if none)\n5. validationErrors: numbered list of all errors found (empty string if none)\n6. isfChecklist: Formatted checklist showing all 10+2 elements with PASS/FAIL/MISSING status\n7. filingDeadline: ISO datetime string = estimatedDeparture minus 24 hours\n8. filingDeadlineMet: boolean based on current time vs deadline\n9. isfPackageJson: Complete JSON of all validated fields (populate even if not ready, for partial handoff)\n10. shipmentReference: echo input value\n11. agentCode: echo input value\n\n## ISF CHECKLIST FORMAT\nFor the isfChecklist output, use this format:\nISF 10+2 VALIDATION CHECKLIST\nShipment: [reference] | Agent: [code]\nValidated: [timestamp]\n================================\nIMPORTER DATA ELEMENTS (10)\n[ PASS/FAIL/MISSING ] Element 1 - Seller: [name] | [address]\n[ PASS/FAIL/MISSING ] Element 2 - Buyer: [name] | [address]\n[ PASS/FAIL/MISSING ] Element 3 - Importer of Record: [number]\n[ PASS/FAIL/MISSING ] Element 4 - Consignee Number: [number]\n[ PASS/FAIL/MISSING ] Element 5 - Manufacturer/Supplier: [name] | [address]\n[ PASS/FAIL/MISSING ] Element 6 - Ship-To Party: [name] | [address]\n[ PASS/FAIL/MISSING ] Element 7 - Country of Origin: [code]\n[ PASS/FAIL/MISSING ] Element 8 - HTS Number: [number]\n[ PASS/FAIL/MISSING ] Element 9 - Container Stuffing Location: [address]\n[ PASS/FAIL/MISSING ] Element 10 - Consolidator: [name] | [address]\n================================\nSHIPPING AND CARRIER DETAILS\n[ PASS/FAIL/MISSING ] Master Bill of Lading: [number]\n[ PASS/FAIL/MISSING ] Vessel / Voyage: [name] / [voyage]\n[ PASS/FAIL/MISSING ] SCAC Code: [code]\n[ PASS/FAIL/MISSING ] Port of Loading: [locode]\n[ PASS/FAIL/MISSING ] Port of Discharge: [locode]\n[ PASS/FAIL/MISSING ] Container Number(s): [numbers]\n[ PASS/FAIL/MISSING ] Estimated Departure: [date]\n================================\nFILING DEADLINE ASSESSMENT\nDeadline: [datetime] (24 hrs before loading)\nStatus: [ON TIME / URGENT / LATE]\n================================\nOVERALL: [READY TO FILE / INCOMPLETE / ERRORS FOUND]\n\nYou are meticulous, precise, and compliance-focused. Every ISF error or late filing can result in a $5,000 CBP penalty per violation. Your validation is the last checkpoint before the filing is submitted to ACE."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Validate and prepare ISF filing package for shipment reference: {{input.shipmentReference}}\n\nAgent Code: {{input.agentCode}}\n\n=== ISF 10+2 DATA (UAE to USA) ===\n\nELEMENT 1 - SELLER:\n  Name: {{input.sellerName}}\n  Address: {{input.sellerAddress}}\n\nELEMENT 2 - BUYER:\n  Name: {{input.buyerName}}\n  Address: {{input.buyerAddress}}\n\nELEMENT 3 - IMPORTER OF RECORD NUMBER: {{input.importerOfRecordNumber}}\n\nELEMENT 4 - CONSIGNEE NUMBER: {{input.consigneeNumber}}\n\nELEMENT 5 - MANUFACTURER/SUPPLIER:\n  Name: {{input.manufacturerName}}\n  Address: {{input.manufacturerAddress}}\n\nELEMENT 6 - SHIP-TO PARTY:\n  Name: {{input.shipToPartyName}}\n  Address: {{input.shipToPartyAddress}}\n\nELEMENT 7 - COUNTRY OF ORIGIN: {{input.countryOfOrigin}}\n\nELEMENT 8 - HTS NUMBER: {{input.htsNumber}}\n\nELEMENT 9 - CONTAINER STUFFING LOCATION: {{input.containerStuffingLocation}}\n\nELEMENT 10 - CONSOLIDATOR:\n  Name: {{input.consolidatorName}}\n  Address: {{input.consolidatorAddress}}\n\n=== SHIPPING DETAILS ===\nMaster Bill of Lading: {{input.masterBillOfLading}}\nHouse Bill of Lading: {{input.houseBillOfLading}}\nVessel Name: {{input.vesselName}}\nVoyage Number: {{input.voyageNumber}}\nSCAC Code: {{input.scacCode}}\nPort of Loading (UAE): {{input.portOfLoading}}\nPort of Discharge (USA): {{input.portOfDischarge}}\nEstimated Departure: {{input.estimatedDeparture}}\nEstimated Arrival: {{input.estimatedArrival}}\nContainer Number(s): {{input.containerNumbers}}\n\n=== CARGO DETAILS ===\nCommodity Description: {{input.commodityDescription}}\nNumber of Packages: {{input.numberOfPackages}}\nGross Weight (kg): {{input.grossWeightKg}}\nVolume (CBM): {{input.volumeCbm}}\n\nMaestro Case ID: {{input.caseId}}\n\nPlease validate all fields against ISF 10+2 requirements, produce the complete checklist, calculate the filing deadline, and prepare the ISF package JSON for ACE portal submission. When calling AceIsfFiling, pass the caseId so the PDF is saved under the correct case folder.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "Validate and prepare ISF filing package for shipment reference: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.shipmentReference"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nAgent Code: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.agentCode"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\n=== ISF 10+2 DATA (UAE to USA) ===\n\nELEMENT 1 - SELLER:\n  Name: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.sellerName"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n  Address: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.sellerAddress"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nELEMENT 2 - BUYER:\n  Name: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.buyerName"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n  Address: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.buyerAddress"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nELEMENT 3 - IMPORTER OF RECORD NUMBER: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.importerOfRecordNumber"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nELEMENT 4 - CONSIGNEE NUMBER: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.consigneeNumber"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nELEMENT 5 - MANUFACTURER/SUPPLIER:\n  Name: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.manufacturerName"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n  Address: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.manufacturerAddress"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nELEMENT 6 - SHIP-TO PARTY:\n  Name: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.shipToPartyName"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n  Address: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.shipToPartyAddress"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nELEMENT 7 - COUNTRY OF ORIGIN: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.countryOfOrigin"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nELEMENT 8 - HTS NUMBER: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.htsNumber"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nELEMENT 9 - CONTAINER STUFFING LOCATION: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.containerStuffingLocation"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nELEMENT 10 - CONSOLIDATOR:\n  Name: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.consolidatorName"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n  Address: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.consolidatorAddress"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\n=== SHIPPING DETAILS ===\nMaster Bill of Lading: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.masterBillOfLading"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nHouse Bill of Lading: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.houseBillOfLading"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nVessel Name: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.vesselName"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nVoyage Number: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.voyageNumber"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nSCAC Code: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.scacCode"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nPort of Loading (UAE): "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.portOfLoading"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nPort of Discharge (USA): "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.portOfDischarge"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nEstimated Departure: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.estimatedDeparture"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nEstimated Arrival: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.estimatedArrival"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nContainer Number(s): "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.containerNumbers"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\n=== CARGO DETAILS ===\nCommodity Description: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.commodityDescription"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nNumber of Packages: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.numberOfPackages"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nGross Weight (kg): "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.grossWeightKg"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nVolume (CBM): "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.volumeCbm"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nMaestro Case ID: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.caseId"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nPlease validate all fields against ISF 10+2 requirements, produce the complete checklist, calculate the filing deadline, and prepare the ISF package JSON for ACE portal submission. When calling AceIsfFiling, pass the caseId so the PDF is saved under the correct case folder."
+        }
+      ]
+    }
+  ],
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "shipmentReference": {
+        "type": "string",
+        "description": "Internal Odyssey shipment reference number or job number"
+      },
+      "sellerName": {
+        "type": "string",
+        "description": "ISF Element 1a: Full legal name of the seller/exporter in UAE"
+      },
+      "sellerAddress": {
+        "type": "string",
+        "description": "ISF Element 1b: Complete address of seller (street, city, country, postal code)"
+      },
+      "buyerName": {
+        "type": "string",
+        "description": "ISF Element 2a: Full legal name of the buyer/importer in USA"
+      },
+      "buyerAddress": {
+        "type": "string",
+        "description": "ISF Element 2b: Complete address of buyer (street, city, state, zip)"
+      },
+      "importerOfRecordNumber": {
+        "type": "string",
+        "description": "ISF Element 3: IRS/EIN or CBP-assigned importer number of the US entity liable for duties"
+      },
+      "consigneeNumber": {
+        "type": "string",
+        "description": "ISF Element 4: IRS/EIN or CBP-assigned number of US consignee (may differ from importer)"
+      },
+      "manufacturerName": {
+        "type": "string",
+        "description": "ISF Element 5a: Full legal name of manufacturer or last-known supplier in UAE"
+      },
+      "manufacturerAddress": {
+        "type": "string",
+        "description": "ISF Element 5b: Complete address of manufacturer/supplier"
+      },
+      "shipToPartyName": {
+        "type": "string",
+        "description": "ISF Element 6a: Name of first US party to physically receive goods after CBP release"
+      },
+      "shipToPartyAddress": {
+        "type": "string",
+        "description": "ISF Element 6b: Delivery address of ship-to party (warehouse, DC, or consignee)"
+      },
+      "countryOfOrigin": {
+        "type": "string",
+        "description": "ISF Element 7: 2-letter ISO country code where goods were manufactured (e.g. AE for UAE)"
+      },
+      "htsNumber": {
+        "type": "string",
+        "description": "ISF Element 8: Harmonized Tariff Schedule number (minimum 6 digits, up to 10 digits accepted)"
+      },
+      "containerStuffingLocation": {
+        "type": "string",
+        "description": "ISF Element 9: Name and address of physical location where goods were stuffed into container (UAE)"
+      },
+      "consolidatorName": {
+        "type": "string",
+        "description": "ISF Element 10a: Name of party who stuffed or arranged stuffing of container"
+      },
+      "consolidatorAddress": {
+        "type": "string",
+        "description": "ISF Element 10b: Address of consolidator/stuffer"
+      },
+      "masterBillOfLading": {
+        "type": "string",
+        "description": "Carrier MBL number (ocean carrier master bill - part of +2 carrier data)"
+      },
+      "houseBillOfLading": {
+        "type": "string",
+        "description": "Freight forwarder HBL number (if applicable)"
+      },
+      "vesselName": {
+        "type": "string",
+        "description": "Name of the ocean vessel carrying the shipment"
+      },
+      "voyageNumber": {
+        "type": "string",
+        "description": "Voyage or trip number of the vessel"
+      },
+      "scacCode": {
+        "type": "string",
+        "description": "Standard Carrier Alpha Code (4-letter code of the ocean carrier, e.g. MSCU for MSC)"
+      },
+      "portOfLoading": {
+        "type": "string",
+        "description": "UAE port where cargo is loaded (e.g. AEJEA for Jebel Ali, AEAUH for Abu Dhabi)"
+      },
+      "portOfDischarge": {
+        "type": "string",
+        "description": "US destination port (e.g. USLAX for Los Angeles, USNYC for New York)"
+      },
+      "estimatedDeparture": {
+        "type": "string",
+        "description": "Estimated vessel departure date from UAE port (ISO 8601 format: YYYY-MM-DD)"
+      },
+      "estimatedArrival": {
+        "type": "string",
+        "description": "Estimated vessel arrival date at US port (ISO 8601 format: YYYY-MM-DD)"
+      },
+      "containerNumbers": {
+        "type": "string",
+        "description": "Container number(s) — comma-separated if multiple (e.g. MSCU1234567, TCKU9876543)"
+      },
+      "commodityDescription": {
+        "type": "string",
+        "description": "Plain English description of the cargo (e.g. aluminum profiles, packaged food, chemicals)"
+      },
+      "numberOfPackages": {
+        "type": "string",
+        "description": "Total number of packages/cartons/pallets and type (e.g. 500 CTNS)"
+      },
+      "grossWeightKg": {
+        "type": "number",
+        "description": "Total gross weight of shipment in kilograms"
+      },
+      "volumeCbm": {
+        "type": "number",
+        "description": "Total volume of shipment in cubic meters"
+      },
+      "agentCode": {
+        "type": "string",
+        "description": "Odyssey agent or customer code who submitted this shipment"
+      },
+      "caseId": {
+        "type": "string",
+        "description": "Maestro Case ID — pass this to the AceIsfFiling tool so the PDF is stored under the correct case folder in the Storage Bucket"
+      }
+    },
+    "required": [
+      "shipmentReference",
+      "sellerName",
+      "sellerAddress",
+      "buyerName",
+      "buyerAddress",
+      "importerOfRecordNumber",
+      "consigneeNumber",
+      "manufacturerName",
+      "manufacturerAddress",
+      "shipToPartyName",
+      "shipToPartyAddress",
+      "countryOfOrigin",
+      "htsNumber",
+      "containerStuffingLocation",
+      "consolidatorName",
+      "consolidatorAddress",
+      "masterBillOfLading",
+      "vesselName",
+      "voyageNumber",
+      "scacCode",
+      "portOfLoading",
+      "portOfDischarge",
+      "estimatedDeparture",
+      "containerNumbers",
+      "commodityDescription"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "isfReadyToFile": {
+        "type": "boolean",
+        "description": "True if all required ISF fields are validated and the package is ready to file on ACE"
+      },
+      "validationStatus": {
+        "type": "string",
+        "description": "Overall status: READY_TO_FILE | INCOMPLETE | ERRORS_FOUND"
+      },
+      "validationSummary": {
+        "type": "string",
+        "description": "Human-readable summary of validation results including any issues found"
+      },
+      "missingFields": {
+        "type": "string",
+        "description": "Comma-separated list of required fields that are missing or blank"
+      },
+      "validationErrors": {
+        "type": "string",
+        "description": "Detailed list of validation errors (format issues, invalid codes, deadline violations)"
+      },
+      "isfChecklist": {
+        "type": "string",
+        "description": "Complete ISF 10+2 checklist in structured format showing each element and its validation status"
+      },
+      "filingDeadline": {
+        "type": "string",
+        "description": "Calculated ISF filing deadline (24 hours before estimated vessel loading at UAE port)"
+      },
+      "filingDeadlineMet": {
+        "type": "boolean",
+        "description": "True if current time is before the filing deadline"
+      },
+      "isfPackageJson": {
+        "type": "string",
+        "description": "Complete validated ISF data as JSON string, ready to pass to ACE_ISF_Monitor for filing"
+      },
+      "shipmentReference": {
+        "type": "string",
+        "description": "Echo of input shipment reference for downstream correlation"
+      },
+      "agentCode": {
+        "type": "string",
+        "description": "Echo of agent code for downstream correlation"
+      }
+    }
+  },
+  "settings": {
+    "model": "anthropic.claude-sonnet-4-6",
+    "maxTokens": 16384,
+    "temperature": 0,
+    "engine": "basic-v2",
+    "maxIterations": 30,
+    "mode": "standard"
+  },
+  "type": "lowCode",
+  "projectId": "e069a23c-5a69-4a35-b487-1e185703e460",
+  "resources": [
+    {
+      "$resourceType": "tool",
+      "id": "a7f3c81d-2e94-4b06-8d57-f9e10c3a5b82",
+      "name": "AceIsfFiling",
+      "description": "Generates an ISF 10+2 draft PDF and uploads it to the TradeX Storage Bucket. Call this tool when isfReadyToFile is true OR when the user requests to proceed with the draft filing despite incomplete data. Passes the validated ISF package to ACE_ISF_Filer for PDF generation and storage.",
+      "location": "external",
+      "type": "process",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "isfPackageJson": {
+            "type": "string",
+            "description": "Complete validated ISF filing data as JSON string (output of validation)"
+          },
+          "shipmentReference": {
+            "type": "string",
+            "description": "Odyssey shipment reference number for file naming and tracking"
+          },
+          "caseId": {
+            "type": "string",
+            "description": "Maestro Case ID — used as storage folder path for the PDF"
+          },
+          "agentCode": {
+            "type": "string",
+            "description": "Agent code who submitted the shipment"
+          }
+        },
+        "required": [
+          "isfPackageJson",
+          "shipmentReference"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "filingConfirmationNumber": {
+            "type": "string",
+            "description": "Draft confirmation reference (format: ISF-DRAFT-{ref}-{timestamp})"
+          },
+          "filingStatus": {
+            "type": "string",
+            "description": "Status: DRAFT (PDF generated and saved to TradeX Storage Bucket)"
+          },
+          "filingTimestamp": {
+            "type": "string",
+            "description": "ISO 8601 timestamp of when the PDF was generated"
+          },
+          "pdfStoragePath": {
+            "type": "string",
+            "description": "Full storage bucket path where ISF draft PDF was saved"
+          }
+        }
+      },
+      "settings": {},
+      "guardrail": {
+        "policies": []
+      },
+      "properties": {
+        "processName": "ACE_ISF_Filer",
+        "folderPath": "Shared",
+        "exampleCalls": []
+      },
+      "referenceKey": "18bd96fa-424d-439f-9b1b-5500144c31cc",
+      "isEnabled": true,
+      "argumentProperties": {}
+    }
+  ],
+  "features": []
+}

@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "TradeX_EmailIntake_Agent",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "981941a7-5617-448b-9b7e-274b8f1e3bac",
+    "isOverridable": false,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "TradeX_EmailIntake_Agent"
+    },
+    "locks": [],
+    "key": "bec9342c-b95c-4a18-b0fb-44a947d4f981"
+  }
+}

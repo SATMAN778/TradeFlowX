@@ -1,0 +1,57 @@
+{
+  "$resourceType": "tool",
+  "id": "b3d7e921-5f42-4c18-9a63-e8f20d4c7b35",
+  "name": "OFACSDNSearch",
+  "description": "Searches the OFAC Specially Designated Nationals (SDN) API for fuzzy name matches. Returns match results, highest score, and whether the party is a confirmed hit. Call this tool for every party screening request.",
+  "location": "external",
+  "type": "process",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "in_PartyName": {
+        "type": "string",
+        "description": "Full legal name of the party to search in the OFAC SDN list"
+      },
+      "in_PartyType": {
+        "type": "string",
+        "description": "Party type filter: Individual, Entity, Vessel, or Aircraft. Empty string searches all."
+      },
+      "in_MinScore": {
+        "type": "integer",
+        "description": "Minimum fuzzy match score threshold (0-100). Default 85."
+      }
+    },
+    "required": [
+      "in_PartyName"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "out_MatchResultsJson": {
+        "type": "string",
+        "description": "Raw JSON response from OFAC SDN API containing all match results"
+      },
+      "out_IsHit": {
+        "type": "boolean",
+        "description": "True if any SDN matches were found at or above the minimum score threshold"
+      },
+      "out_HighestMatchScore": {
+        "type": "integer",
+        "description": "Highest fuzzy match score found (0-100). 0 if no matches."
+      }
+    }
+  },
+  "settings": {},
+  "guardrail": {
+    "policies": []
+  },
+  "properties": {
+    "processName": "OFAC_SDN_Search",
+    "folderPath": "Shared/OFAC_Screening_Solution",
+    "exampleCalls": []
+  },
+  "referenceKey": "6FA85BEF-5747-4101-B625-0084A0157105",
+  "isEnabled": true,
+  "argumentProperties": {}
+}

@@ -1,0 +1,21 @@
+{
+  "version": "2.0",
+  "resources": [
+    {
+      "resource": "process",
+      "key": "OFAC_SDN_Search",
+      "value": {
+        "name": {
+          "defaultValue": "OFAC_SDN_Search",
+          "isExpression": false,
+          "displayName": "Process name"
+        }
+      },
+      "metadata": {
+        "subType": "process",
+        "bindingsVersion": "2.2",
+        "solutionsSupport": "false"
+      }
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "$resourceType": "tool",
+  "id": "d4e5f6a7-b8c9-0123-defa-123456789012",
+  "name": "PgaStatusPollerTool",
+  "description": "Polls all Partner Government Agencies (FDA, USDA, EPA, FWS, CBP) to get their import admission status for a given shipment. Returns the worst-case overall PGA status (APPROVED, MAY_HOLD, or REFUSED) along with per-agency results as JSON. Call this tool in Phase 2 after researching agency requirements.",
+  "location": "external",
+  "type": "process",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "in_PgaAgencies": {
+        "type": "string",
+        "description": "JSON array of PGA agency codes to poll (e.g. [\"FDA\",\"USDA\",\"EPA\"])"
+      },
+      "in_PoNumber": {
+        "type": "string",
+        "description": "Purchase order number for the shipment being screened"
+      }
+    },
+    "required": []
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "out_PgaStatus": {
+        "type": "string",
+        "description": "Overall PGA status: APPROVED, MAY_HOLD, or REFUSED (worst-case roll-up)"
+      },
+      "out_PgaStatusJson": {
+        "type": "string",
+        "description": "Full JSON with per-agency results including status, portal URL, and reference code"
+      },
+      "out_AffectedAgencies": {
+        "type": "string",
+        "description": "Comma-separated list of agencies with non-APPROVED status"
+      },
+      "out_ReportStoragePath": {
+        "type": "string",
+        "description": "Storage bucket path where the PGA status report JSON was uploaded"
+      }
+    }
+  },
+  "settings": {},
+  "guardrail": {
+    "policies": []
+  },
+  "properties": {
+    "processName": "PGA_StatusPoller",
+    "folderPath": "Shared",
+    "exampleCalls": []
+  },
+  "referenceKey": "ad451e4b-7f86-48b7-9b10-b0f2e550fdf0",
+  "isEnabled": true,
+  "argumentProperties": {}
+}

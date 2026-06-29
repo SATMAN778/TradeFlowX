@@ -1,0 +1,3 @@
+namespace PGA_StatusPoller
+{
+}

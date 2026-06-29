@@ -1,0 +1,6 @@
+{
+  "Name": "TradeX_GmailReader",
+  "ProjectType": "Process",
+  "Description": "Project",
+  "MainFile": "Main.xaml"
+}

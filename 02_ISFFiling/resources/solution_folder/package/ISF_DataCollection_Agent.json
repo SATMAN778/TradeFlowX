@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "ISF_DataCollection_Agent",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "d841a98c-a0df-4592-a6b1-e5f976c045cd",
+    "isOverridable": false,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "ISF_DataCollection_Agent"
+    },
+    "locks": [],
+    "key": "e115bb44-d936-465d-af14-92cd34bb9443"
+  }
+}

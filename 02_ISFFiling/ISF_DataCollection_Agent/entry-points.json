@@ -1,0 +1,220 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "$id": "entry-points.json",
+  "entryPoints": [
+    {
+      "filePath": "/content/agent.json",
+      "uniqueId": "73a269bb-b794-4c12-ae8f-90335945506c",
+      "type": "agent",
+      "input": {
+        "type": "object",
+        "properties": {
+          "shipmentReference": {
+            "type": "string",
+            "description": "Internal Odyssey shipment reference number or job number"
+          },
+          "sellerName": {
+            "type": "string",
+            "description": "ISF Element 1a: Full legal name of the seller/exporter in UAE"
+          },
+          "sellerAddress": {
+            "type": "string",
+            "description": "ISF Element 1b: Complete address of seller (street, city, country, postal code)"
+          },
+          "buyerName": {
+            "type": "string",
+            "description": "ISF Element 2a: Full legal name of the buyer/importer in USA"
+          },
+          "buyerAddress": {
+            "type": "string",
+            "description": "ISF Element 2b: Complete address of buyer (street, city, state, zip)"
+          },
+          "importerOfRecordNumber": {
+            "type": "string",
+            "description": "ISF Element 3: IRS/EIN or CBP-assigned importer number of the US entity liable for duties"
+          },
+          "consigneeNumber": {
+            "type": "string",
+            "description": "ISF Element 4: IRS/EIN or CBP-assigned number of US consignee"
+          },
+          "manufacturerName": {
+            "type": "string",
+            "description": "ISF Element 5a: Full legal name of manufacturer or last-known supplier in UAE"
+          },
+          "manufacturerAddress": {
+            "type": "string",
+            "description": "ISF Element 5b: Complete address of manufacturer/supplier"
+          },
+          "shipToPartyName": {
+            "type": "string",
+            "description": "ISF Element 6a: Name of first US party to physically receive goods after CBP release"
+          },
+          "shipToPartyAddress": {
+            "type": "string",
+            "description": "ISF Element 6b: Delivery address of ship-to party"
+          },
+          "countryOfOrigin": {
+            "type": "string",
+            "description": "ISF Element 7: 2-letter ISO country code where goods were manufactured"
+          },
+          "htsNumber": {
+            "type": "string",
+            "description": "ISF Element 8: Harmonized Tariff Schedule number (minimum 6 digits)"
+          },
+          "containerStuffingLocation": {
+            "type": "string",
+            "description": "ISF Element 9: Name and address of physical location where goods were stuffed into container"
+          },
+          "consolidatorName": {
+            "type": "string",
+            "description": "ISF Element 10a: Name of party who stuffed or arranged stuffing of container"
+          },
+          "consolidatorAddress": {
+            "type": "string",
+            "description": "ISF Element 10b: Address of consolidator/stuffer"
+          },
+          "masterBillOfLading": {
+            "type": "string",
+            "description": "Carrier MBL number"
+          },
+          "houseBillOfLading": {
+            "type": "string",
+            "description": "Freight forwarder HBL number (if applicable)"
+          },
+          "vesselName": {
+            "type": "string",
+            "description": "Name of the ocean vessel carrying the shipment"
+          },
+          "voyageNumber": {
+            "type": "string",
+            "description": "Voyage or trip number of the vessel"
+          },
+          "scacCode": {
+            "type": "string",
+            "description": "Standard Carrier Alpha Code (4-letter code of the ocean carrier)"
+          },
+          "portOfLoading": {
+            "type": "string",
+            "description": "UAE port of loading UN/LOCODE"
+          },
+          "portOfDischarge": {
+            "type": "string",
+            "description": "US destination port UN/LOCODE"
+          },
+          "estimatedDeparture": {
+            "type": "string",
+            "description": "Estimated vessel departure date from UAE port (YYYY-MM-DD)"
+          },
+          "estimatedArrival": {
+            "type": "string",
+            "description": "Estimated vessel arrival date at US port (YYYY-MM-DD)"
+          },
+          "containerNumbers": {
+            "type": "string",
+            "description": "Container number(s) — comma-separated if multiple"
+          },
+          "commodityDescription": {
+            "type": "string",
+            "description": "Plain English description of the cargo"
+          },
+          "numberOfPackages": {
+            "type": "string",
+            "description": "Total number of packages/cartons/pallets and type"
+          },
+          "grossWeightKg": {
+            "type": "number",
+            "description": "Total gross weight of shipment in kilograms"
+          },
+          "volumeCbm": {
+            "type": "number",
+            "description": "Total volume of shipment in cubic meters"
+          },
+          "agentCode": {
+            "type": "string",
+            "description": "Odyssey agent or customer code who submitted this shipment"
+          },
+          "caseId": {
+            "type": "string",
+            "description": "Maestro Case ID — passed to AceIsfFiling tool for storage bucket pathing"
+          }
+        },
+        "required": [
+          "shipmentReference",
+          "sellerName",
+          "sellerAddress",
+          "buyerName",
+          "buyerAddress",
+          "importerOfRecordNumber",
+          "consigneeNumber",
+          "manufacturerName",
+          "manufacturerAddress",
+          "shipToPartyName",
+          "shipToPartyAddress",
+          "countryOfOrigin",
+          "htsNumber",
+          "containerStuffingLocation",
+          "consolidatorName",
+          "consolidatorAddress",
+          "masterBillOfLading",
+          "vesselName",
+          "voyageNumber",
+          "scacCode",
+          "portOfLoading",
+          "portOfDischarge",
+          "estimatedDeparture",
+          "containerNumbers",
+          "commodityDescription"
+        ]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "isfReadyToFile": {
+            "type": "boolean",
+            "description": "True if all required ISF fields are validated and the package is ready to file on ACE"
+          },
+          "validationStatus": {
+            "type": "string",
+            "description": "Overall status: READY_TO_FILE | INCOMPLETE | ERRORS_FOUND"
+          },
+          "validationSummary": {
+            "type": "string",
+            "description": "Human-readable summary of validation results"
+          },
+          "missingFields": {
+            "type": "string",
+            "description": "Comma-separated list of required fields that are missing or blank"
+          },
+          "validationErrors": {
+            "type": "string",
+            "description": "Detailed list of validation errors"
+          },
+          "isfChecklist": {
+            "type": "string",
+            "description": "Complete ISF 10+2 checklist showing each element and its validation status"
+          },
+          "filingDeadline": {
+            "type": "string",
+            "description": "Calculated ISF filing deadline (24 hours before estimated vessel loading)"
+          },
+          "filingDeadlineMet": {
+            "type": "boolean",
+            "description": "True if current time is before the filing deadline"
+          },
+          "isfPackageJson": {
+            "type": "string",
+            "description": "Complete validated ISF data as JSON string, ready for ACE_ISF_Monitor"
+          },
+          "shipmentReference": {
+            "type": "string",
+            "description": "Echo of input shipment reference"
+          },
+          "agentCode": {
+            "type": "string",
+            "description": "Echo of agent code"
+          }
+        }
+      }
+    }
+  ]
+}

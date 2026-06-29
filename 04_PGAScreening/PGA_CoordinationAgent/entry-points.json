@@ -1,0 +1,47 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "$id": "entry-points.json",
+  "entryPoints": [
+    {
+      "filePath": "/content/agent.json",
+      "uniqueId": "3e424e8b-bfe6-42bd-921d-53bc27800727",
+      "type": "agent",
+      "input": {
+        "type": "object",
+        "properties": {
+          "pgaAgencies": {
+            "type": "string",
+            "description": "JSON array of PGA agency codes requiring review (e.g. [\"FDA\",\"USDA\",\"EPA\"])"
+          },
+          "htsCode": {
+            "type": "string",
+            "description": "Confirmed HTS code for the goods being imported"
+          },
+          "goodsDescription": {
+            "type": "string",
+            "description": "Plain English description of the goods being imported"
+          },
+          "poNumber": {
+            "type": "string",
+            "description": "Purchase order number for this shipment"
+          }
+        },
+        "required": [
+          "pgaAgencies",
+          "htsCode",
+          "goodsDescription",
+          "poNumber"
+        ]
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "pgaStatus": {
+            "type": "string",
+            "description": "Overall PGA screening result: APPROVED, MAY_HOLD, REFUSED, or NOT_REQUIRED"
+          }
+        }
+      }
+    }
+  ]
+}

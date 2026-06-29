@@ -1,0 +1,37 @@
+{
+  "DocVersion": "1.0.1",
+  "StudioMinVersion": "2025.10.0",
+  "SolutionId": "73712da4-05ca-434a-b2ab-a0999c77307e",
+  "Projects": [
+    {
+      "Type": "Agent",
+      "ProjectRelativePath": "TradeX_COOAgent/project.uiproj",
+      "Id": "10d3dd44-bb92-4ebf-8306-679abb327988"
+    },
+    {
+      "Type": "Agent",
+      "ProjectRelativePath": "TradeX_EmailIntake_Agent/project.uiproj",
+      "Id": "981941a7-5617-448b-9b7e-274b8f1e3bac"
+    },
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "TradeX_GmailReader/project.uiproj",
+      "Id": "d096deaa-260e-4337-9f5b-83e67806e3e3"
+    },
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "TradeX_POEnrichment/project.uiproj",
+      "Id": "7411f317-cf24-402b-bd88-c61f432251cd"
+    },
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "TradeX_SalesforceOrderCreator/project.uiproj",
+      "Id": "49144cf7-d54a-4da1-b62a-71a8870b132d"
+    },
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "TradeX_WebSearch/project.uiproj",
+      "Id": "6099568b-3c9f-4adb-a72c-e25b4a664b2a"
+    }
+  ]
+}

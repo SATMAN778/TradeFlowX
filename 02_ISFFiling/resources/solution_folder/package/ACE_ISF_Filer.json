@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "ACE_ISF_Filer",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "350b339c-8785-408a-b064-b1241dc09b3a",
+    "isOverridable": false,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "ACE_ISF_Filer"
+    },
+    "locks": [],
+    "key": "5cc9c462-53c8-47e2-840f-89538674a527"
+  }
+}

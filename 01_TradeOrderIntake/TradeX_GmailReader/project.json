@@ -1,0 +1,66 @@
+{
+  "name": "TradeX_GmailReader",
+  "description": "Reads newest unread email from Gmail INBOX and returns body, subject, attachments as JSON",
+  "main": "Main.cs",
+  "dependencies": {
+    "UiPath.System.Activities": "[26.2.5]",
+    "UiPath.IntegrationService.Activities": "[1.26.0]",
+    "UiPath.GSuite.Activities": "[3.9.11]"
+  },
+  "webServices": [],
+  "entitiesStores": [],
+  "schemaVersion": "4.0",
+  "studioVersion": "26.0.194.0",
+  "projectVersion": "1.0.28",
+  "runtimeOptions": {
+    "autoDispose": false,
+    "netFrameworkLazyLoading": false,
+    "isPausable": false,
+    "isAttended": false,
+    "requiresUserInteraction": false,
+    "supportsPersistence": false,
+    "workflowSerialization": "NewtonsoftJson",
+    "excludedLoggedData": [
+      "Private:*",
+      "*password*"
+    ],
+    "executionType": "Workflow",
+    "readyForPiP": false,
+    "startsInPiP": false,
+    "mustRestoreAllDependencies": true,
+    "pipType": "ChildSession"
+  },
+  "designOptions": {
+    "projectProfile": "Developement",
+    "outputType": "Process",
+    "libraryOptions": {
+      "privateWorkflows": []
+    },
+    "processOptions": {
+      "ignoredFiles": []
+    },
+    "fileInfoCollection": [],
+    "saveToCloud": false
+  },
+  "expressionLanguage": "CSharp",
+  "entryPoints": [
+    {
+      "filePath": "Main.cs",
+      "uniqueId": "a1b2c3d4-e5f6-7890-a1b2-c3d4e5f67890",
+      "input": [
+        { "name": "in_CaseId", "type": "System.String", "required": false },
+        { "name": "in_TestMessageId", "type": "System.String", "required": false }
+      ],
+      "output": [
+        { "name": "out_EmailJson", "type": "System.String" },
+        { "name": "out_EmailId", "type": "System.String" },
+        { "name": "out_HasEmail", "type": "System.Boolean" },
+        { "name": "out_AttachmentBucketPathsJson", "type": "System.String" }
+      ]
+    }
+  ],
+  "isTemplate": false,
+  "templateProjectData": {},
+  "publishData": {},
+  "targetFramework": "Windows"
+}

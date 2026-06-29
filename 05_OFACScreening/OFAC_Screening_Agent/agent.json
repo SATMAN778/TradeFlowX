@@ -1,0 +1,130 @@
+{
+  "version": "1.1.0",
+  "settings": {
+    "model": "anthropic.claude-sonnet-4-6",
+    "maxTokens": 16384,
+    "temperature": 0,
+    "engine": "basic-v2",
+    "maxIterations": 25,
+    "mode": "standard"
+  },
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "partyName": {
+        "type": "string",
+        "description": "Full legal name of the party to screen (individual, company, or vessel)"
+      },
+      "partyType": {
+        "type": "string",
+        "description": "Party type: Individual, Entity, Vessel, or Aircraft. Leave empty to search all types."
+      },
+      "partyCountry": {
+        "type": "string",
+        "description": "Country of the party (ISO 2-letter code, e.g. CN, RU, IR). Used for context."
+      },
+      "partyAddress": {
+        "type": "string",
+        "description": "Address or city of the party. Used for disambiguation."
+      }
+    },
+    "required": [
+      "partyName"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "hitStatus": {
+        "type": "string",
+        "description": "Screening result: CONFIRMED_HIT, POTENTIAL_MATCH, or CLEAR"
+      },
+      "matchScore": {
+        "type": "integer",
+        "description": "Highest fuzzy match score from OFAC SDN list (0-100)"
+      },
+      "riskLevel": {
+        "type": "string",
+        "description": "Risk assessment: HIGH, MEDIUM, LOW, or NONE"
+      },
+      "matchedEntries": {
+        "type": "array",
+        "description": "List of matched SDN entries with name, type, and score",
+        "items": {
+          "type": "object"
+        }
+      },
+      "recommendation": {
+        "type": "string",
+        "description": "Compliance action recommendation: BLOCK, ESCALATE, MANUAL_REVIEW, or APPROVE"
+      },
+      "rawSearchResults": {
+        "type": "string",
+        "description": "Raw JSON results from OFAC SDN API search"
+      }
+    }
+  },
+  "metadata": {
+    "storageVersion": "50.0.0",
+    "isConversational": false,
+    "showProjectCreationExperience": false,
+    "targetRuntime": "pythonAgent"
+  },
+  "type": "lowCode",
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are an OFAC compliance expert agent for Odyssey Logistics. Your role is to screen parties against the OFAC Specially Designated Nationals (SDN) list and other denied party lists to prevent trade with sanctioned entities.\n\nWhen screening a party:\n1. Use the OFACSDNSearch tool to query the OFAC Sanctions Search API with the party name\n2. Use the DesignatedNationalsList knowledge context to retrieve relevant SDN entries, aliases, and sanctioned entity patterns for cross-reference — query it with the party name and country\n3. Analyze both the API results and the knowledge context to determine the risk level\n4. Provide a clear compliance recommendation\n\nScoring guidelines:\n- Score 95-100: CONFIRMED_HIT — block the transaction immediately\n- Score 85-94: POTENTIAL_MATCH — escalate to compliance officer for manual review\n- Score 70-84: LOW_MATCH — flag for manual review with lower priority\n- Score below 70 or no results: CLEAR — party is not on the SDN list\n\nAlways consider context: country, address, and party type help disambiguate common names. Document your reasoning in the recommendation.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "You are an OFAC compliance expert agent for Odyssey Logistics. Your role is to screen parties against the OFAC Specially Designated Nationals (SDN) list and other denied party lists to prevent trade with sanctioned entities.\n\nWhen screening a party:\n1. Use the OFACSDNSearch tool to query the OFAC Sanctions Search API with the party name\n2. Use the DesignatedNationalsList knowledge context to retrieve relevant SDN entries, aliases, and sanctioned entity patterns for cross-reference — query it with the party name and country\n3. Analyze both the API results and the knowledge context to determine the risk level\n4. Provide a clear compliance recommendation\n\nScoring guidelines:\n- Score 95-100: CONFIRMED_HIT — block the transaction immediately\n- Score 85-94: POTENTIAL_MATCH — escalate to compliance officer for manual review\n- Score 70-84: LOW_MATCH — flag for manual review with lower priority\n- Score below 70 or no results: CLEAR — party is not on the SDN list\n\nAlways consider context: country, address, and party type help disambiguate common names. Document your reasoning in the recommendation."
+        }
+      ]
+    },
+    {
+      "role": "user",
+      "content": "Screen the following party for OFAC compliance:\n\nName: {{input.partyName}}\nType: {{input.partyType}}\nCountry: {{input.partyCountry}}\nAddress: {{input.partyAddress}}\n\nProvide the screening result with hitStatus, matchScore, riskLevel, matchedEntries list, and recommendation.",
+      "contentTokens": [
+        {
+          "type": "simpleText",
+          "rawString": "Screen the following party for OFAC compliance:\n\nName: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.partyName"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nType: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.partyType"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nCountry: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.partyCountry"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\nAddress: "
+        },
+        {
+          "type": "variable",
+          "rawString": "input.partyAddress"
+        },
+        {
+          "type": "simpleText",
+          "rawString": "\n\nProvide the screening result with hitStatus, matchScore, riskLevel, matchedEntries list, and recommendation."
+        }
+      ]
+    }
+  ],
+  "guardrails": [],
+  "projectId": "8e65c772-34a1-4b15-9255-8c8aa6e1140c"
+}

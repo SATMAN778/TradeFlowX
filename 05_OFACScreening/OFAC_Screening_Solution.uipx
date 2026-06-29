@@ -1,0 +1,17 @@
+{
+  "DocVersion": "1.0.0",
+  "StudioMinVersion": "2025.10.0",
+  "SolutionId": "149aa67c-816b-43a6-91e3-04608af804cb",
+  "Projects": [
+    {
+      "Type": "Agent",
+      "ProjectRelativePath": "OFAC_Screening_Agent\\project.uiproj",
+      "Id": "c50eeaeb-9bf9-4e1c-bb90-ad1853a1ca01"
+    },
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "OFAC_SDN_Search\\project.json",
+      "Id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+    }
+  ]
+}

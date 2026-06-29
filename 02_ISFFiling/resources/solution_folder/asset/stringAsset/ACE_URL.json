@@ -1,0 +1,29 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "ACE_URL",
+    "kind": "asset",
+    "type": "stringAsset",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Text",
+      "value": "https://ace.cbp.gov/",
+      "name": "ACE_URL",
+      "description": "ACE Secure Data Portal",
+      "scope": "Global",
+      "accountMachineValues": null,
+      "tags": []
+    },
+    "locks": [],
+    "key": "49f4fccc-58de-4d87-89e0-6ce3532d1fc6"
+  }
+}

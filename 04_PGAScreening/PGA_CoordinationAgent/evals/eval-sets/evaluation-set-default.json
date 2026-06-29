@@ -1,0 +1,17 @@
+{
+  "fileName": "evaluation-set-default.json",
+  "id": "1ea48ac2-ec6e-425e-b00c-521dac2fe004",
+  "name": "Default Evaluation Set",
+  "batchSize": 10,
+  "evaluatorRefs": [
+    "fccbfaa3-b759-41fc-ba00-c04bf4e444a6",
+    "365550e6-bda6-4fad-8fad-5b444296b554"
+  ],
+  "evaluations": [],
+  "modelSettings": [],
+  "agentMemoryEnabled": false,
+  "agentMemorySettings": [],
+  "lineByLineEvaluation": false,
+  "createdAt": "2026-06-28T16:36:57.127Z",
+  "updatedAt": "2026-06-28T16:36:57.127Z"
+}

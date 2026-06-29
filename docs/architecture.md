@@ -1,6 +1,6 @@
-# System Architecture: TradeFlow Maestro AI
+# System Architecture: TradeFlowX
 
-TradeFlow Maestro AI is a regulated **Agentic Import Operations Platform** designed to manage and orchestrate the full customs clearance lifecycle for imports from Dubai/JAFZA (UAE) to the USA. 
+TradeFlowX is a regulated **Agentic Import Operations Platform** designed to manage and orchestrate the full customs clearance lifecycle for imports from Dubai/JAFZA (UAE) to the USA. 
 
 The platform bridges the gap between structured business processes, automated RPA bots, external regulatory APIs, human decision-makers, and autonomous AI agents.
 
@@ -130,7 +130,7 @@ This prevents premature customs entry submissions, which are highly regulated an
 ## Component Integration Patterns
 
 ### 1. LangGraph AI Agents
-The three AI agents reside in their respective subdirectories (`hts-classifier-agent`, `transshipment-risk-agent`, `duty-savings-agent`). They are structured using the LangGraph library to maintain state and handle complex branching:
+The three AI agents reside in their respective subdirectories (`03_Agent_HTSClassifier_LangGraph`, `01_Agent_TransshipmentRisk_LangGraph`, `07_Agent_DutySavings_LangGraph`). They are structured using the LangGraph library to maintain state and handle complex branching:
 *   **Input/Output Binding**: Triggered via API Workflow tasks that pass JSON parameters and write outputs back into Maestro Case Variables.
 *   **State Persistence**: Enables recovery if an LLM call fails or a connection times out.
 

@@ -1,0 +1,6 @@
+{
+  "Name": "ACE_ISF_Monitor",
+  "ProjectType": "Process",
+  "Description": "Monitors ACE portal for ISF filing updates submitted by agents",
+  "MainFile": "Main.xaml"
+}

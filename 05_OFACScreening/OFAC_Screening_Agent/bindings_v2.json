@@ -1,0 +1,24 @@
+{
+  "version": "2.0",
+  "resources": [
+    {
+      "resource": "index",
+      "key": "Specially Designated Nationals List",
+      "value": {
+        "name": {
+          "defaultValue": "Specially Designated Nationals List",
+          "isExpression": false,
+          "displayName": "Index Name"
+        },
+        "folderPath": {
+          "defaultValue": "Shared",
+          "isExpression": false
+        }
+      },
+      "metadata": {
+        "bindingsVersion": "2.2",
+        "solutionsSupport": "true"
+      }
+    }
+  ]
+}
