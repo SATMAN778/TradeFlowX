@@ -51,7 +51,7 @@ export default function HumanTasks({
   activeRole,
 }: HumanTasksProps) {
   const task = taskDetails?.task;
-  const data = task?.data ?? {};
+  const data = task?.data || task?.Data || {};
   const assignedToUser = extractAssignedUser(task?.assignedToUser);
   const title = task?.title || 'Active Action Task';
   const priority = task?.priority || 'Medium';

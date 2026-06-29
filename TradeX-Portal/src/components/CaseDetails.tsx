@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, MapPin, Building, DollarSign, ShieldAlert, RefreshCw } from 'lucide-react';
 import { getCaseDetails, getTaskDetails, assignTask, unassignTask, completeTask, getDocuments } from '../services/casesService';
-import type { CaseDetailsResponse, TaskDetailsResponse, ShipmentDoc } from '../types/cases';
+import type { CaseDetailsResponse, TaskDetailsResponse, ShipmentDoc, Stage } from '../types/cases';
 import StageTracker from './StageTracker';
 import HumanTasks from './HumanTasks';
 import S3DocumentViewer from './S3DocumentViewer';
 import DocumentLifecycle from './DocumentLifecycle';
 import { useAuth } from '../context/AuthContext';
+import { dfHelper } from '../lib/sdk';
+import type { ImportCaseRecord } from '../types/entities';
 
 interface CaseDetailsProps {
   caseInstanceId: string;
@@ -17,6 +19,7 @@ interface CaseDetailsProps {
 export default function CaseDetails({ caseInstanceId, folderKey, onBack }: CaseDetailsProps) {
   const { activeRole, userEmail } = useAuth();
   const [details, setDetails] = useState<CaseDetailsResponse | null>(null);
+  const [caseRecord, setCaseRecord] = useState<ImportCaseRecord | null>(null);
   const [taskDetails, setTaskDetails] = useState<TaskDetailsResponse | null>(null);
   const [documents, setDocuments] = useState<ShipmentDoc[]>([]);
   const [detailTab, setDetailTab] = useState<'info' | 'docs'>('info');
@@ -40,6 +43,31 @@ export default function CaseDetails({ caseInstanceId, folderKey, onBack }: CaseD
       }
       setTaskDetails(taskData);
       setDocuments(docsData);
+
+      // Fetch case record from Data Fabric using the case reference
+      let caseRecordData = null;
+      const entityId = import.meta.env.VITE_ENTITY_CASE;
+      if (entityId && !entityId.startsWith('import') && !entityId.includes('mock-')) {
+        try {
+          const res = await dfHelper.query(entityId, `CaseRef eq '${caseInstanceId}'`);
+          const items = Array.isArray(res) ? res : (res as any).items || (res as any).value || [];
+          if (items.length > 0) {
+            caseRecordData = items[0];
+          } else {
+            const extId = detailsData?.instance?.externalId || (detailsData as any)?.externalId;
+            if (extId) {
+              const res2 = await dfHelper.query(entityId, `CaseRef eq '${extId}'`);
+              const items2 = Array.isArray(res2) ? res2 : (res2 as any).items || (res2 as any).value || [];
+              if (items2.length > 0) {
+                caseRecordData = items2[0];
+              }
+            }
+          }
+        } catch (err) {
+          console.error('Failed to fetch case record from Data Fabric:', err);
+        }
+      }
+      setCaseRecord(caseRecordData);
       setError(null);
     } catch (err) {
       console.error(err);
@@ -138,25 +166,98 @@ export default function CaseDetails({ caseInstanceId, folderKey, onBack }: CaseD
     );
   }
 
-  const variables = details?.variables || {};
-  const instance = details?.instance;
+  const detailsAny = details as any;
+  const variables = detailsAny?.variables || {};
+  const instance = detailsAny?.instance || detailsAny;
+
+  // Helper to extract a variable value safely from various possible formats
+  const getVar = (name: string) => {
+    // 1. Check in details.variables
+    if (detailsAny?.variables && detailsAny.variables[name] !== undefined) {
+      return detailsAny.variables[name];
+    }
+    // 2. Check in details.inputOutputs
+    if (Array.isArray(detailsAny?.inputOutputs)) {
+      const found = detailsAny.inputOutputs.find((v: any) => v.name === name || v.id === name);
+      if (found && found.value !== undefined) return found.value;
+    }
+    // 3. Check directly in details
+    if (detailsAny && detailsAny[name] !== undefined) {
+      return detailsAny[name];
+    }
+    // 4. Fall back to caseRecord properties
+    if (caseRecord) {
+      if (name === 'poNumber' || name === 'shipmentReference') return caseRecord.PoNumber || caseRecord.CaseRef;
+      if (name === 'supplierName' || name === 'supplierNameUAE') return caseRecord.SupplierName;
+      if (name === 'importerOfRecord' || name === 'importer') return caseRecord.ImporterName;
+      if (name === 'portOfEntry' || name === 'portOfEntryUSA') return caseRecord.PortOfEntry;
+      if (name === 'htsCode') return caseRecord.HtsCode;
+      if (name === 'totalValueUsd' || name === 'shipmentValueUSD') return caseRecord.TotalValueUsd;
+      if (name === 'dutyAmountUsd') return caseRecord.DutyAmountUsd;
+      if (name === 'cbpStatus' || name === 'cbpReleaseStatus') return caseRecord.CbpStatus;
+      if (name === 'caseState' || name === 'caseStatus') return caseRecord.CaseState;
+    }
+    return undefined;
+  };
 
   const caseData = {
-    id: instance?.externalId || instance?.instanceId?.substring(0, 8) || 'Unknown',
-    shipmentRef: variables.shipmentReference || 'Pending',
-    supplierName: variables.supplierNameUAE || '-',
-    importer: variables.importerOfRecord || '-',
-    portOfLoading: variables.portOfLoading || 'Dubai / Jebel Ali',
-    portOfEntry: variables.portOfEntryUSA || '-',
-    htsCode: variables.htsCode || '-',
-    shipmentValue: variables.shipmentValueUSD ? Number(variables.shipmentValueUSD) : 0,
-    entryType: variables.entryType || '-',
-    isfStatus: variables.isfFilingStatus || 'Pending',
-    ofacStatus: variables.ofacScreeningResult || 'Pending',
-    cbpStatus: variables.cbpReleaseStatus || 'Pending',
-    overallStatus: variables.caseStatus || instance?.latestRunStatus || 'Active',
-    stages: details?.stages || [],
+    id: caseRecord?.CaseRef || instance?.externalId || instance?.instanceId?.substring(0, 8) || caseInstanceId?.substring(0, 8) || 'Unknown',
+    shipmentRef: getVar('poNumber') || getVar('shipmentReference') || 'Pending',
+    supplierName: getVar('supplierName') || getVar('supplierNameUAE') || '-',
+    importer: getVar('importer') || getVar('importerOfRecord') || '-',
+    portOfLoading: getVar('portOfLoading') || 'Dubai / Jebel Ali',
+    portOfEntry: getVar('portOfEntry') || getVar('portOfEntryUSA') || '-',
+    htsCode: getVar('htsCode') || '-',
+    shipmentValue: Number(getVar('totalValueUsd') || getVar('shipmentValueUSD') || 0),
+    entryType: getVar('entryType') || '-',
+    isfStatus: getVar('isfStatus') || getVar('isfFilingStatus') || 'Pending',
+    ofacStatus: getVar('ofacClearStatus') || getVar('ofacScreeningResult') || 'Pending',
+    cbpStatus: getVar('cbpStatus') || getVar('cbpReleaseStatus') || 'Pending',
+    overallStatus: caseRecord?.CaseState || getVar('caseState') || getVar('caseStatus') || instance?.latestRunStatus || 'Active',
+    stages: [] as Stage[],
   };
+
+  if (caseData.entryType === '-' || !caseData.entryType) {
+    const val = caseData.shipmentValue;
+    if (val > 0) {
+      if (val < 800) caseData.entryType = 'Type 86 (De Minimis)';
+      else if (val <= 2500) caseData.entryType = 'Type 11 (Informal)';
+      else caseData.entryType = 'Type 01 (Formal)';
+    }
+  }
+
+  // Generate 7-stage pipeline statuses based on caseRecord.CurrentStage
+  const stageDefs = [
+    { id: 'S1', title: 'Stage 1: Order Intake', description: 'Intake trade details and verify shipper/consignee.' },
+    { id: 'S2', title: 'Stage 2: ISF Filing', description: 'Submit Importer Security Filing to CBP.' },
+    { id: 'S3', title: 'Stage 3: HTS Classification & Duty', description: 'Determine HTSUS codes and calculate duty fees.' },
+    { id: 'S4', title: 'Stage 4: PGA Screening', description: 'Partner Government Agencies screening (conditional).' },
+    { id: 'S5', title: 'Stage 5: OFAC & Denied Party Screening', description: 'Screen against OFAC SDN and sanction lists.' },
+    { id: 'S6', title: 'Stage 6: CBP Entry Filing', description: 'Submit entry summary to Customs and Border Protection.' },
+    { id: 'S7', title: 'Stage 7: Document Lifecycle & Post-Entry', description: 'Post-release reconciliation and document retention archiving.' }
+  ];
+
+  const currentStage = caseRecord?.CurrentStage || getVar('currentStage') || 'S1';
+  const stageOrder = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7'];
+  const currentIdx = stageOrder.indexOf(currentStage);
+
+  caseData.stages = stageDefs.map((def, i) => {
+    let status: 'completed' | 'in_progress' | 'pending' | 'error' = 'pending';
+    if (i < currentIdx) {
+      status = 'completed';
+    } else if (def.id === currentStage) {
+      const isError = caseRecord?.CaseState?.toLowerCase() === 'faulted' || caseData.overallStatus?.toLowerCase() === 'faulted';
+      status = isError ? 'error' : 'in_progress';
+    } else {
+      status = 'pending';
+    }
+    return {
+      id: def.id,
+      title: def.title,
+      description: def.description,
+      status
+    };
+  });
 
   // Helper function to color code badges
   const getBadgeClass = (val: string) => {

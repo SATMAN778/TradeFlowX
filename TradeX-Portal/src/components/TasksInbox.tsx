@@ -4,7 +4,7 @@ import {
   AlertTriangle, ExternalLink, ChevronDown, ChevronUp, Check, X, ShieldAlert
 } from 'lucide-react';
 import type { MyTask } from '../types/cases';
-import { getMyTasks, assignTask, unassignTask, completeTask } from '../services/casesService';
+import { getMyTasks, assignTask, unassignTask, completeTask, getTaskById } from '../services/casesService';
 import { useAuth } from '../context/AuthContext';
 import type { UserRole } from '../types/auth';
 import S3DocumentViewer from './S3DocumentViewer';
@@ -97,12 +97,14 @@ interface TaskModalProps {
   onRefresh: (actionType?: 'claim' | 'unclaim' | 'complete', taskId?: string, payload?: any) => void;
 }
 
-function TaskWorkstation({ task, onClose, onRefresh }: TaskModalProps) {
+function TaskWorkstation({ task: initialTask, onClose, onRefresh }: TaskModalProps) {
   const { activeRole, userEmail } = useAuth();
+  const [task, setTask] = useState<MyTask>(initialTask);
+  const [loadingDetails, setLoadingDetails] = useState(!initialTask.taskId.startsWith('demo-'));
   const [formValues, setFormValues] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
-    if (task.data && typeof task.data === 'object') {
-      for (const [k, v] of Object.entries(task.data)) {
+    if (initialTask.data && typeof initialTask.data === 'object') {
+      for (const [k, v] of Object.entries(initialTask.data)) {
         init[k] = typeof v === 'object' ? JSON.stringify(v, null, 2) : String(v ?? '');
       }
     }
@@ -114,6 +116,52 @@ function TaskWorkstation({ task, onClose, onRefresh }: TaskModalProps) {
   const [unclaiming, setUnclaiming] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialTask.taskId.startsWith('demo-')) {
+      setTask(initialTask);
+      setLoadingDetails(false);
+      return;
+    }
+    
+    let active = true;
+    setLoadingDetails(true);
+    setErrorMsg(null);
+    
+    getTaskById(initialTask.taskId, initialTask.folderId, initialTask.type || (initialTask as any).task?.type)
+      .then((fullTask) => {
+        if (active) {
+          const updated = {
+            ...initialTask,
+            data: fullTask.data || {},
+            externalLink: fullTask.externalLink || (fullTask as any).externalLink,
+            priority: fullTask.priority || fullTask.Priority || initialTask.priority,
+            title: fullTask.title || fullTask.Title || initialTask.title,
+            assignedToUser: fullTask.assignedToUser?.emailAddress || fullTask.AssignedToUser?.EmailAddress || initialTask.assignedToUser,
+          };
+          setTask(updated);
+          
+          const init: Record<string, string> = {};
+          const rawData = fullTask.data || {};
+          for (const [k, v] of Object.entries(rawData)) {
+            init[k] = typeof v === 'object' && v !== null ? JSON.stringify(v, null, 2) : String(v ?? '');
+          }
+          setFormValues(init);
+          setLoadingDetails(false);
+        }
+      })
+      .catch((err) => {
+        if (active) {
+          console.error("Failed to load task details:", err);
+          setErrorMsg('Failed to load detailed task data: ' + (err.message || err));
+          setLoadingDetails(false);
+        }
+      });
+      
+    return () => {
+      active = false;
+    };
+  }, [initialTask.taskId, initialTask.folderId]);
 
   const isAssignedToMe =
     task.currentUserEmail &&
@@ -204,6 +252,42 @@ function TaskWorkstation({ task, onClose, onRefresh }: TaskModalProps) {
   };
 
   const dataEntries = Object.entries(formValues);
+
+  if (loadingDetails) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', animation: 'fadeIn 0.3s ease' }}>
+        {/* Top control bar with Back button */}
+        <div className="glass-panel" style={{ padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <button className="btn btn-secondary" onClick={onClose} style={{ padding: '6px 12px' }}>
+            ← Back to Tasks Inbox
+          </button>
+          <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
+            Active Workstation &mdash; <strong style={{ color: 'var(--text-primary)' }}>{task.taskId}</strong>
+          </span>
+        </div>
+
+        <div className="glass-panel" style={{
+          display: 'flex',
+          flexDirection: 'row',
+          padding: 0,
+          height: 'calc(100vh - 280px)',
+          minHeight: '650px',
+          overflow: 'hidden'
+        }}>
+          {/* Left Side: S3 Document Viewer */}
+          <div style={{ width: '60%', height: '100%', borderRight: '1px solid var(--glass-border)' }}>
+            <S3DocumentViewer task={task} />
+          </div>
+
+          {/* Right Side: Loading state */}
+          <div style={{ width: '40%', height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px', gap: '12px' }}>
+            <RefreshCw size={24} className="animate-spin text-gradient" />
+            <p className="text-secondary" style={{ fontSize: '0.9rem' }}>Loading task details from Orchestrator...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', animation: 'fadeIn 0.3s ease' }}>

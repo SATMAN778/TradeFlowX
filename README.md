@@ -21,7 +21,7 @@ Built on UiPath Maestro, the platform acts as a **digital Import Operations Mana
 
 ## TradeX Portal Dashboard
 
-The **TradeX Portal** is a Vite + React + TypeScript web application that serves as the central control room for import operations managers. It provides a visual dashboard of active cases, direct database records via the Data Fabric Registry, a dedicated Task Inbox for human-in-the-loop approvals, and a detailed Action History trail.
+The **TradeX Portal** is a Vite + React + TypeScript web application that serves as the central control room for import operations managers. It provides a visual dashboard of active cases, direct database records via the Data Fabric Registry, a dedicated Task Inbox for human-in-the-loop approvals (integrating directly with Orchestrator Storage Buckets to render and verify actual shipment documents in real-time), and a detailed Action History trail.
 
 | Operator Login Page | Main Dashboard Overview |
 | :---: | :---: |
