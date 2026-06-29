@@ -1,0 +1,43 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "PGA_StatusPoller",
+    "kind": "process",
+    "type": "process",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "e776e2d3-d925-43df-ac8c-1090633621f8",
+    "dependencies": [
+      {
+        "kind": "package",
+        "name": "PGA_StatusPoller"
+      }
+    ],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Process",
+      "name": "PGA_StatusPoller",
+      "package": {
+        "key": "2ff04d5e-03dc-4af6-bea4-a202495ea8a4"
+      },
+      "jobPriority": "Medium",
+      "jobRecording": "Disabled",
+      "targetFrameworkValue": "Portable",
+      "duration": 40,
+      "frequency": 500,
+      "quality": 100,
+      "remoteControlAccess": "None",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "135f2fc1-26bc-48c8-8769-d386d8b3820e",
+    "files": []
+  }
+}

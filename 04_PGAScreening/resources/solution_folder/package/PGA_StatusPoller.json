@@ -1,0 +1,22 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "PGA_StatusPoller",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "e776e2d3-d925-43df-ac8c-1090633621f8",
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "PGA_StatusPoller"
+    },
+    "locks": [],
+    "key": "2ff04d5e-03dc-4af6-bea4-a202495ea8a4",
+    "files": []
+  }
+}

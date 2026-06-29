@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "TradeX_GmailReader",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "d096deaa-260e-4337-9f5b-83e67806e3e3",
+    "isOverridable": false,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "TradeX_GmailReader"
+    },
+    "locks": [],
+    "key": "f4cf10db-52cd-4f18-86d2-fe6236506fed"
+  }
+}

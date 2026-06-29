@@ -1,0 +1,56 @@
+{
+  "$resourceType": "tool",
+  "id": "5d3103c3-5ef7-4483-8f47-49329f376bdb",
+  "name": "CreateSalesforceOrderTool",
+  "description": "Creates a Salesforce Order from 22 CBP fields JSON. Inputs: in_FieldsJson (required), in_EmailId, in_AttachmentNamesJson, in_AttachmentBucketPathsJson. Returns out_OrderId, out_OrderNumber (CaseId), out_PO_HasAllDetails, out_MissingFields.",
+  "type": "process",
+  "isEnabled": true,
+  "location": "external",
+  "referenceKey": "42a849b0-5cf7-45b2-817f-9a1ea2f60487",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "in_FieldsJson": {
+        "type": "string"
+      },
+      "in_EmailId": {
+        "type": "string"
+      },
+      "in_AttachmentNamesJson": {
+        "type": "string"
+      },
+      "in_AttachmentBucketPathsJson": {
+        "type": "string"
+      }
+    },
+    "required": []
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "out_OrderId": {
+        "type": "string"
+      },
+      "out_OrderNumber": {
+        "type": "string"
+      },
+      "out_PO_HasAllDetails": {
+        "type": "boolean"
+      },
+      "out_MissingFields": {
+        "type": "string"
+      }
+    },
+    "required": []
+  },
+  "settings": {},
+  "guardrail": {
+    "policies": []
+  },
+  "properties": {
+    "processName": "TradeX_SalesforceOrderCreator",
+    "folderPath": "solution_folder",
+    "exampleCalls": []
+  },
+  "argumentProperties": {}
+}

@@ -1,0 +1,25 @@
+{
+  "$resourceType": "context",
+  "id": "d4e5f6a7-b8c9-0d1e-2f3a-4b5c6d7e8f90",
+  "referenceKey": null,
+  "name": "DesignatedNationalsList",
+  "description": "OFAC Specially Designated Nationals List — indexed from the Orchestrator storage bucket of the same name. Used for semantic retrieval of sanctioned entity patterns during compliance screening.",
+  "contextType": "index",
+  "folderPath": "Shared",
+  "indexName": "Specially Designated Nationals List",
+  "settings": {
+    "retrievalMode": "semantic",
+    "query": {
+      "variant": "dynamic",
+      "description": "Search for sanctioned entity names, aliases, countries, and identifying information"
+    },
+    "folderPathPrefix": {
+      "variant": "static"
+    },
+    "fileExtension": {
+      "value": "All"
+    },
+    "threshold": 0,
+    "resultCount": 5
+  }
+}

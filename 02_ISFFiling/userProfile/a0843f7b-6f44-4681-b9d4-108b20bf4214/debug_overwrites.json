@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "tenants": [
+    {
+      "tenantKey": "ee95743d-d5db-43bb-9844-cd4b0cecafc2",
+      "resources": [
+        {
+          "solutionResourceKey": "49f4fccc-58de-4d87-89e0-6ce3532d1fc6",
+          "reprovisioningIndex": 0,
+          "overwrite": {
+            "resourceKey": "49f4fccc-58de-4d87-89e0-6ce3532d1fc6",
+            "resourceName": "ACE_URL",
+            "folderKey": "749d9c00-5419-451e-a4b7-af62d7438f3a",
+            "folderFullyQualifiedName": "Shared",
+            "folderPath": "749d9c00-5419-451e-a4b7-af62d7438f3a",
+            "type": "Reference",
+            "kind": "asset"
+          }
+        }
+      ]
+    }
+  ]
+}

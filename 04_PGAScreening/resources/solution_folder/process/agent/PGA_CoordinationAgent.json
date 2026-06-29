@@ -1,0 +1,37 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "PGA_CoordinationAgent",
+    "kind": "process",
+    "type": "agent",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "4ad2acf5-b8fd-4bcb-8a45-0fe2eca1538d",
+    "dependencies": [
+      {
+        "kind": "package",
+        "name": "PGA_CoordinationAgent"
+      }
+    ],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Agent",
+      "name": "PGA_CoordinationAgent",
+      "package": {
+        "key": "332dadff-5e99-4d7f-b7d3-1127e565ba79"
+      },
+      "targetFrameworkValue": "Portable",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "2503ffc9-e4b6-440e-a9fa-4b0556c638e4",
+    "files": []
+  }
+}

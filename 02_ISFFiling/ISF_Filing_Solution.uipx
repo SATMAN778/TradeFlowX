@@ -1,0 +1,22 @@
+{
+  "DocVersion": "1.0.0",
+  "StudioMinVersion": "2025.10.0",
+  "SolutionId": "df4c4bc8-431b-4d54-9be2-3f43da76bc68",
+  "Projects": [
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "ACE_ISF_Filer/project.uiproj",
+      "Id": "350b339c-8785-408a-b064-b1241dc09b3a"
+    },
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "ACE_ISF_Monitor/project.uiproj",
+      "Id": "c1642bed-343c-4b3a-8347-de28e41f7e8e"
+    },
+    {
+      "Type": "Agent",
+      "ProjectRelativePath": "ISF_DataCollection_Agent/project.uiproj",
+      "Id": "d841a98c-a0df-4592-a6b1-e5f976c045cd"
+    }
+  ]
+}

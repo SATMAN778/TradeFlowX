@@ -1,0 +1,107 @@
+﻿{
+    "name":  "TradeX_POEnrichment",
+    "description":  "Reads an existing Salesforce Order, validates all 22 CBP fields, downloads attachments to Storage Bucket, and initializes DataFabric entities. Handles the manual/phone intake path where the SF Order was created before automation.",
+    "main":  "Main.cs",
+    "dependencies":  {
+                         "UiPath.System.Activities":  "[26.2.5]",
+                         "UiPath.IntegrationService.Activities":  "[1.26.0]"
+                     },
+    "webServices":  [
+
+                    ],
+    "entitiesStores":  [
+
+                       ],
+    "schemaVersion":  "4.0",
+    "studioVersion":  "26.0.194.0",
+    "projectVersion":  "1.0.8",
+    "runtimeOptions":  {
+                           "autoDispose":  false,
+                           "netFrameworkLazyLoading":  false,
+                           "isPausable":  false,
+                           "isAttended":  false,
+                           "requiresUserInteraction":  false,
+                           "supportsPersistence":  false,
+                           "workflowSerialization":  "NewtonsoftJson",
+                           "excludedLoggedData":  [
+                                                      "Private:*",
+                                                      "*password*"
+                                                  ],
+                           "executionType":  "Workflow",
+                           "readyForPiP":  false,
+                           "startsInPiP":  false,
+                           "mustRestoreAllDependencies":  true,
+                           "pipType":  "ChildSession"
+                       },
+    "designOptions":  {
+                          "projectProfile":  "Developement",
+                          "outputType":  "Process",
+                          "libraryOptions":  {
+                                                 "privateWorkflows":  [
+
+                                                                      ]
+                                             },
+                          "processOptions":  {
+                                                 "ignoredFiles":  [
+
+                                                                  ]
+                                             },
+                          "fileInfoCollection":  [
+
+                                                 ],
+                          "saveToCloud":  false
+                      },
+    "expressionLanguage":  "CSharp",
+    "entryPoints":  [
+                        {
+                            "filePath":  "Main.cs",
+                            "uniqueId":  "c3d4e5f6-a7b8-9012-c3d4-e5f6a7b89013",
+                            "input":  [
+                                          {
+                                              "name":  "in_OrderNumber",
+                                              "type":  "System.String",
+                                              "required":  true
+                                          },
+                                          {
+                                              "name":  "in_StorageBucketName",
+                                              "type":  "System.String",
+                                              "required":  false
+                                          }
+                                      ],
+                            "output":  [
+                                           {
+                                               "name":  "out_PO_HasAllDetails",
+                                               "type":  "System.Boolean"
+                                           },
+                                           {
+                                               "name":  "out_MissingFields",
+                                               "type":  "System.String"
+                                           },
+                                           {
+                                               "name":  "out_DocumentsSaved",
+                                               "type":  "System.Int32"
+                                           },
+                                           {
+                                               "name":  "out_StorageBucketPaths",
+                                               "type":  "System.String"
+                                           },
+                                           {
+                                               "name":  "out_SalesforceOrderId",
+                                               "type":  "System.String"
+                                           },
+                                           {
+                                               "name":  "out_DataFabricInitialized",
+                                               "type":  "System.Boolean"
+                                           }
+                                       ]
+                        }
+                    ],
+    "isTemplate":  false,
+    "templateProjectData":  {
+
+                            },
+    "publishData":  {
+
+                    },
+    "targetFramework":  "Windows"
+}

@@ -1,0 +1,6 @@
+{
+  "Name": "PGA_StatusPoller",
+  "ProjectType": "Process",
+  "Description": "Project",
+  "MainFile": "Main.xaml"
+}

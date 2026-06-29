@@ -1,0 +1,39 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "ISF_DataCollection_Agent",
+    "kind": "process",
+    "type": "agent",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "d841a98c-a0df-4592-a6b1-e5f976c045cd",
+    "isOverridable": false,
+    "dependencies": [
+      {
+        "name": "ISF_DataCollection_Agent",
+        "kind": "package"
+      }
+    ],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Agent",
+      "name": "ISF_DataCollection_Agent",
+      "package": {
+        "key": "e115bb44-d936-465d-af14-92cd34bb9443"
+      },
+      "inputArguments": "{}",
+      "targetFrameworkValue": "Portable",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "75b96c19-59a0-4f9c-9104-cbec6a27a925"
+  }
+}

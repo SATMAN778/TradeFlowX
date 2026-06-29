@@ -1,0 +1,36 @@
+{
+  "docVersion": "1.0.0",
+  "tenants": [
+    {
+      "tenantKey": "ee95743d-d5db-43bb-9844-cd4b0cecafc2",
+      "resources": [
+        {
+          "solutionResourceKey": "2230215f-f50c-4e1a-a1df-093d41df899b",
+          "reprovisioningIndex": 0,
+          "overwrite": {
+            "resourceKey": "2230215f-f50c-4e1a-a1df-093d41df899b",
+            "resourceName": "TradeX_GmailReader",
+            "folderKey": "749d9c00-5419-451e-a4b7-af62d7438f3a",
+            "folderFullyQualifiedName": "Shared",
+            "folderPath": "749d9c00-5419-451e-a4b7-af62d7438f3a",
+            "type": "Reference",
+            "kind": "connection"
+          }
+        },
+        {
+          "solutionResourceKey": "42a849b0-5cf7-45b2-817f-9a1ea2f60487",
+          "reprovisioningIndex": 0,
+          "overwrite": {
+            "resourceKey": "42a849b0-5cf7-45b2-817f-9a1ea2f60487",
+            "resourceName": "TradeX_SalesforceOrderCreator",
+            "folderKey": "749d9c00-5419-451e-a4b7-af62d7438f3a",
+            "folderFullyQualifiedName": "Shared",
+            "folderPath": "749d9c00-5419-451e-a4b7-af62d7438f3a",
+            "type": "Reference",
+            "kind": "connection"
+          }
+        }
+      ]
+    }
+  ]
+}

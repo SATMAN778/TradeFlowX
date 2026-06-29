@@ -1,0 +1,44 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "TradeX_SalesforceOrderCreator",
+    "kind": "process",
+    "type": "process",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "49144cf7-d54a-4da1-b62a-71a8870b132d",
+    "isOverridable": false,
+    "dependencies": [
+      {
+        "name": "TradeX_SalesforceOrderCreator",
+        "kind": "package"
+      }
+    ],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Process",
+      "name": "TradeX_SalesforceOrderCreator",
+      "package": {
+        "key": "f2336b6b-d953-4e87-a8eb-847800cb7576"
+      },
+      "jobPriority": "Medium",
+      "jobRecording": "Disabled",
+      "targetFrameworkValue": "Portable",
+      "duration": 40,
+      "frequency": 500,
+      "quality": 100,
+      "remoteControlAccess": "None",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "5f92ca98-f5d6-4b5e-960e-f4d74154a2e3"
+  }
+}

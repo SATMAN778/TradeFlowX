@@ -1,0 +1,26 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "Specially Designated Nationals List",
+    "kind": "bucket",
+    "type": "orchestratorBucket",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Orchestrator",
+      "name": "Specially Designated Nationals List",
+      "description": "Specially Designated Nationals List",
+      "tags": []
+    },
+    "locks": [],
+    "key": "5419239c-084a-422d-b733-5603acb5e622",
+    "files": []
+  }
+}

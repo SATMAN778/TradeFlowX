@@ -1,0 +1,37 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "OFAC_Screening_Agent",
+    "kind": "process",
+    "type": "agent",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "c50eeaeb-9bf9-4e1c-bb90-ad1853a1ca01",
+    "dependencies": [
+      {
+        "kind": "package",
+        "name": "OFAC_Screening_Agent"
+      }
+    ],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Agent",
+      "name": "OFAC_Screening_Agent",
+      "package": {
+        "key": "c9803848-048f-418d-b130-6965daa81914"
+      },
+      "targetFrameworkValue": "Portable",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "fd26b4a5-5951-441e-9455-47f766208618",
+    "files": []
+  }
+}

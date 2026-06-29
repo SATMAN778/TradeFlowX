@@ -1,0 +1,38 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "TradeX_COOAgent",
+    "kind": "process",
+    "type": "agent",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "10d3dd44-bb92-4ebf-8306-679abb327988",
+    "isOverridable": false,
+    "dependencies": [
+      {
+        "name": "TradeX_COOAgent",
+        "kind": "package"
+      }
+    ],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Agent",
+      "name": "TradeX_COOAgent",
+      "package": {
+        "key": "cf476d62-289f-487f-951c-86b7006dbf96"
+      },
+      "targetFrameworkValue": "Portable",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "f9bac377-b534-45f7-841e-7cfb93aaab62"
+  }
+}

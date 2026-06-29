@@ -1,0 +1,38 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "TradeX_EmailIntake_Agent",
+    "kind": "process",
+    "type": "agent",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "981941a7-5617-448b-9b7e-274b8f1e3bac",
+    "isOverridable": false,
+    "dependencies": [
+      {
+        "name": "TradeX_EmailIntake_Agent",
+        "kind": "package"
+      }
+    ],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Agent",
+      "name": "TradeX_EmailIntake_Agent",
+      "package": {
+        "key": "bec9342c-b95c-4a18-b0fb-44a947d4f981"
+      },
+      "targetFrameworkValue": "Portable",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "3d431868-f92a-47e5-8dc9-4f837253fc3e"
+  }
+}

@@ -1,0 +1,116 @@
+﻿{
+    "name":  "TradeX_SalesforceOrderCreator",
+    "projectId":  "de778f88-64c0-435c-8582-72a1ab0ac6d3",
+    "description":  "Project",
+    "main":  "Main.cs",
+    "dependencies":  {
+                         "UiPath.IntegrationService.Activities":  "[1.26.0]",
+                         "UiPath.System.Activities":  "[26.2.5]"
+                     },
+    "webServices":  [
+
+                    ],
+    "entitiesStores":  [
+
+                       ],
+    "schemaVersion":  "4.0",
+    "studioVersion":  "26.0.194.0",
+    "projectVersion":  "1.0.15",
+    "runtimeOptions":  {
+                           "autoDispose":  false,
+                           "netFrameworkLazyLoading":  false,
+                           "isPausable":  false,
+                           "isAttended":  false,
+                           "requiresUserInteraction":  false,
+                           "supportsPersistence":  false,
+                           "workflowSerialization":  "NewtonsoftJson",
+                           "excludedLoggedData":  [
+                                                      "Private:*",
+                                                      "*password*"
+                                                  ],
+                           "executionType":  "Workflow",
+                           "readyForPiP":  false,
+                           "startsInPiP":  false,
+                           "mustRestoreAllDependencies":  true,
+                           "pipType":  "ChildSession"
+                       },
+    "designOptions":  {
+                          "projectProfile":  "Developement",
+                          "outputType":  "Process",
+                          "libraryOptions":  {
+                                                 "privateWorkflows":  [
+
+                                                                      ]
+                                             },
+                          "processOptions":  {
+                                                 "ignoredFiles":  [
+
+                                                                  ]
+                                             },
+                          "fileInfoCollection":  [
+
+                                                 ],
+                          "saveToCloud":  false
+                      },
+    "expressionLanguage":  "CSharp",
+    "entryPoints":  [
+                        {
+                            "filePath":  "Main.cs",
+                            "uniqueId":  "b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78902",
+                            "input":  [
+                                          {
+                                              "name":  "in_FieldsJson",
+                                              "type":  "System.String",
+                                              "required":  true,
+                                              "hasDefault":  false
+                                          },
+                                          {
+                                              "name":  "in_EmailId",
+                                              "type":  "System.String",
+                                              "required":  false,
+                                              "hasDefault":  false
+                                          },
+                                          {
+                                              "name":  "in_AttachmentNamesJson",
+                                              "type":  "System.String",
+                                              "required":  false,
+                                              "hasDefault":  false
+                                          },
+                                          {
+                                              "name":  "in_AttachmentBucketPathsJson",
+                                              "type":  "System.String",
+                                              "required":  false,
+                                              "hasDefault":  true,
+                                              "direction":  "In",
+                                              "defaultValue":  "[]"
+                                          }
+                                      ],
+                            "output":  [
+                                           {
+                                               "name":  "out_OrderId",
+                                               "type":  "System.String"
+                                           },
+                                           {
+                                               "name":  "out_OrderNumber",
+                                               "type":  "System.String"
+                                           },
+                                           {
+                                               "name":  "out_PO_HasAllDetails",
+                                               "type":  "System.Boolean"
+                                           },
+                                           {
+                                               "name":  "out_MissingFields",
+                                               "type":  "System.String"
+                                           }
+                                       ]
+                        }
+                    ],
+    "isTemplate":  false,
+    "templateProjectData":  {
+
+                            },
+    "publishData":  {
+
+                    },
+    "targetFramework":  "Windows"
+}

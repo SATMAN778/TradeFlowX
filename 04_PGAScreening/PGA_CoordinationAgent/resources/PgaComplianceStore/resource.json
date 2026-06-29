@@ -1,0 +1,25 @@
+{
+  "$resourceType": "context",
+  "id": "e5f6a7b8-c9d0-1234-efab-234567890123",
+  "referenceKey": null,
+  "name": "PgaComplianceStore",
+  "description": "PGA compliance knowledge index containing US import regulations, agency requirements, HTS code-specific PGA rules, import alerts, and detention order information. Use this in Phase 1 to research applicable PGA requirements for the given HTS code and goods description.",
+  "contextType": "index",
+  "folderPath": "Shared",
+  "indexName": "PGA-Compliance-Knowledge",
+  "settings": {
+    "retrievalMode": "semantic",
+    "query": {
+      "variant": "dynamic",
+      "description": "Search for PGA compliance requirements, agency rules, and import regulations relevant to the HTS code and goods description"
+    },
+    "folderPathPrefix": {
+      "variant": "static"
+    },
+    "fileExtension": {
+      "value": "All"
+    },
+    "threshold": 0,
+    "resultCount": 5
+  }
+}

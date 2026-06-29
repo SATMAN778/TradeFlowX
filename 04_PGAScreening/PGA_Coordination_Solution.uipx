@@ -1,0 +1,17 @@
+{
+  "DocVersion": "1.0.0",
+  "StudioMinVersion": "2025.10.0",
+  "SolutionId": "71cb95d5-b34b-4520-a12c-64d737d9c621",
+  "Projects": [
+    {
+      "Type": "Agent",
+      "ProjectRelativePath": "PGA_CoordinationAgent\\project.uiproj",
+      "Id": "4ad2acf5-b8fd-4bcb-8a45-0fe2eca1538d"
+    },
+    {
+      "Type": "Process",
+      "ProjectRelativePath": "PGA_StatusPoller\\project.uiproj",
+      "Id": "e776e2d3-d925-43df-ac8c-1090633621f8"
+    }
+  ]
+}

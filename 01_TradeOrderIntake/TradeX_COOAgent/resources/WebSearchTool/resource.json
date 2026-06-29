@@ -1,0 +1,49 @@
+{
+  "$resourceType": "tool",
+  "name": "WebSearchTool",
+  "description": "Performs a DuckDuckGo web search and returns abstract text and related topics. Use this tool to research manufacturer names for entity list matches, HTS code import risk signals, transshipment corridors, and COO misclassification patterns.",
+  "location": "external",
+  "type": "process",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "in_Query": {
+        "type": "string",
+        "description": "Search query string"
+      }
+    },
+    "required": [
+      "in_Query"
+    ]
+  },
+  "outputSchema": {
+    "type": "object",
+    "properties": {
+      "out_SearchResultsJson": {
+        "type": "string",
+        "description": "Full raw JSON from DuckDuckGo"
+      },
+      "out_AbstractText": {
+        "type": "string",
+        "description": "Abstract summary text from DuckDuckGo"
+      },
+      "out_RelatedTopics": {
+        "type": "string",
+        "description": "JSON array of related topic snippets (first 5)"
+      }
+    }
+  },
+  "settings": {},
+  "guardrail": {
+    "policies": []
+  },
+  "properties": {
+    "processName": "TradeX_WebSearch",
+    "folderPath": "Shared",
+    "exampleCalls": []
+  },
+  "id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "referenceKey": "e88095d7-394b-4e36-9b11-ad01f568fe6a",
+  "isEnabled": true,
+  "argumentProperties": {}
+}

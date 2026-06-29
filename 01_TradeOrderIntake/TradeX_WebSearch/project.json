@@ -1,0 +1,62 @@
+{
+  "name": "TradeX_WebSearch",
+  "description": "Project",
+  "main": "Main.cs",
+  "dependencies": {
+    "UiPath.System.Activities": "[26.2.5]"
+  },
+  "webServices": [],
+  "entitiesStores": [],
+  "schemaVersion": "4.0",
+  "studioVersion": "26.0.194.0",
+  "projectVersion": "1.0.0",
+  "runtimeOptions": {
+    "autoDispose": false,
+    "netFrameworkLazyLoading": false,
+    "isPausable": false,
+    "isAttended": false,
+    "requiresUserInteraction": false,
+    "supportsPersistence": false,
+    "workflowSerialization": "NewtonsoftJson",
+    "excludedLoggedData": [
+      "Private:*",
+      "*password*"
+    ],
+    "executionType": "Workflow",
+    "readyForPiP": false,
+    "startsInPiP": false,
+    "mustRestoreAllDependencies": true,
+    "pipType": "ChildSession"
+  },
+  "designOptions": {
+    "projectProfile": "Developement",
+    "outputType": "Process",
+    "libraryOptions": {
+      "privateWorkflows": []
+    },
+    "processOptions": {
+      "ignoredFiles": []
+    },
+    "fileInfoCollection": [],
+    "saveToCloud": false
+  },
+  "expressionLanguage": "CSharp",
+  "entryPoints": [
+    {
+      "filePath": "Main.cs",
+      "uniqueId": "b2c3d4e5-f6a7-8901-b2c3-d4e5f6a78901",
+      "input": [
+        { "name": "in_Query", "type": "System.String", "required": true }
+      ],
+      "output": [
+        { "name": "out_SearchResultsJson", "type": "System.String" },
+        { "name": "out_AbstractText", "type": "System.String" },
+        { "name": "out_RelatedTopics", "type": "System.String" }
+      ]
+    }
+  ],
+  "isTemplate": false,
+  "templateProjectData": {},
+  "publishData": {},
+  "targetFramework": "Windows"
+}

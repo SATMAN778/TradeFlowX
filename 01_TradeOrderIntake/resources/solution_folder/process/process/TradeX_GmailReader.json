@@ -1,0 +1,44 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "TradeX_GmailReader",
+    "kind": "process",
+    "type": "process",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "d096deaa-260e-4337-9f5b-83e67806e3e3",
+    "isOverridable": false,
+    "dependencies": [
+      {
+        "name": "TradeX_GmailReader",
+        "kind": "package"
+      }
+    ],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Process",
+      "name": "TradeX_GmailReader",
+      "package": {
+        "key": "f4cf10db-52cd-4f18-86d2-fe6236506fed"
+      },
+      "jobPriority": "Medium",
+      "jobRecording": "Disabled",
+      "targetFrameworkValue": "Portable",
+      "duration": 40,
+      "frequency": 500,
+      "quality": 100,
+      "remoteControlAccess": "None",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180
+    },
+    "locks": [],
+    "key": "4d9716da-65ec-4771-8c04-6bef51ec457b"
+  }
+}

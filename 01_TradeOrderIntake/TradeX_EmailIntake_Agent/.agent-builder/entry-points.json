@@ -1,0 +1,50 @@
+{
+  "$schema": "https://cloud.uipath.com/draft/2024-12/entry-point",
+  "$id": "entry-points.json",
+  "entryPoints": [
+    {
+      "filePath": "/content/agent.json",
+      "uniqueId": "8954d88d-1a87-4b22-8adc-c83af717ed50",
+      "type": "agent",
+      "input": {
+        "type": "object",
+        "properties": {
+          "in_CaseId": {
+            "type": "string",
+            "description": "Maestro Case ID passed from the Maestro Case context. Used as the Storage Bucket folder for attachments."
+          }
+        },
+        "required": []
+      },
+      "output": {
+        "type": "object",
+        "properties": {
+          "out_SalesforceOrderId": {
+            "type": "string",
+            "description": "Salesforce Order record ID"
+          },
+          "out_CaseId": {
+            "type": "string",
+            "description": "Salesforce Order.OrderNumber used as Case ID"
+          },
+          "out_PO_HasAllDetails": {
+            "type": "boolean",
+            "description": "True if all 22 CBP-required fields were present"
+          },
+          "out_MissingFields": {
+            "type": "string",
+            "description": "JSON array of missing field names"
+          },
+          "out_AttachmentCount": {
+            "type": "integer",
+            "description": "Number of email attachments"
+          },
+          "out_HasEmail": {
+            "type": "boolean",
+            "description": "True if an unread email was found"
+          }
+        }
+      }
+    }
+  ]
+}

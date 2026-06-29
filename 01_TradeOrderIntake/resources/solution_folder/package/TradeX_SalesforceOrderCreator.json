@@ -1,0 +1,23 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "TradeX_SalesforceOrderCreator",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "49144cf7-d54a-4da1-b62a-71a8870b132d",
+    "isOverridable": false,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "TradeX_SalesforceOrderCreator"
+    },
+    "locks": [],
+    "key": "f2336b6b-d953-4e87-a8eb-847800cb7576"
+  }
+}

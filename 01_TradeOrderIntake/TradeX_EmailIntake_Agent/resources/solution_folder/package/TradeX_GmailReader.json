@@ -1,0 +1,33 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "TradeX_GmailReader",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "isOverridable": true,
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "files": [
+      {
+        "name": "TradeX_GmailReader.1.0.28.nupkg",
+        "kind": "Package",
+        "version": "1.0.28",
+        "url": "https://staging.uipath.com/hackathon26_423/DefaultTenant/orchestrator_/odata/Processes/UiPath.Server.Configuration.OData.DownloadPackage(key='TradeX_GmailReader%3A1.0.28')",
+        "key": "TradeX_GmailReader_1_0_28"
+      }
+    ],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "fileName": "TradeX_GmailReader.1.0.28.nupkg",
+      "fileReference": "TradeX_GmailReader_1_0_28",
+      "name": "TradeX_GmailReader",
+      "description": null
+    },
+    "locks": [],
+    "key": "TradeX_GmailReader:1.0.28"
+  }
+}

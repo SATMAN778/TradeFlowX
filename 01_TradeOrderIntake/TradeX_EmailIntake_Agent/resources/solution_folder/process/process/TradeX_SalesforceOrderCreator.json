@@ -1,0 +1,62 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "TradeX_SalesforceOrderCreator",
+    "kind": "process",
+    "type": "process",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "isOverridable": true,
+    "dependencies": [
+      {
+        "name": "TradeX_SalesforceOrderCreator",
+        "kind": "Package"
+      }
+    ],
+    "runtimeDependencies": [],
+    "files": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "type": "Process",
+      "jobPriority": "Medium",
+      "jobRecording": "Disabled",
+      "duration": 40,
+      "frequency": 500,
+      "quality": 100,
+      "remoteControlAccess": "None",
+      "name": "TradeX_SalesforceOrderCreator",
+      "package": {
+        "name": "TradeX_SalesforceOrderCreator",
+        "key": "TradeX_SalesforceOrderCreator:1.0.15"
+      },
+      "packageName": "TradeX_SalesforceOrderCreator",
+      "packageVersion": "1.0.15",
+      "entryPointUniqueId": null,
+      "entryPointName": null,
+      "inputArguments": null,
+      "inputArgumentsSchema": "[\n  {\n    \"name\": \"in_FieldsJson\",\n    \"type\": \"System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e\",\n    \"required\": true,\n    \"hasDefault\": false\n  },\n  {\n    \"name\": \"in_EmailId\",\n    \"type\": \"System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e\",\n    \"required\": true,\n    \"hasDefault\": true,\n    \"defaultValue\": \"\\\"\\\"\"\n  },\n  {\n    \"name\": \"in_AttachmentNamesJson\",\n    \"type\": \"System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e\",\n    \"required\": true,\n    \"hasDefault\": true,\n    \"defaultValue\": \"\\\"[]\\\"\"\n  },\n  {\n    \"name\": \"in_AttachmentBucketPathsJson\",\n    \"type\": \"System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e\",\n    \"required\": true,\n    \"hasDefault\": true,\n    \"defaultValue\": \"\\\"[]\\\"\"\n  }\n]",
+      "outputArgumentsSchema": "[\n  {\n    \"name\": \"out_OrderId\",\n    \"type\": \"System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e\"\n  },\n  {\n    \"name\": \"out_OrderNumber\",\n    \"type\": \"System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e\"\n  },\n  {\n    \"name\": \"out_PO_HasAllDetails\",\n    \"type\": \"System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e\"\n  },\n  {\n    \"name\": \"out_MissingFields\",\n    \"type\": \"System.String, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e\"\n  }\n]",
+      "inputArgumentsSchemaV2": null,
+      "outputArgumentsSchemaV2": null,
+      "hiddenForAttendedUser": false,
+      "alwaysRunning": false,
+      "autoStartProcess": false,
+      "targetFrameworkValue": "Portable",
+      "retentionAction": "Delete",
+      "retentionPeriod": 30,
+      "retentionBucketRef": null,
+      "staleRetentionAction": "Delete",
+      "staleRetentionPeriod": 180,
+      "staleRetentionBucketRef": null,
+      "entryPoints": null,
+      "connections": null,
+      "tags": [],
+      "description": null
+    },
+    "locks": [],
+    "key": "42a849b0-5cf7-45b2-817f-9a1ea2f60487"
+  }
+}

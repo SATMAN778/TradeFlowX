@@ -500,30 +500,77 @@ Where goods transit Dubai without substantial transformation, the first-sale (ma
 
 ## Repository Structure
 
+All solutions live in a single monorepo. Folders are prefixed with the stage number so they sort in pipeline order. UiPath solutions contain the `.uipx` manifest at the folder root; LangGraph agents are suffixed `_LangGraph` to distinguish them from UiPath-native automation.
+
 ```
-tradeflow-maestro-ai/
-├── README.md                                  # Workspace root overview and design manual
-├── docs/                                      # System guides, architecture, and step-by-step documentations
-│   ├── README.md                              # Document index and directory guide
-│   ├── architecture.md                        # Overall technical design and sync logic
-│   ├── getting_started.md                     # Platform configuration and developer setup
-│   ├── publishing_and_deployment.md           # Solution packaging and deploy instructions
-│   └── stages/                                # Detailed stage-by-stage manuals (Stage 1 to 7)
-├── 00_CaseOrchestration/                      # UiPath Maestro case definition and orchestration logic
-│   └── TradeXCase/
-│       └── caseplan.json                      # Unified case definition, SLA timers, and HITL tasks
-├── 01_TradeOrderIntake/                       # Stage 1 workflow automation (PO data capture)
-├── 01_Agent_TransshipmentRisk_LangGraph/      # Stage 1 transshipment risk classifier agent (LangGraph/Python)
-├── 02_ISFFiling/                              # Stage 2 ISF filing and ACE status polling workflows
-├── 03_HTSClassification/                      # Stage 3 HTS classification & duty lookup workflows
-├── 03_Agent_HTSClassifier_LangGraph/          # Stage 3 product classification agent (LangGraph/Python)
-├── 04_PGAScreening/                           # Stage 4 PGA screening coordinator and polling bots
-├── 05_OFACScreening/                          # Stage 5 party extraction and OFAC API checks
-├── 06_CBPEntry/                               # Stage 6 customs entry filing (CBP 3461) and status monitoring
-├── 07_PostEntry/                              # Stage 7 DMS archival & ERP landed cost workflows
-├── 07_Agent_DutySavings_LangGraph/            # Stage 7 duty savings analysis agent (LangGraph/Python)
-├── App_CaseUI/                                # Operator human-task UI interfaces & Apps
-└── TradeX-Portal/                             # Vite + React + TypeScript central control room dashboard
+TradeFlowAICase/                                         # ← monorepo root
+│
+├── 00_CaseOrchestration/                                # Maestro Case plan — caseplan.json, SLA timers, HITL tasks
+│   ├── TradeFlowImportSolution.uipx                     # Solution manifest
+│   └── TradeXCase/                                      # Case project (caseplan.json, entry-points.json)
+│
+├── 01_TradeOrderIntake/                                 # Stage 1 — PO intake, document collection, COO verification
+│   ├── TradeXIntake.uipx                                # Solution manifest
+│   ├── TradeX_EmailIntake/                              # RPA: inbox monitor & attachment downloader
+│   ├── TradeX_EmailIntake_Agent/                        # Orchestration agent: PO field extraction
+│   ├── TradeX_COOAgent/                                 # Orchestration agent: COO verification
+│   ├── TradeX_POEnrichment/                             # RPA: ERP PO data enrichment
+│   ├── TradeX_GmailReader/                              # RPA: Gmail connector
+│   ├── TradeX_SalesforceOrderCreator/                   # RPA: Salesforce trade order creation
+│   └── TradeX_WebSearch/                                # RPA: web search utility
+│
+├── 01_Agent_TransshipmentRisk_LangGraph/                # Stage 1 — LangGraph Python agent: transshipment risk classifier
+│   ├── main.py                                          # Agent entrypoint & graph definition
+│   ├── agent.json / project.uiproj                      # UiPath agent manifest
+│   └── src/                                             # Agent source (state, nodes, tools)
+│
+├── 02_ISFFiling/                                        # Stage 2 — ISF 10+2 filing & ACE status polling
+│   ├── ISF_Filing_Solution.uipx                         # Solution manifest
+│   ├── ACE_ISF_Filer/                                   # RPA: CBP ACE ISF submission workflow
+│   ├── ACE_ISF_Monitor/                                 # RPA: ACE status poller
+│   └── ISF_DataCollection_Agent/                        # Orchestration agent: 10+2 data aggregation
+│
+├── 03_HTSClassification/                                # Stage 3 — HTS classification, duty rates, PGA flag
+│   ├── HTSClassificationDutySolution.uipx               # Solution manifest
+│   ├── IXPPipeline/                                     # RPA: IDP document extraction pipeline
+│   ├── DutyRateLookup/                                  # API Workflow: MFN + Section 301 + ADD/CVD duty lookup
+│   └── PGAFlagWorkflow/                                 # API Workflow: PGA agency flag evaluation
+│
+├── 03_Agent_HTSClassifier_LangGraph/                    # Stage 3 — LangGraph Python agent: HTS code classifier (RAG)
+│   ├── main.py                                          # Agent entrypoint & graph definition
+│   ├── agent.json / project.uiproj                      # UiPath agent manifest
+│   └── src/                                             # Agent source (state, nodes, tools, assets)
+│
+├── 04_PGAScreening/                                     # Stage 4 — PGA agency coordination (conditional)
+│   ├── PGA_Coordination_Solution.uipx                   # Solution manifest
+│   ├── PGA_CoordinationAgent/                           # Orchestration agent: FDA/USDA/FCC submission
+│   └── PGA_StatusPoller/                                # RPA: PGA status polling bot
+│
+├── 05_OFACScreening/                                    # Stage 5 — OFAC & denied-party screening
+│   ├── OFAC_Screening_Solution.uipx                     # Solution manifest
+│   ├── OFAC_SDN_Search/                                 # RPA: OFAC SDN API search workflow
+│   └── OFAC_Screening_Agent/                            # Orchestration agent: multi-list party screener
+│
+├── 06_CBPEntry/                                         # Stage 6 — CBP Form 3461 entry filing & clearance
+│   ├── CBPEntryFillingSolution.uipx                     # Solution manifest
+│   ├── CBP3461FormBot/                                  # RPA: CBP 3461 form generation & submission
+│   ├── CBPStatusPoller/                                 # API Workflow: CBP exam status polling
+│   └── CBPDutyCalculation/                              # RPA: duty calculation (MFN + MPF + HMF)
+│
+├── 07_PostEntry/                                        # Stage 7 — DMS archival & ERP landed cost posting
+│   ├── DocMgmtPostEntrySolution.uipx                    # Solution manifest
+│   ├── DMSArchiveWorkflow/                              # RPA: document archive to DMS (7-year retention)
+│   └── ERPLandedCostWorkflow/                           # RPA: landed cost GL posting to ERP
+│
+├── 07_Agent_DutySavings_LangGraph/                      # Stage 7 — LangGraph Python agent: duty savings analyser
+│   ├── main.py                                          # Agent entrypoint & graph definition
+│   ├── agent.json / project.uiproj                      # UiPath agent manifest
+│   └── src/                                             # Agent source (state, nodes, tools)
+│
+├── App_CaseUI/                                          # Maestro Case App — operator task UI & human-task forms
+├── TradeX-Portal/                                       # Vite + React + TypeScript central control room dashboard
+├── docs/                                                # Architecture guides, stage runbooks, deployment notes
+└── samples/                                             # Sample POs, invoices, and test data sets
 ```
 
 ---
@@ -556,68 +603,124 @@ The platform coordinates two categories of agents: **Coded Python (LangGraph) Ag
 
 ### Prerequisites
 
-- **UiPath CLI** (`@uipath/cli` installed via npm: `npm install -g @uipath/cli`)
-- **UiPath Automation Cloud** tenant with Maestro and Studio Web enabled
-- **Python 3.10+** (for LangGraph agents)
-- **Node.js v18+ & npm** (for TradeX Portal)
-- API credentials for CBP ACE, OFAC SDN, USITC, and OpenAI
+| Tool | Version | Purpose |
+|---|---|---|
+| [UiPath CLI](https://www.npmjs.com/package/@uipath/cli) | latest | Pack, publish, deploy all UiPath solutions |
+| UiPath Automation Cloud | — | Maestro, Orchestrator, Action Center, Studio Web |
+| Python | 3.10+ | LangGraph agents (`01_`, `03_`, `07_` `_LangGraph` folders) |
+| Node.js + npm | 18+ | TradeX Portal (`TradeX-Portal/`) |
 
-### Setup & Configuration
-
-1. **Clone the repository**:
-   ```bash
-   git clone https://github.com/your-username/TradeFlowAICase.git
-   cd TradeFlowAICase
-   ```
-
-2. **Authenticate with the UiPath CLI**:
-   ```bash
-   uip login
-   ```
-
-### Pack and Deploy the Solution
-
-The Case definition, triggers, stages, and bindings are bundled in the `00_CaseOrchestration` solution folder. To pack and deploy:
+### 1. Clone & Authenticate
 
 ```bash
-# 1. Sync resource bindings with cloud/local projects
+git clone https://github.com/your-username/TradeFlowAICase.git
+cd TradeFlowAICase
+
+# Install the UiPath CLI globally if not already installed
+npm install -g @uipath/cli
+
+# Log in to your UiPath Automation Cloud tenant
+uip login
+```
+
+### 2. Deploy the Case Orchestration (Stage 00)
+
+The Maestro case plan (`caseplan.json`) is the backbone — deploy this first. It defines all stages, SLA timers, HITL tasks, and case variables.
+
+```bash
+# Sync resource bindings
 uip solution resources refresh --solution-folder 00_CaseOrchestration
 
-# 2. Pack the solution into a deployable zip package
-uip solution pack 00_CaseOrchestration ./dist --version 1.0.0 --output json
+# Pack into a deployable zip
+uip solution pack 00_CaseOrchestration ./dist -v 1.0.0 --output json
 
-# 3. Publish the package to your tenant solution feed
-uip solution publish ./dist/TradeFlowImportSolution.1.0.0.zip --output json
+# Publish to your tenant feed
+uip solution publish ./dist/TradeFlowImportSolution_1.0.0.zip --output json
 
-# 4. Deploy and activate the solution package
+# Deploy and activate
 uip solution deploy run \
-  --name "TradeFlowImport-Dev" \
+  --name "TradeXCase-Prod" \
   --package-name "TradeFlowImportSolution" \
   --package-version "1.0.0" \
-  --folder-name "TradeFlowImport" \
+  --folder-name "TradeXCase" \
   --parent-folder-path "Shared" \
   --output json
 ```
 
-### Running a Test Case
+### 3. Deploy Each Stage Solution
+
+Repeat the pack → publish → deploy pattern for each stage. Replace `<STAGE_FOLDER>`, `<SOLUTION_NAME>`, and `<STAGE_FOLDER_NAME>` accordingly:
+
+| Stage | Folder | Solution name | Deploy folder |
+|---|---|---|---|
+| S1 | `01_TradeOrderIntake` | `TradeXIntake` | `TradeXCase/Stage01` |
+| S2 | `02_ISFFiling` | `ISF_Filing_Solution` | `TradeXCase/Stage02` |
+| S3 | `03_HTSClassification` | `HTSClassificationDutySolution` | `TradeXCase/Stage03` |
+| S4 | `04_PGAScreening` | `PGA_Coordination_Solution` | `TradeXCase/Stage04` |
+| S5 | `05_OFACScreening` | `OFAC_Screening_Solution` | `TradeXCase/Stage05` |
+| S6 | `06_CBPEntry` | `CBPEntryFillingSolution` | `TradeXCase/Stage06` |
+| S7 | `07_PostEntry` | `DocMgmtPostEntrySolution` | `TradeXCase/Stage07` |
 
 ```bash
-# Trigger a test intake via the Orchestrator API
-curl -X POST https://your-orchestrator/api/jobs/StartJobs \
-  -H "Authorization: Bearer $UIPATH_TOKEN" \
-  -d '{
-    "startInfo": {
-      "ReleaseKey": "<S1_OrderIntake_ReleaseKey>",
-      "Strategy": "All",
-      "InputArguments": {
-        "PONumber": "TEST-PO-001",
-        "SupplierName": "Test Supplier LLC",
-        "SupplierCountry": "UAE",
-        "ShipmentValue": 15000,
-        "PortOfLoading": "Jebel Ali"
-      }
-    }
-  }'
+# Example — Stage 3
+uip solution resources refresh --solution-folder 03_HTSClassification
+uip solution pack 03_HTSClassification ./dist -v 1.0.0 --output json
+uip solution publish ./dist/HTSClassificationDutySolution_1.0.0.zip --output json
+uip solution deploy run \
+  --name "HTSClassification-Prod" \
+  --package-name "HTSClassificationDutySolution" \
+  --package-version "1.0.0" \
+  --folder-name "Stage03" \
+  --parent-folder-path "Shared/TradeXCase" \
+  --output json
+```
+
+### 4. Set Up LangGraph Agents
+
+Each `_LangGraph` folder is a standalone Python project registered with UiPath Agents.
+
+```bash
+# Example — HTS Classifier Agent (Stage 3)
+cd 03_Agent_HTSClassifier_LangGraph
+
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate          # Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure environment variables
+cp .env.example .env              # then fill in API keys
+
+# Run locally to verify
+python main.py
+
+# Deploy to UiPath Agents
+uip agent deploy --output json
+```
+
+Repeat for `01_Agent_TransshipmentRisk_LangGraph` and `07_Agent_DutySavings_LangGraph`.
+
+### 5. Start the TradeX Portal
+
+```bash
+cd TradeX-Portal
+npm install
+npm run dev          # development server at http://localhost:5173
+npm run build        # production build → dist/
+```
+
+### 6. Trigger a Test Case
+
+Once all solutions are deployed, start a case manually from Orchestrator or via the Maestro API:
+
+```bash
+# Start a manual test case via the UiPath CLI
+uip or jobs start \
+  --process-name "TradeXIntake" \
+  --folder-path "Shared/TradeXCase/Stage01" \
+  --input '{"PONumber":"TEST-PO-001","SupplierName":"JAFZA Test Co","SupplierCountry":"UAE","ShipmentValue":15000,"PortOfLoading":"Jebel Ali"}'
 ```
 
 ---

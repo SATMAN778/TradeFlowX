@@ -1,0 +1,22 @@
+{
+  "docVersion": "1.0.0",
+  "resource": {
+    "name": "PGA_CoordinationAgent",
+    "kind": "package",
+    "apiVersion": "orchestrator.uipath.com/v1",
+    "projectKey": "4ad2acf5-b8fd-4bcb-8a45-0fe2eca1538d",
+    "dependencies": [],
+    "runtimeDependencies": [],
+    "folders": [
+      {
+        "fullyQualifiedName": "solution_folder"
+      }
+    ],
+    "spec": {
+      "name": "PGA_CoordinationAgent"
+    },
+    "locks": [],
+    "key": "332dadff-5e99-4d7f-b7d3-1127e565ba79",
+    "files": []
+  }
+}
