@@ -81,10 +81,14 @@ export default function DocumentLifecycle({ caseInstanceId, documents, onRefresh
     setDownloadingDocId(doc.id);
     try {
       const fileNameMap: Record<string, string> = {
-        'Commercial Invoice': 'commercial_invoice.pdf',
-        'Packing List': 'packing_list.pdf',
-        'Bill of Lading': 'bill_of_lading.pdf',
-        'Certificate of Origin': 'certificate_of_origin.pdf',
+        'Commercial Invoice': 'Invoice_S01_GPC-INV-2025-0847.pdf',
+        'Packing List': 'PackingList_S01_GPC-INV-2025-0847.pdf',
+        'Bill of Lading': 'BOL_S01_MSCU7741839UAE.pdf',
+        'Certificate of Origin': 'COO_S01_DCOC-2025-COO-41892.pdf',
+        'Arrival Notice': 'ArrivalNotice_S01_AN-S01-41839UAE.pdf',
+        'Freight Invoice': 'FreightInvoice_S01_TALS-FI-S01-0847.pdf',
+        'ISF Filing': 'ISF_S01_ISF-S01-2025-839UAE.pdf',
+        'ISF': 'ISF_S01_ISF-S01-2025-839UAE.pdf',
       };
       const fileName = fileNameMap[doc.documentType] || (doc.documentType.toLowerCase().replace(/\s+/g, '_') + '.pdf');
       const url = await getDocumentDownloadUrl(fileName);
@@ -508,11 +512,13 @@ export function RetentionDashboard() {
   
   // Flatten mock documents across cases for admin overview
   const allDocs = [
-    { id: 'doc-1', caseRef: 'TF-88201', fileName: 'commercial_invoice_CI-88201.pdf', type: 'Commercial Invoice', daysLeft: 2550, size: '428 KB', uploadedBy: 'shipper.ops@tradeflow.ai' },
-    { id: 'doc-2', caseRef: 'TF-88201', fileName: 'bill_of_lading_BL-88201.pdf', type: 'Bill of Lading', daysLeft: 1820, size: '1.2 MB', uploadedBy: 'logistics.ff@tradeflow.ai' },
-    { id: 'doc-3', caseRef: 'TF-88201', fileName: 'packing_list_PL-88201.pdf', type: 'Packing List', daysLeft: 2190, size: '315 KB', uploadedBy: 'shipper.ops@tradeflow.ai' },
-    { id: 'doc-4', caseRef: 'TF-88201', fileName: 'certificate_of_origin_CO-4819.pdf', type: 'Certificate of Origin', daysLeft: 2555, size: '582 KB', uploadedBy: 'shipper.ops@tradeflow.ai' },
-    { id: 'doc-5', caseRef: 'TF-10023', fileName: 'commercial_invoice_CI-10023.pdf', type: 'Commercial Invoice', daysLeft: 2900, size: '410 KB', uploadedBy: 'shipper.ops@tradeflow.ai' }
+    { id: 'doc-1', caseRef: 'TF-S01', fileName: 'Invoice_S01_GPC-INV-2025-0847.pdf', type: 'Commercial Invoice', daysLeft: 2550, size: '428 KB', uploadedBy: 'shipper.ops@tradeflow.ai' },
+    { id: 'doc-2', caseRef: 'TF-S01', fileName: 'BOL_S01_MSCU7741839UAE.pdf', type: 'Bill of Lading', daysLeft: 1820, size: '1.2 MB', uploadedBy: 'logistics.ff@tradeflow.ai' },
+    { id: 'doc-3', caseRef: 'TF-S01', fileName: 'PackingList_S01_GPC-INV-2025-0847.pdf', type: 'Packing List', daysLeft: 2190, size: '315 KB', uploadedBy: 'shipper.ops@tradeflow.ai' },
+    { id: 'doc-4', caseRef: 'TF-S01', fileName: 'COO_S01_DCOC-2025-COO-41892.pdf', type: 'Certificate of Origin', daysLeft: 2555, size: '582 KB', uploadedBy: 'shipper.ops@tradeflow.ai' },
+    { id: 'doc-5', caseRef: 'TF-S01', fileName: 'ArrivalNotice_S01_AN-S01-41839UAE.pdf', type: 'Arrival Notice', daysLeft: 2900, size: '450 KB', uploadedBy: 'carrier.ops@tradeflow.ai' },
+    { id: 'doc-6', caseRef: 'TF-S01', fileName: 'FreightInvoice_S01_TALS-FI-S01-0847.pdf', type: 'Freight Invoice', daysLeft: 1460, size: '180 KB', uploadedBy: 'carrier.ops@tradeflow.ai' },
+    { id: 'doc-7', caseRef: 'TF-S01', fileName: 'ISF_S01_ISF-S01-2025-839UAE.pdf', type: 'ISF Filing', daysLeft: 1825, size: '#210 KB', uploadedBy: 'customs.broker@tradeflow.ai' }
   ];
 
   const filtered = allDocs.filter(d => 

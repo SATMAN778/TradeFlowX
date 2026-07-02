@@ -63,7 +63,7 @@ Per CBP (19 CFR Part 163) and OFAC regulations, all documentation must be stored
 *   **Type**: `rpa`
 *   **Run Only Once**: Yes
 *   **Required**: Yes
-*   **Description**: Connects to the corporate ERP (SAP/NetSuite) API to post the final customs duties, processing fees, and broker charges, updating the unit landed cost of the items.
+*   **Description**: Connects to the corporate ERP API to post the final customs duties, processing fees, and broker charges, updating the unit landed cost of the items.
 *   **Inputs**: `poNumber`, `actualDutyUsd`, `mpfAmount`, `hmfAmount`
 *   **Outputs**: `landedCostPosted` (boolean)
 

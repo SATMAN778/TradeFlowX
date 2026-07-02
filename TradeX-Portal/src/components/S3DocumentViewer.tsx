@@ -9,17 +9,20 @@ interface S3DocumentViewerProps {
 }
 
 export default function S3DocumentViewer({ task }: S3DocumentViewerProps) {
-  const [activeTab, setActiveTab] = useState<'ci' | 'bl' | 'pl' | 'co'>('ci');
+  const [activeTab, setActiveTab] = useState<'ci' | 'bl' | 'pl' | 'co' | 'an' | 'fi' | 'isf'>('ci');
   const [downloading, setDownloading] = useState(false);
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [loadingPdf, setLoadingPdf] = useState(false);
 
   // Bucket file names mapping
   const bucketFileNames = {
-    ci: 'commercial_invoice.pdf',
-    bl: 'bill_of_lading.pdf',
-    pl: 'packing_list.pdf',
-    co: 'certificate_of_origin.pdf',
+    ci: 'Invoice_S01_GPC-INV-2025-0847.pdf',
+    bl: 'BOL_S01_MSCU7741839UAE.pdf',
+    pl: 'PackingList_S01_GPC-INV-2025-0847.pdf',
+    co: 'COO_S01_DCOC-2025-COO-41892.pdf',
+    an: 'ArrivalNotice_S01_AN-S01-41839UAE.pdf',
+    fi: 'FreightInvoice_S01_TALS-FI-S01-0847.pdf',
+    isf: 'ISF_S01_ISF-S01-2025-839UAE.pdf',
   };
 
   const currentFileName = bucketFileNames[activeTab];
@@ -140,7 +143,10 @@ export default function S3DocumentViewer({ task }: S3DocumentViewerProps) {
           ['ci', 'Commercial Invoice'],
           ['bl', 'Bill of Lading'],
           ['pl', 'Packing List'],
-          ['co', 'Certificate of Origin']
+          ['co', 'Certificate of Origin'],
+          ['an', 'Arrival Notice'],
+          ['fi', 'Freight Invoice'],
+          ['isf', 'ISF Filing']
         ] as const).map(([tabId, label]) => {
           const isActive = activeTab === tabId;
           return (

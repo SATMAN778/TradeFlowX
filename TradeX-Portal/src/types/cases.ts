@@ -44,6 +44,7 @@ export interface CaseInstance {
   startedAt: string;
   status: string;
   folderKey: string;
+  currentStage?: string;
 }
 
 export interface TaskDetailsResponse {

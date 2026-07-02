@@ -1,5 +1,5 @@
 import type { CaseInstance, CaseInstanceRaw, CaseSummary, CaseSummaryRaw, TaskDetailsResponse, CaseDetailsResponse, MyTask, ShipmentDoc } from '../types/cases';
-import { tasksSvc, entitiesSvc, maestroProcessesSvc, caseInstancesSvc, casesSvc, bucketsSvc } from '../lib/sdk';
+import { sdk, tasksSvc, entitiesSvc, maestroProcessesSvc, caseInstancesSvc, casesSvc, bucketsSvc } from '../lib/sdk';
 import { config } from '../config';
 
 const BASE = config.apiBaseUrl;
@@ -60,18 +60,44 @@ export async function getCaseInstances(processKey: string): Promise<CaseInstance
   try {
     const data: any = await caseInstancesSvc.getAll({ folderKey: FOLDER_KEY } as any);
     const items = data.instances ?? data.items ?? data.value ?? data ?? [];
-    return items.filter((raw: any) => raw.processKey === processKey).map((raw: any) => {
-      const dateVal = raw.startedTime || raw.startedTimeUtc || raw.creationTime;
-      const parsedDate = dateVal ? new Date(dateVal) : new Date();
-      const startedAt = isNaN(parsedDate.getTime()) ? '—' : parsedDate.toLocaleString();
+
+    // Fetch all case records from Data Fabric to map stages
+    let dfRecords: any[] = [];
+    const entityId = import.meta.env.VITE_ENTITY_CASE;
+    if (entityId && !entityId.startsWith('import') && !entityId.includes('mock-')) {
+      try {
+        const res = await entitiesSvc.getAllRecords(entityId, { pageSize: 1000 });
+        dfRecords = res.items || [];
+      } catch (e) {
+        console.error('Failed to fetch case records from Data Fabric inside getCaseInstances:', e);
+      }
+    }
+
+    const filteredItems = items.filter((raw: any) => {
+      const pKey = raw.ProcessKey || raw.processKey || raw.CaseDefinitionKey || raw.caseDefinitionKey;
+      return pKey === processKey;
+    });
+
+    return filteredItems.map((raw: any) => {
+      const dateVal = raw.StartTime || raw.startTime || raw.CreationTime || raw.creationTime || raw.StartedTime || raw.startedTime || raw.StartedTimeUtc || raw.startedTimeUtc;
+      const parsedDate = dateVal ? new Date(dateVal) : undefined;
+      const startedAt = parsedDate && !isNaN(parsedDate.getTime()) && parsedDate.getFullYear() > 2000 ? parsedDate.toLocaleString() : '—';
       
+      const instanceId = raw.Id || raw.id || raw.InstanceId || raw.instanceId;
+      const id = raw.ExternalId || raw.externalId || raw.Id || raw.id;
+      
+      // Find matching stage in Data Fabric records
+      const matchingRecord = dfRecords.find((r: any) => r.CaseRef === instanceId || r.CaseRef === id);
+      const currentStage = matchingRecord ? matchingRecord.CurrentStage : undefined;
+
       return {
-        instanceId: raw.instanceId || raw.id,
-        id: raw.externalId || raw.id,
-        version: raw.packageVersion || '1.0',
+        instanceId,
+        id,
+        version: raw.PackageVersion || raw.packageVersion || '1.0',
         startedAt,
-        status: raw.latestRunStatus || raw.status,
-        folderKey: raw.folderKey || FOLDER_KEY,
+        status: raw.Status || raw.status || raw.LatestRunStatus || raw.latestRunStatus,
+        folderKey: raw.FolderKey || raw.folderKey || FOLDER_KEY,
+        currentStage,
       };
     });
   } catch (err) {
@@ -96,10 +122,21 @@ export async function getTaskDetails(instanceId: string, folderKey: string): Pro
     const items = tasks?.value || tasks?.items || tasks || [];
     const task = items.find((t: any) => t.CaseInstanceId === instanceId || t.TaskSource?.SourceId === instanceId);
     if (!task) throw new Error(`Task not found for instance: ${instanceId}. Total tasks: ${items.length}`);
+    
+    // Fetch full task details (including Data/formLayout) using getById
+    const taskId = task.Id || task.id;
+    const folderId = task.OrganizationUnitId || task.organizationUnitId || task.folderId;
+    const taskType = task.Type || task.type;
+    const fullTask = await tasksSvc.getById(taskId, { taskType }, folderId);
+    if (fullTask) {
+      fullTask.data = fullTask.data || fullTask.Data || {};
+      fullTask.Data = fullTask.Data || fullTask.data || {};
+    }
+    
     return {
-      taskId: String(task.Id || task.id),
-      folderId: task.OrganizationUnitId || task.organizationUnitId,
-      task: task
+      taskId: String(taskId),
+      folderId: folderId,
+      task: fullTask
     } as any;
   } catch (err: any) {
     console.error('Failed to fetch task details from SDK', err);
@@ -116,6 +153,16 @@ export async function getTaskDetails(instanceId: string, folderKey: string): Pro
       }
     } as any;
   }
+}
+
+export async function getTaskById(taskId: string, folderId: number, taskType?: string): Promise<any> {
+  // @ts-ignore
+  const fullTask = await tasksSvc.getById(Number(taskId), taskType ? { taskType: taskType as any } : {}, folderId);
+  if (fullTask) {
+    fullTask.data = fullTask.data || fullTask.Data || {};
+    fullTask.Data = fullTask.Data || fullTask.data || {};
+  }
+  return fullTask;
 }
 
 export async function getCaseDetails(instanceId: string, folderKey: string): Promise<CaseDetailsResponse> {
@@ -156,18 +203,48 @@ export async function unassignTask(taskId: string, folderId: number): Promise<vo
   }
 }
 
-// Fixed missing completeTask
+function getDecodedUserEmail(): string {
+  try {
+    const token = sdk.getToken();
+    if (!token) return 'operator@tradeflow.ai';
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window.atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    const parsed = JSON.parse(jsonPayload);
+    return parsed.email || parsed.email_address || parsed.unique_name || parsed.upn || parsed.sub || 'operator@tradeflow.ai';
+  } catch (err) {
+    return 'operator@tradeflow.ai';
+  }
+}
+
+// Fixed missing completeTask to conform to action-schema.json inputs & outputs & outcomes
 export async function completeTask(
   taskId: string,
   folderId: number,
   data: Record<string, unknown>,
   action: string,
 ): Promise<void> {
+  const mappedAction = action === 'Approve' ? 'Approved' : action === 'Reject' ? 'Rejected' : action;
+  
+  // Format the outputs to match action-schema.json expected output properties
+  const payload = {
+    ...data,
+    decision: mappedAction,
+    reviewedBy: getDecodedUserEmail(),
+    reviewedAt: new Date().toISOString(),
+    comments: (data.comments as string) || (data.Comments as string) || `Task completed as '${mappedAction}' via TradeX Portal.`
+  };
+
   await tasksSvc.complete({
     type: 'AppTask' as any,
     taskId: Number(taskId),
-    data,
-    action
+    data: payload,
+    action: mappedAction
   }, folderId);
 }
 

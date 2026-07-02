@@ -758,40 +758,62 @@ function CaseInstancesPanel({ caseName, processKey, onBackToDashboard, onSelectI
                 <th style={{ padding: '12px', fontWeight: 500 }}>Instance ID</th>
                 <th style={{ padding: '12px', fontWeight: 500 }}>Started At</th>
                 <th style={{ padding: '12px', fontWeight: 500 }}>Status</th>
+                <th style={{ padding: '12px', fontWeight: 500 }}>Current Stage</th>
                 <th style={{ padding: '12px', fontWeight: 500 }}>Action</th>
               </tr>
             </thead>
             <tbody>
-              {instances.map((inst) => (
-                <tr key={inst.instanceId} style={{ borderBottom: '1px solid var(--glass-border)' }}>
-                  <td style={{ padding: '16px 12px', fontWeight: 600, fontFamily: 'monospace', fontSize: '0.9rem' }}>
-                    {inst.id || inst.instanceId.substring(0, 8)}
-                  </td>
-                  <td style={{ padding: '16px 12px', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Clock size={13} /> {inst.startedAt}
-                    </span>
-                  </td>
-                  <td style={{ padding: '16px 12px' }}>
-                    <span className={`status-badge ${
-                      inst.status.toLowerCase() === 'inprogress' || inst.status.toLowerCase() === 'running'
-                        ? 'status-info' : inst.status.toLowerCase() === 'completed'
-                        ? 'status-success' : 'status-danger'
-                    }`}>
-                      {inst.status}
-                    </span>
-                  </td>
-                  <td style={{ padding: '16px 12px' }}>
-                    <button
-                      className="btn btn-primary"
-                      onClick={() => onSelectInstance(inst.instanceId, inst.folderKey)}
-                      style={{ padding: '6px 14px', fontSize: '0.8rem' }}
-                    >
-                      Inspect →
-                    </button>
-                  </td>
-                </tr>
-              ))}
+              {instances.map((inst) => {
+                const getStageFriendlyName = (stageId?: string) => {
+                  if (!stageId) return 'Not Started';
+                  const stagesMap: Record<string, string> = {
+                    'S1': 'S1: Order Intake',
+                    'S2': 'S2: ISF Filing',
+                    'S3': 'S3: HTS Classification',
+                    'S4': 'S4: PGA Screening',
+                    'S5': 'S5: OFAC Screening',
+                    'S6': 'S6: Customs Entry',
+                    'S7': 'S7: Post-Entry'
+                  };
+                  return stagesMap[stageId] || stageId;
+                };
+
+                return (
+                  <tr key={inst.instanceId} style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                    <td style={{ padding: '16px 12px', fontWeight: 600, fontFamily: 'monospace', fontSize: '0.9rem' }}>
+                      {inst.id || inst.instanceId.substring(0, 8)}
+                    </td>
+                    <td style={{ padding: '16px 12px', color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Clock size={13} /> {inst.startedAt}
+                      </span>
+                    </td>
+                    <td style={{ padding: '16px 12px' }}>
+                      <span className={`status-badge ${
+                        inst.status.toLowerCase() === 'inprogress' || inst.status.toLowerCase() === 'running'
+                          ? 'status-info' : inst.status.toLowerCase() === 'completed'
+                          ? 'status-success' : 'status-danger'
+                      }`}>
+                        {inst.status}
+                      </span>
+                    </td>
+                    <td style={{ padding: '16px 12px', fontSize: '0.875rem', fontWeight: 500 }}>
+                      <span style={{ color: inst.currentStage ? 'var(--accent-primary)' : 'var(--text-secondary)' }}>
+                        {getStageFriendlyName(inst.currentStage)}
+                      </span>
+                    </td>
+                    <td style={{ padding: '16px 12px' }}>
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => onSelectInstance(inst.instanceId, inst.folderKey)}
+                        style={{ padding: '6px 14px', fontSize: '0.8rem' }}
+                      >
+                        Inspect →
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
